@@ -17,78 +17,66 @@ class OnboardingScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Image section
-            Expanded(
-              flex: 3,
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(color: AppColors.background),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Placeholder for onboarding image
-                      Container(
-                        width: 280,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
-                            'assets/images/logo.png',
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // Content section
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              // reduce vertical padding so the image and content are closer
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 28),
+              constraints: const BoxConstraints(maxWidth: 900),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Headline
+                  // Onboarding image (responsive)
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final screenW = MediaQuery.of(context).size.width;
+                      final boxWidth = (screenW < 400)
+                          ? screenW * 0.95
+                          : screenW * 0.9;
+
+                      // Use the image's original size. Do not force width/height.
+                      // Wrap with Center and constrain max width so it doesn't overflow on small screens.
+                      return SizedBox(
+                        width: boxWidth,
+                        child: Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              'assets/images/logo.png',
+                              // no width/height: original image size will be used
+                              fit: BoxFit.none,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  // Content below image (all inside the same centered box)
                   Text(
-                    'Hãy cùng bắt đầu nào',
+                    "Let's get started",
                     style: AppTextStyles.headline1,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-
-                  // Subtitle
                   Text(
-                    'Trải nghiệm Memotion ngay!',
+                    'Experience Memotion today!',
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: AppColors.textSecondary,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 40),
-
-                  // Buttons
-                  PrimaryButton(text: 'Đăng nhập', onPressed: onLoginPressed),
+                  PrimaryButton(text: 'Login', onPressed: onLoginPressed),
                   const SizedBox(height: 16),
-
                   SecondaryButton(
-                    text: 'Đăng ký',
+                    text: 'Register',
                     onPressed: onRegisterPressed,
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

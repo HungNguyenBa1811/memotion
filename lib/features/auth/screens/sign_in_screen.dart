@@ -67,11 +67,15 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
+        toolbarHeight: 84, // increased vertical space to match Figma padding
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
           onPressed: widget.onBackPressed,
         ),
-        title: Text('Đăng nhập', style: AppTextStyles.headline2),
+        title: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Text('Login', style: AppTextStyles.headline2),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -86,18 +90,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
                 // Email field
                 AppTextField(
-                  hint: 'Email của bạn',
+                  hint: 'Your Email',
                   controller: _emailController,
                   prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Vui lòng nhập email';
+                      return 'Please enter your email';
                     }
                     if (!RegExp(
                       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                     ).hasMatch(value)) {
-                      return 'Email không hợp lệ';
+                      return 'Invalid email';
                     }
                     return null;
                   },
@@ -106,16 +110,16 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
                 // Password field
                 AppTextField(
-                  hint: 'Mật khẩu của bạn',
+                  hint: 'Your Password',
                   controller: _passwordController,
                   prefixIcon: Icons.lock_outline,
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Vui lòng nhập mật khẩu';
+                      return 'Please enter your password';
                     }
                     if (value.length < 6) {
-                      return 'Mật khẩu phải có ít nhất 6 ký tự';
+                      return 'Password must be at least 6 characters';
                     }
                     return null;
                   },
@@ -130,12 +134,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       // TODO: Implement forgot password
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Tính năng đang được phát triển'),
+                          content: Text('This feature is under development'),
                         ),
                       );
                     },
                     child: Text(
-                      'Quên mật khẩu?',
+                      'Forgot password?',
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w500,
@@ -147,7 +151,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
                 // Login button
                 PrimaryButton(
-                  text: 'Đăng nhập',
+                  text: 'Sign In',
                   onPressed: _handleLogin,
                   isLoading: isLoading,
                 ),
@@ -159,11 +163,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     onTap: widget.onRegisterPressed,
                     child: Text.rich(
                       TextSpan(
-                        text: 'Bạn chưa có tài khoản ư? ',
+                        text: "Don't have an account? ",
                         style: AppTextStyles.bodyMedium,
                         children: [
                           TextSpan(
-                            text: 'Đăng ký',
+                            text: 'Sign Up',
                             style: AppTextStyles.bodyMedium.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,
@@ -183,7 +187,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        'HOẶC',
+                        'OR',
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -196,7 +200,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
                 // Google login button
                 SocialButton(
-                  text: 'Đăng nhập với Google',
+                  text: 'Sign in with Google',
                   icon: Image.network(
                     'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
                     width: 24,
@@ -209,7 +213,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     // TODO: Implement Google login
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Tính năng đang được phát triển'),
+                        content: Text('This feature is under development'),
                       ),
                     );
                   },

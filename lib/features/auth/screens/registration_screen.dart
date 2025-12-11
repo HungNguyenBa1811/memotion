@@ -84,11 +84,15 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
+        toolbarHeight: 84, // increased vertical space to match Figma padding
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
           onPressed: widget.onBackPressed,
         ),
-        title: Text('Đăng ký', style: AppTextStyles.headline2),
+        title: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Text('Register', style: AppTextStyles.headline2),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -103,15 +107,15 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
                 // Nickname field
                 AppTextField(
-                  hint: 'Nickname của bạn',
+                  hint: 'Your Nickname',
                   controller: _nicknameController,
                   prefixIcon: Icons.person_outline,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Vui lòng nhập nickname';
+                      return 'Please enter your nickname';
                     }
                     if (value.length < 3) {
-                      return 'Nickname phải có ít nhất 3 ký tự';
+                      return 'Nickname must be at least 3 characters';
                     }
                     return null;
                   },
@@ -120,18 +124,18 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
                 // Email field
                 AppTextField(
-                  hint: 'Email của bạn',
+                  hint: 'Your Email',
                   controller: _emailController,
                   prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Vui lòng nhập email';
+                      return 'Please enter your email';
                     }
                     if (!RegExp(
                       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                     ).hasMatch(value)) {
-                      return 'Email không hợp lệ';
+                      return 'Invalid email address';
                     }
                     return null;
                   },
@@ -140,16 +144,16 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
                 // Password field
                 AppTextField(
-                  hint: 'Mật khẩu của bạn',
+                  hint: 'Your Password',
                   controller: _passwordController,
                   prefixIcon: Icons.lock_outline,
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Vui lòng nhập mật khẩu';
+                      return 'Please enter your password';
                     }
                     if (value.length < 6) {
-                      return 'Mật khẩu phải có ít nhất 6 ký tự';
+                      return 'Password must be at least 6 characters';
                     }
                     return null;
                   },
@@ -179,7 +183,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                     Expanded(
                       child: Text.rich(
                         TextSpan(
-                          text: 'Tôi đồng ý với ',
+                          text: 'I agree to the ',
                           style: AppTextStyles.bodySmall,
                           children: [
                             TextSpan(
@@ -189,7 +193,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            const TextSpan(text: ' và '),
+                            const TextSpan(text: ' and '),
                             TextSpan(
                               text: 'Privacy Policy',
                               style: AppTextStyles.bodySmall.copyWith(
@@ -207,7 +211,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
                 // Register button
                 PrimaryButton(
-                  text: 'Đăng ký',
+                  text: 'Register',
                   onPressed: _handleRegister,
                   isLoading: isLoading,
                 ),
@@ -219,11 +223,11 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                     onTap: widget.onLoginPressed,
                     child: Text.rich(
                       TextSpan(
-                        text: 'WTF có tài khoản rồi à? ',
+                        text: 'Already have an account? ',
                         style: AppTextStyles.bodyMedium,
                         children: [
                           TextSpan(
-                            text: 'Đăng nhập',
+                            text: 'Login',
                             style: AppTextStyles.bodyMedium.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,

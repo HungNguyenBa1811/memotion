@@ -18,11 +18,16 @@ class ProfileScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        title: Text('Hồ sơ', style: AppTextStyles.headline2),
+        title: Text('Profile', style: AppTextStyles.headline2),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined),
+            icon: Image.asset(
+              'assets/images/icon_settings.png',
+              width: 22,
+              height: 22,
+              color: AppColors.textPrimary,
+            ),
             onPressed: () {
               // TODO: Navigate to settings
             },
@@ -69,7 +74,60 @@ class ProfileScreen extends ConsumerWidget {
                   color: AppColors.textSecondary,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 12),
+
+              // Edit profile quick action
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/icon_user.png',
+                            width: 28,
+                            height: 28,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Edit Profile',
+                                style: AppTextStyles.bodyMedium,
+                              ),
+                              Text(
+                                'Update your information',
+                                style: AppTextStyles.caption,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'Edit',
+                          style: AppTextStyles.buttonMedium.copyWith(
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
 
               // Stats section
               Container(
@@ -88,15 +146,15 @@ class ProfileScreen extends ConsumerWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildStatItem('Nhiệm vụ', '12', Icons.task_alt),
+                    _buildStatItem('Tasks', '12', Icons.task_alt),
                     _buildDivider(),
                     _buildStatItem(
                       'Streak',
-                      '7 ngày',
+                      '7 days',
                       Icons.local_fire_department,
                     ),
                     _buildDivider(),
-                    _buildStatItem('Điểm', '850', Icons.star),
+                    _buildStatItem('Points', '850', Icons.star),
                   ],
                 ),
               ),
@@ -115,16 +173,16 @@ class ProfileScreen extends ConsumerWidget {
                     final confirmed = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Đăng xuất'),
-                        content: const Text('Bạn có chắc muốn đăng xuất?'),
+                        title: const Text('Logout'),
+                        content: const Text('Are you sure you want to logout?'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Hủy'),
+                            child: const Text('Cancel'),
                           ),
                           TextButton(
                             onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Đăng xuất'),
+                            child: const Text('Logout'),
                           ),
                         ],
                       ),
@@ -137,7 +195,7 @@ class ProfileScreen extends ConsumerWidget {
                   },
                   icon: const Icon(Icons.logout, color: AppColors.error),
                   label: Text(
-                    'Đăng xuất',
+                    'Logout',
                     style: AppTextStyles.buttonMedium.copyWith(
                       color: AppColors.error,
                     ),
@@ -180,22 +238,27 @@ class ProfileScreen extends ConsumerWidget {
   Widget _buildMenuSection() {
     final menuItems = [
       _MenuItem(
-        icon: Icons.person_outline,
-        title: 'Chỉnh sửa hồ sơ',
+        iconWidget: Image.asset(
+          'assets/images/icon_user.png',
+          width: 22,
+          height: 22,
+          color: AppColors.textPrimary,
+        ),
+        title: 'Account',
         onTap: () {},
       ),
       _MenuItem(
         icon: Icons.notifications_outlined,
-        title: 'Thông báo',
+        title: 'Notifications',
         onTap: () {},
       ),
-      _MenuItem(icon: Icons.lock_outline, title: 'Bảo mật', onTap: () {}),
+      _MenuItem(icon: Icons.lock_outline, title: 'Security', onTap: () {}),
       _MenuItem(
         icon: Icons.help_outline,
-        title: 'Trợ giúp & Hỗ trợ',
+        title: 'Help & Support',
         onTap: () {},
       ),
-      _MenuItem(icon: Icons.info_outline, title: 'Về ứng dụng', onTap: () {}),
+      _MenuItem(icon: Icons.info_outline, title: 'About', onTap: () {}),
     ];
 
     return Container(
@@ -216,7 +279,9 @@ class ProfileScreen extends ConsumerWidget {
           return Column(
             children: [
               ListTile(
-                leading: Icon(item.icon, color: AppColors.textPrimary),
+                leading:
+                    item.iconWidget ??
+                    Icon(item.icon, color: AppColors.textPrimary),
                 title: Text(item.title, style: AppTextStyles.bodyMedium),
                 trailing: const Icon(
                   Icons.chevron_right,
@@ -238,12 +303,14 @@ class ProfileScreen extends ConsumerWidget {
 }
 
 class _MenuItem {
-  final IconData icon;
+  final IconData? icon;
+  final Widget? iconWidget;
   final String title;
   final VoidCallback onTap;
 
   const _MenuItem({
-    required this.icon,
+    this.icon,
+    this.iconWidget,
     required this.title,
     required this.onTap,
   });
