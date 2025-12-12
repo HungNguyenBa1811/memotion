@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/theme.dart';
 import 'package:memotion/shared/widgets/bottom_pill_nav.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../core/router/app_router.dart';
 
 class ProfileScreen extends ConsumerWidget {
   final VoidCallback onLogout;
@@ -37,7 +39,10 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-      bottomNavigationBar: BottomPillNav(currentIndex: 3),
+      bottomNavigationBar: BottomPillNav(
+        currentIndex: 3,
+        onTap: (index) => _handleNavTap(context, index),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -407,6 +412,26 @@ class _SvgAssetWithFallbackState extends State<SvgAssetWithFallback> {
         );
       },
     );
+  }
+}
+
+void _handleNavTap(BuildContext context, int index) {
+  switch (index) {
+    case 0:
+      context.go(AppRoutes.home);
+      break;
+    case 1:
+      // Calendar - not implemented yet
+      break;
+    case 2:
+      context.go(AppRoutes.nutrition);
+      break;
+    case 3:
+      // Already on Profile
+      break;
+    case 4:
+      // Settings - not implemented yet
+      break;
   }
 }
 

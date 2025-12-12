@@ -5,6 +5,8 @@ import '../../features/auth/screens/registration_screen.dart';
 import '../../features/auth/screens/sign_in_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
+import '../../features/nutrition/screens/nutrition_screen.dart';
+import '../../features/nutrition/screens/nutrition_detail_screen.dart';
 
 // Route names
 class AppRoutes {
@@ -12,6 +14,9 @@ class AppRoutes {
   static const String signIn = '/sign-in';
   static const String registration = '/registration';
   static const String profile = '/profile';
+  static const String home = '/home';
+  static const String nutrition = '/nutrition';
+  static const String nutritionDetail = '/nutrition-detail';
 }
 
 // Router provider
@@ -68,6 +73,25 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.profile,
         builder: (context, state) =>
             ProfileScreen(onLogout: () => context.go(AppRoutes.onboarding)),
+      ),
+      GoRoute(
+        path: AppRoutes.home,
+        builder: (context, state) => const NutritionScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.nutrition,
+        builder: (context, state) => const NutritionScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.nutritionDetail,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return NutritionDetailScreen(
+            title: extra?['title'] ?? 'Keto Salad',
+            subtitle: extra?['subtitle'] ?? 'Beans, mandarin and avocado salad',
+            kcal: extra?['kcal']?.replaceAll(' Kcal', '') ?? '370',
+          );
+        },
       ),
     ],
   );
