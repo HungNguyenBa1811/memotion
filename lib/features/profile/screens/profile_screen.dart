@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import '../../../core/theme/theme.dart';
+import 'package:memotion/shared/widgets/bottom_pill_nav.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -22,11 +25,11 @@ class ProfileScreen extends ConsumerWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Image.asset(
-              'assets/images/icon_settings.png',
+            icon: SvgPicture.asset(
+              'assets/images/NavSettingsIcon.svg',
               width: 22,
               height: 22,
-              color: AppColors.textPrimary,
+              color: AppColors.primary,
             ),
             onPressed: () {
               // TODO: Navigate to settings
@@ -34,6 +37,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
+      bottomNavigationBar: BottomPillNav(currentIndex: 3),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -76,139 +80,35 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
 
-              // Edit profile quick action
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+              // Figma-alike stats row (Nhịp tim / Năng lượng / Cân nặng)
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildHealthStat(
+                    svgAsset: 'assets/images/HeartbeatIcon.svg',
+                    fallbackIcon: Icons.favorite,
+                    label: 'Nhịp tim',
+                    value: '215bpm',
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Image.asset(
-                            'assets/images/icon_user.png',
-                            width: 28,
-                            height: 28,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Edit Profile',
-                                style: AppTextStyles.bodyMedium,
-                              ),
-                              Text(
-                                'Update your information',
-                                style: AppTextStyles.caption,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'Edit',
-                          style: AppTextStyles.buttonMedium.copyWith(
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                    ],
+                  _buildHealthStat(
+                    svgAsset: 'assets/images/FireIcon.svg',
+                    fallbackIcon: Icons.local_fire_department,
+                    label: 'Năng lượng',
+                    value: '756cal',
                   ),
-                ),
+                  _buildHealthStat(
+                    svgAsset: 'assets/images/WeightIcon.svg',
+                    fallbackIcon: Icons.fitness_center,
+                    label: 'Cân nặng',
+                    value: '103lbs',
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
 
-              // Stats section
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.shadow,
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildStatItem('Tasks', '12', Icons.task_alt),
-                    _buildDivider(),
-                    _buildStatItem(
-                      'Streak',
-                      '7 days',
-                      Icons.local_fire_department,
-                    ),
-                    _buildDivider(),
-                    _buildStatItem('Points', '850', Icons.star),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Menu items
-              _buildMenuSection(),
-              const SizedBox(height: 32),
-
-              // Logout button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    // Show confirmation dialog
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Logout'),
-                        content: const Text('Are you sure you want to logout?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Logout'),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (confirmed == true) {
-                      await ref.read(authProvider.notifier).logout();
-                      onLogout();
-                    }
-                  },
-                  icon: const Icon(Icons.logout, color: AppColors.error),
-                  label: Text(
-                    'Logout',
-                    style: AppTextStyles.buttonMedium.copyWith(
-                      color: AppColors.error,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.error),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
+              // Menu items matching Figma order
+              _buildFigmaMenu(context, ref),
             ],
           ),
         ),
@@ -298,6 +198,214 @@ class ProfileScreen extends ConsumerWidget {
           );
         }).toList(),
       ),
+    );
+  }
+
+  Widget _buildHealthStat({
+    String? svgAsset,
+    IconData? fallbackIcon,
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: AppColors.secondary.withOpacity(0.15),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: svgAsset != null
+                ? SvgPicture.asset(
+                    svgAsset,
+                    width: 22,
+                    height: 22,
+                    color: AppColors.primary,
+                  )
+                : Icon(
+                    fallbackIcon ?? Icons.help_outline,
+                    color: AppColors.primary,
+                    size: 22,
+                  ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: AppTextStyles.headline3.copyWith(color: AppColors.primary),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: AppTextStyles.caption),
+      ],
+    );
+  }
+
+  Widget _buildFigmaMenu(BuildContext context, WidgetRef ref) {
+    // Items: Chỉnh sửa hồ sơ, Thông tin về người bệnh, Trợ giúp, Đăng xuất
+    final items = [
+      {
+        'title': 'Chỉnh sửa hồ sơ',
+        'iconAsset': 'assets/images/icon_user.png',
+        'action': () {},
+      },
+      {
+        'title': 'Thông tin về người bệnh',
+        'iconAssetSvg': 'assets/images/DocumentIcon.svg',
+        'action': () {},
+      },
+      {
+        'title': 'Trợ giúp',
+        'iconAssetSvg': 'assets/images/ChatIcon.svg',
+        'action': () {},
+      },
+      {
+        'title': 'Đăng xuất',
+        'iconAssetSvgPrimary': 'assets/images/LogoutIcon.svg',
+        'iconAssetSvgFallback': 'assets/images/LogoutIcon.svg',
+        'action': () async {
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (c) => AlertDialog(
+              title: const Text('Đăng xuất'),
+              content: const Text('Bạn có chắc muốn đăng xuất?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(c, false),
+                  child: const Text('Hủy'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(c, true),
+                  child: const Text('Đăng xuất'),
+                ),
+              ],
+            ),
+          );
+
+          if (confirmed == true) {
+            await ref.read(authProvider.notifier).logout();
+            onLogout();
+          }
+        },
+      },
+    ];
+
+    return Column(
+      children: items.map((it) {
+        final isLogout = it['title'] == 'Đăng xuất';
+        return Column(
+          children: [
+            ListTile(
+              leading: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.secondary,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: it.containsKey('iconAsset')
+                      ? Image.asset(
+                          it['iconAsset'] as String,
+                          width: 20,
+                          height: 20,
+                          color: AppColors.surface,
+                        )
+                      : it.containsKey('iconAssetSvgPrimary')
+                      ? SvgAssetWithFallback(
+                          primary: it['iconAssetSvgPrimary'] as String,
+                          fallback: it['iconAssetSvgFallback'] as String?,
+                          width: 20,
+                          height: 20,
+                          color: AppColors.surface,
+                        )
+                      : it.containsKey('iconAssetSvg')
+                      ? SvgPicture.asset(
+                          it['iconAssetSvg'] as String,
+                          width: 20,
+                          height: 20,
+                          color: AppColors.surface,
+                        )
+                      : Icon(it['icon'] as IconData, color: AppColors.surface),
+                ),
+              ),
+              title: Text(
+                it['title'] as String,
+                style: AppTextStyles.bodyLarge,
+              ),
+              trailing: SvgPicture.asset(
+                'assets/images/ChevronListIcon.svg',
+                width: 18,
+                height: 18,
+                color: AppColors.textSecondary,
+              ),
+              onTap: it['action'] as void Function(),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Divider(height: 1, color: AppColors.divider),
+            ),
+          ],
+        );
+      }).toList(),
+    );
+  }
+}
+
+/// Widget that tries to load [primary] SVG asset and falls back to [fallback]
+class SvgAssetWithFallback extends StatefulWidget {
+  final String primary;
+  final String? fallback;
+  final double? width;
+  final double? height;
+  final Color? color;
+
+  const SvgAssetWithFallback({
+    super.key,
+    required this.primary,
+    this.fallback,
+    this.width,
+    this.height,
+    this.color,
+  });
+
+  @override
+  State<SvgAssetWithFallback> createState() => _SvgAssetWithFallbackState();
+}
+
+class _SvgAssetWithFallbackState extends State<SvgAssetWithFallback> {
+  late Future<String> _which;
+
+  @override
+  void initState() {
+    super.initState();
+    _which = _chooseAsset();
+  }
+
+  Future<String> _chooseAsset() async {
+    try {
+      await rootBundle.load(widget.primary);
+      return widget.primary;
+    } catch (_) {
+      if (widget.fallback != null) return widget.fallback!;
+      return widget.primary;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: _which,
+      builder: (context, snap) {
+        final path = snap.data ?? widget.primary;
+        return SvgPicture.asset(
+          path,
+          width: widget.width,
+          height: widget.height,
+          color: widget.color,
+        );
+      },
     );
   }
 }
