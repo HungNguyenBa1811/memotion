@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/theme.dart';
 import 'package:memotion/shared/widgets/bottom_pill_nav.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../viewmodels/profile_view_model.dart';
 import '../../../core/router/app_router.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -15,8 +16,8 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-    final user = authState.user;
+    final vm = ref.watch(profileViewModelProvider);
+    final user = vm.user;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -218,7 +219,7 @@ class ProfileScreen extends ConsumerWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: AppColors.secondary.withOpacity(0.15),
+            color: AppColors.secondary.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -248,6 +249,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildFigmaMenu(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(profileViewModelProvider);
     // Items: Chỉnh sửa hồ sơ, Thông tin về người bệnh, Trợ giúp, Đăng xuất
     final items = [
       {
@@ -289,7 +291,7 @@ class ProfileScreen extends ConsumerWidget {
           );
 
           if (confirmed == true) {
-            await ref.read(authProvider.notifier).logout();
+            await vm.logout();
             onLogout();
           }
         },

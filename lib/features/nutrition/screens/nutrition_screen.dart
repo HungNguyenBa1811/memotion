@@ -17,7 +17,7 @@ class NutritionScreen extends StatelessWidget {
           SafeArea(
             bottom: false,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 120),
+              padding: const EdgeInsets.only(bottom: 160),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -75,24 +75,27 @@ class NutritionScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // Category pills
+                  // Category pills (horizontally scrollable to avoid overflow)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        _buildCategoryPill('Lunch', isActive: true),
-                        const SizedBox(width: 20),
-                        _buildCategoryPill('Fruit'),
-                        const SizedBox(width: 20),
-                        _buildCategoryPill('Meat'),
-                      ],
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildCategoryPill('Lunch', isActive: true),
+                          const SizedBox(width: 20),
+                          _buildCategoryPill('Fruit'),
+                          const SizedBox(width: 20),
+                          _buildCategoryPill('Meat'),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 30),
 
                   // Featured salads horizontal scroll
                   SizedBox(
-                    height: 340,
+                    height: 320,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -102,7 +105,7 @@ class NutritionScreen extends StatelessWidget {
                           title: 'Keto Salad',
                           subtitle: 'Beans & fruits',
                           kcal: '370 Kcal',
-                          imagePath: 'assets/images/keto_salad.png',
+                          imagePath: 'assets/images/KetoSalad.png',
                         ),
                         const SizedBox(width: 20),
                         _buildFeaturedSaladCard(
@@ -110,7 +113,7 @@ class NutritionScreen extends StatelessWidget {
                           title: 'Skewers Salad',
                           subtitle: 'Chicken & quinoa',
                           kcal: '580 Kcal',
-                          imagePath: 'assets/images/skewers_salad.png',
+                          imagePath: 'assets/images/Salad3.png',
                         ),
                       ],
                     ),
@@ -152,7 +155,7 @@ class NutritionScreen extends StatelessWidget {
                       title: 'Cavolo Nero Salad',
                       subtitle: 'Cavolo nero & tomato',
                       kcal: '230 Kcal',
-                      imagePath: 'assets/images/cavolo_nero_salad.png',
+                      imagePath: 'assets/images/CavoloSalad.png',
                     ),
                   ),
                 ],
@@ -183,7 +186,7 @@ class NutritionScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: ),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -219,11 +222,10 @@ class NutritionScreen extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: () {
-        context.push(AppRoutes.nutritionDetail, extra: {
-          'title': title,
-          'subtitle': subtitle,
-          'kcal': kcal,
-        });
+        context.push(
+          AppRoutes.nutritionDetail,
+          extra: {'title': title, 'subtitle': subtitle, 'kcal': kcal},
+        );
       },
       child: Container(
         width: 220,
@@ -237,7 +239,7 @@ class NutritionScreen extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: ),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -245,22 +247,27 @@ class NutritionScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Salad image placeholder
-            Container(
-              height: 180,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(70),
-                  topRight: Radius.circular(70),
-                ),
+            // Salad image
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(70),
+                topRight: Radius.circular(70),
               ),
-              child: Center(
-                child: Icon(
-                  Icons.restaurant,
-                  size: 60,
-                  color: AppColors.primary.withValues(alpha: ),
+              child: Image.asset(
+                imagePath,
+                height: 160,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stack) => Container(
+                  height: 160,
+                  color: AppColors.background,
+                  child: Center(
+                    child: Icon(
+                      Icons.restaurant,
+                      size: 60,
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -271,6 +278,8 @@ class NutritionScreen extends StatelessWidget {
                 children: [
                   Text(
                     title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.lexend(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
@@ -339,22 +348,28 @@ class NutritionScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Image placeholder
-          Container(
-            width: 140,
-            height: 140,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(70),
-                bottomLeft: Radius.circular(27),
-              ),
+          // Image
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(70),
+              bottomLeft: Radius.circular(27),
             ),
-            child: Center(
-              child: Icon(
-                Icons.eco,
-                size: 50,
-                color: AppColors.primary.withValues(alpha: 0.3),
+            child: Image.asset(
+              imagePath,
+              width: 140,
+              height: 140,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stack) => Container(
+                width: 140,
+                height: 140,
+                color: AppColors.background,
+                child: Center(
+                  child: Icon(
+                    Icons.eco,
+                    size: 50,
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                  ),
+                ),
               ),
             ),
           ),
@@ -393,7 +408,11 @@ class NutritionScreen extends StatelessWidget {
                           color: Colors.black,
                         ),
                       ),
-                      Icon(Icons.favorite_border, color: Colors.black, size: 18),
+                      Icon(
+                        Icons.favorite_border,
+                        color: Colors.black,
+                        size: 18,
+                      ),
                     ],
                   ),
                 ],

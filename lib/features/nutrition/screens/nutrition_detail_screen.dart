@@ -89,7 +89,7 @@ class NutritionDetailScreen extends StatelessWidget {
                     height: 300,
                     child: Stack(
                       children: [
-                        // Food image placeholder (right side)
+                        // Food image (right side)
                         Positioned(
                           right: -20,
                           top: 0,
@@ -97,7 +97,6 @@ class NutritionDetailScreen extends StatelessWidget {
                             width: 260,
                             height: 260,
                             decoration: BoxDecoration(
-                              color: Colors.white,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
@@ -107,11 +106,27 @@ class NutritionDetailScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            child: Center(
-                              child: Icon(
-                                Icons.restaurant,
-                                size: 80,
-                                color: AppColors.primary.withValues(alpha: 0.3),
+                            child: ClipOval(
+                              child: Image.asset(
+                                'assets/images/KetoSalad.png',
+                                width: 260,
+                                height: 260,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stack) =>
+                                    Container(
+                                      width: 260,
+                                      height: 260,
+                                      color: Colors.white,
+                                      child: Center(
+                                        child: Icon(
+                                          Icons.restaurant,
+                                          size: 80,
+                                          color: AppColors.primary.withValues(
+                                            alpha: 0.3,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                               ),
                             ),
                           ),

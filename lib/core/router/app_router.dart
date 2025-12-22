@@ -4,6 +4,7 @@ import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/registration_screen.dart';
 import '../../features/auth/screens/sign_in_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
+import '../../features/onboarding/screens/onboarding_steps.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/nutrition/screens/nutrition_screen.dart';
 import '../../features/nutrition/screens/nutrition_detail_screen.dart';
@@ -11,6 +12,10 @@ import '../../features/nutrition/screens/nutrition_detail_screen.dart';
 // Route names
 class AppRoutes {
   static const String onboarding = '/';
+  static const String onboardingStep1 = '/onboarding/1';
+  static const String onboardingStep2 = '/onboarding/2';
+  static const String onboardingStep3 = '/onboarding/3';
+  static const String onboardingStep4 = '/onboarding/4';
   static const String signIn = '/sign-in';
   static const String registration = '/registration';
   static const String profile = '/profile';
@@ -58,7 +63,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => SignInScreen(
           onBackPressed: () => context.go(AppRoutes.onboarding),
           onRegisterPressed: () => context.go(AppRoutes.registration),
-          onLoginSuccess: () => context.go(AppRoutes.profile),
+          onLoginSuccess: () => context.go(AppRoutes.onboardingStep1),
         ),
       ),
       GoRoute(
@@ -66,8 +71,25 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => RegistrationScreen(
           onBackPressed: () => context.go(AppRoutes.onboarding),
           onLoginPressed: () => context.go(AppRoutes.signIn),
-          onRegisterSuccess: () => context.go(AppRoutes.profile),
+          onRegisterSuccess: () => context.go(AppRoutes.onboardingStep1),
         ),
+      ),
+      // Onboarding step routes (sequence after auth)
+      GoRoute(
+        path: AppRoutes.onboardingStep1,
+        builder: (context, state) => const OnboardingStepScreen(step: 1),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep2,
+        builder: (context, state) => const OnboardingStepScreen(step: 2),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep3,
+        builder: (context, state) => const OnboardingStepScreen(step: 3),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep4,
+        builder: (context, state) => const OnboardingStepScreen(step: 4),
       ),
       GoRoute(
         path: AppRoutes.profile,
