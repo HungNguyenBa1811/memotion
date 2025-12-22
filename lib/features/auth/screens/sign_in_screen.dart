@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/theme.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../providers/auth_provider.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/router/app_router.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   final VoidCallback onBackPressed;
@@ -40,7 +42,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         .login(_emailController.text.trim(), _passwordController.text);
 
     if (success && mounted) {
-      widget.onLoginSuccess();
+      // Navigate to onboarding step 1 after successful login
+      context.go(AppRoutes.onboardingStep1);
     }
   }
 

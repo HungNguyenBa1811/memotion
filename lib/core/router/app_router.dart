@@ -1,10 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/registration_screen.dart';
 import '../../features/auth/screens/sign_in_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
-import '../../features/onboarding/screens/onboarding_steps.dart';
+import '../../features/onboarding/screens/onboarding_screen_new.dart';
+import '../../features/onboarding/providers/onboarding_provider.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/nutrition/screens/nutrition_screen.dart';
 import '../../features/nutrition/screens/nutrition_detail_screen.dart';
@@ -36,11 +38,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isOnAuthPage =
           state.matchedLocation == AppRoutes.signIn ||
           state.matchedLocation == AppRoutes.registration;
-      final isOnOnboarding = state.matchedLocation == AppRoutes.onboarding;
 
-      // If authenticated and on auth pages, redirect to profile
-      if (isAuthenticated && (isOnAuthPage || isOnOnboarding)) {
-        return AppRoutes.profile;
+      // If authenticated and on auth pages, redirect to onboarding step 1
+      // to allow users to complete the onboarding flow after login/registration.
+      if (isAuthenticated && isOnAuthPage) {
+        return AppRoutes.onboardingStep1;
       }
 
       // If not authenticated and trying to access profile, redirect to onboarding
@@ -75,21 +77,34 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       // Onboarding step routes (sequence after auth)
+      // Sử dụng OnboardingScreenNew với animation và state management
       GoRoute(
         path: AppRoutes.onboardingStep1,
-        builder: (context, state) => const OnboardingStepScreen(step: 1),
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 1),
+        ),
       ),
       GoRoute(
         path: AppRoutes.onboardingStep2,
-        builder: (context, state) => const OnboardingStepScreen(step: 2),
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 2),
+        ),
       ),
       GoRoute(
         path: AppRoutes.onboardingStep3,
-        builder: (context, state) => const OnboardingStepScreen(step: 3),
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 3),
+        ),
       ),
       GoRoute(
         path: AppRoutes.onboardingStep4,
-        builder: (context, state) => const OnboardingStepScreen(step: 4),
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 4),
+        ),
       ),
       GoRoute(
         path: AppRoutes.profile,
@@ -118,3 +133,27 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+/// Custom page transition cho onboarding screens
+/// Tạo hiệu ứng slide mượt mà giữa các step
+CustomTransitionPage _buildOnboardingPage(GoRouterState state, Widget child) {
+  return CustomTransitionPage(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 300),
+    reverseTransitionDuration: const Duration(milliseconds: 250),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      // Fade + Slide transition
+      return FadeTransition(
+        opacity: CurveTween(curve: Curves.easeOut).animate(animation),
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0.1, 0),
+            end: Offset.zero,
+          ).animate(CurveTween(curve: Curves.easeOutCubic).animate(animation)),
+          child: child,
+        ),
+      );
+    },
+  );
+}

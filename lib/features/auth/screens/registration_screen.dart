@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/theme.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../providers/auth_provider.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/router/app_router.dart';
 
 class RegistrationScreen extends ConsumerStatefulWidget {
   final VoidCallback onBackPressed;
@@ -57,7 +59,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         );
 
     if (success && mounted) {
-      widget.onRegisterSuccess();
+      // Navigate to onboarding step 1 after successful registration
+      context.go(AppRoutes.onboardingStep1);
     }
   }
 
