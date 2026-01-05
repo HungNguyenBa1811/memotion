@@ -10,6 +10,8 @@ import '../../features/onboarding/providers/onboarding_provider.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/nutrition/screens/nutrition_screen.dart';
 import '../../features/nutrition/screens/nutrition_detail_screen.dart';
+import '../../features/workout/screens/workout_screen.dart';
+import '../../features/workout/screens/workout_detail_screen.dart';
 
 // Route names
 class AppRoutes {
@@ -24,6 +26,8 @@ class AppRoutes {
   static const String home = '/home';
   static const String nutrition = '/nutrition';
   static const String nutritionDetail = '/nutrition-detail';
+  static const String workout = '/workout';
+  static const String workoutDetail = '/workout-detail';
 }
 
 // Router provider
@@ -128,6 +132,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             subtitle: extra?['subtitle'] ?? 'Beans, mandarin and avocado salad',
             kcal: extra?['kcal']?.replaceAll(' Kcal', '') ?? '370',
           );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.workout,
+        builder: (context, state) => const WorkoutScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.workoutDetail,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return WorkoutDetailScreen(workoutId: extra?['workoutId'] ?? '');
         },
       ),
     ],

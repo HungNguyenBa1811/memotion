@@ -367,7 +367,7 @@ class NutritionDetailScreen extends StatelessWidget {
         context.go(AppRoutes.home);
         break;
       case 1:
-        // Calendar - not implemented yet
+        context.go(AppRoutes.workout);
         break;
       case 2:
         context.go(AppRoutes.nutrition);
