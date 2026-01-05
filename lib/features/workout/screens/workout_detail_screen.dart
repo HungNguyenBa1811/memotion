@@ -401,7 +401,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
     const double imageHeight = 227.0;
     const double overlayCardHeight = 60.0;
     const double overlapOffset = 30.0; // How much the card overlaps the image
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10),
       height: imageHeight + overlayCardHeight - overlapOffset,
@@ -443,17 +443,15 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
               ),
             ),
           ),
-          
+
           // Play button overlay (center of image)
           Positioned(
             top: (imageHeight - 48) / 2,
             left: 0,
             right: 0,
-            child: Center(
-              child: _buildPlayButton(),
-            ),
+            child: Center(child: _buildPlayButton()),
           ),
-          
+
           // Glassmorphism info overlay card
           Positioned(
             bottom: 0,
@@ -565,27 +563,23 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                   icon: Icons.access_time_rounded,
                   iconColor: AppColors.primary,
                   label: 'Time',
-                  value: workout.durationMinutes != null 
-                      ? '${workout.durationMinutes} min' 
+                  value: workout.durationMinutes != null
+                      ? '${workout.durationMinutes} min'
                       : workout.time,
                 ),
               ),
-              
+
               // Vertical divider
-              Container(
-                width: 1,
-                height: 35,
-                color: AppColors.primary,
-              ),
-              
+              Container(width: 1, height: 35, color: AppColors.primary),
+
               // Burn calories section
               Expanded(
                 child: _buildInfoItem(
                   icon: Icons.local_fire_department_rounded,
                   iconColor: AppColors.textPrimary,
                   label: 'Burn',
-                  value: workout.caloriesBurn != null 
-                      ? '${workout.caloriesBurn} kcal' 
+                  value: workout.caloriesBurn != null
+                      ? '${workout.caloriesBurn} kcal'
                       : '-- kcal',
                 ),
               ),
@@ -615,14 +609,10 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
               color: AppColors.primary,
               borderRadius: BorderRadius.circular(5),
             ),
-            child: Icon(
-              icon,
-              color: const Color(0xFFFAFAF5),
-              size: 18,
-            ),
+            child: Icon(icon, color: const Color(0xFFFAFAF5), size: 18),
           ),
           const SizedBox(width: 6),
-          
+
           // Label and value
           Expanded(
             child: Column(
