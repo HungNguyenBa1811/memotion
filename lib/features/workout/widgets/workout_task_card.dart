@@ -19,116 +19,119 @@ class WorkoutTaskCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        height: 110,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(70),
+            bottomLeft: Radius.circular(70),
+            topRight: Radius.circular(27),
+            bottomRight: Radius.circular(27),
+          ),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            // Teal dot indicator
-            Container(
-              margin: const EdgeInsets.only(top: 6),
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                color: AppColors.secondary,
-                shape: BoxShape.circle,
+            // Teal dot indicator - top right
+            Positioned(
+              top: 10,
+              right: 15,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: AppColors.secondary,
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-            const SizedBox(width: 14),
 
-            // Task content
-            Expanded(
+            // Image on left side
+            Positioned(
+              left: 20,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: SizedBox(
+                  width: 70,
+                  height: 86,
+                  child: workout.imageAsset != null
+                      ? Image.asset(
+                          workout.imageAsset!,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return _buildIconPlaceholder();
+                          },
+                        )
+                      : _buildIconPlaceholder(),
+                ),
+              ),
+            ),
+
+            // Title and Description
+            Positioned(
+              left: 110,
+              top: 20,
+              right: 80,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title
                   Text(
                     workout.title,
                     style: GoogleFonts.lexend(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                      letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  // Time
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.access_time,
-                        size: 14,
-                        color: AppColors.textSecondary,
+                  const SizedBox(height: 8),
+                  if (workout.description != null &&
+                      workout.description!.isNotEmpty)
+                    Text(
+                      workout.description!,
+                      style: GoogleFonts.lexend(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.black,
+                        letterSpacing: -0.3,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        workout.time,
-                        style: GoogleFonts.lexend(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                 ],
               ),
             ),
 
-            // Image thumbnail (if available)
-            if (workout.imageAsset != null) ...[
-              const SizedBox(width: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  workout.imageAsset!,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        _getIconForType(workout.type),
-                        size: 30,
-                        color: AppColors.primary,
-                      ),
-                    );
-                  },
+            // Time at bottom right
+            Positioned(
+              bottom: 15,
+              right: 20,
+              child: Text(
+                workout.time,
+                style: GoogleFonts.lexend(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                  letterSpacing: -0.3,
                 ),
               ),
-            ] else ...[
-              // Icon placeholder based on workout type
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: _getColorForType(workout.type).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _getIconForType(workout.type),
-                  size: 26,
-                  color: _getColorForType(workout.type),
-                ),
-              ),
-            ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildIconPlaceholder() {
+    return Container(
+      decoration: BoxDecoration(
+        color: _getColorForType(workout.type).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        _getIconForType(workout.type),
+        size: 40,
+        color: _getColorForType(workout.type),
       ),
     );
   }

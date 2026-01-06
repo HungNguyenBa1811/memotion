@@ -94,67 +94,54 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with back button
+          // Header with back button and notification
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Back button
+                // Back button - circular with primary color
                 GestureDetector(
                   onTap: () => context.pop(),
                   child: Container(
-                    width: 40,
-                    height: 40,
+                    width: 56,
+                    height: 56,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
+                      shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.arrow_back_ios_new,
                       color: Colors.white,
-                      size: 18,
+                      size: 20,
                     ),
                   ),
                 ),
-                // Mark as done button
-                GestureDetector(
-                  onTap: () => _markAsCompleted(workout),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: workout.isCompleted
-                          ? AppColors.secondary.withOpacity(0.2)
-                          : AppColors.primary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          workout.isCompleted
-                              ? Icons.check_circle
-                              : Icons.check_circle_outline,
-                          color: workout.isCompleted
-                              ? AppColors.secondary
-                              : Colors.white,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          workout.isCompleted ? 'Đã hoàn thành' : 'Hoàn thành',
-                          style: GoogleFonts.lexend(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: workout.isCompleted
-                                ? AppColors.secondary
-                                : Colors.white,
+                // Notification icon
+                Container(
+                  width: 24,
+                  height: 24,
+                  child: Stack(
+                    children: [
+                      Icon(
+                        Icons.notifications,
+                        color: AppColors.textPrimary,
+                        size: 24,
+                      ),
+                      // Notification dot
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: AppColors.secondary,
+                            shape: BoxShape.circle,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -165,111 +152,41 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
           _buildHeroImageSection(workout),
           const SizedBox(height: 24),
 
-          // Title and time
+          // Title section
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 25),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Type badge
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _getColorForType(workout.type).withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    _getTypeName(workout.type),
-                    style: GoogleFonts.lexend(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: _getColorForType(workout.type),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Title
+                // Title - Lato ExtraBold 24px
                 Text(
                   workout.title,
-                  style: GoogleFonts.lexend(
+                  style: GoogleFonts.lato(
                     fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1B4332),
                   ),
-                ),
-                const SizedBox(height: 8),
-
-                // Time and duration info
-                Row(
-                  children: [
-                    Icon(
-                      Icons.access_time,
-                      size: 18,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      workout.time,
-                      style: GoogleFonts.lexend(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    if (workout.durationMinutes != null) ...[
-                      const SizedBox(width: 20),
-                      Icon(
-                        Icons.timer_outlined,
-                        size: 18,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${workout.durationMinutes} phút',
-                        style: GoogleFonts.lexend(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
-          // Description
+          // Description - Lato Regular 15px, line-height 22px
           if (workout.description != null) ...[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Mô tả',
-                    style: GoogleFonts.lexend(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    workout.description!,
-                    style: GoogleFonts.lexend(
-                      fontSize: 14,
-                      height: 1.6,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: Text(
+                workout.description!,
+                style: GoogleFonts.lato(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                  height: 22 / 15,
+                  color: const Color(0xFF1B4332),
+                ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
           ],
 
           // Steps
@@ -303,33 +220,29 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
 
           const SizedBox(height: 40),
 
-          // Action button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: workout.isCompleted
-                    ? null
-                    : () => _markAsCompleted(workout),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: workout.isCompleted
+          // "Lets Workout" button - centered, 163x36px, border-radius 32px
+          Center(
+            child: GestureDetector(
+              onTap: workout.isCompleted
+                  ? null
+                  : () => _markAsCompleted(workout),
+              child: Container(
+                width: 163,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: workout.isCompleted
                       ? AppColors.textSecondary.withOpacity(0.3)
                       : AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  elevation: 0,
+                  borderRadius: BorderRadius.circular(32),
                 ),
-                child: Text(
-                  workout.isCompleted
-                      ? 'Đã hoàn thành nhiệm vụ'
-                      : 'Đánh dấu hoàn thành',
-                  style: GoogleFonts.lexend(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                child: Center(
+                  child: Text(
+                    workout.isCompleted ? 'Completed' : 'Lets Workout',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFFAFAF5),
+                    ),
                   ),
                 ),
               ),
@@ -444,9 +357,9 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             ),
           ),
 
-          // Play button overlay (center of image)
+          // Play button overlay (center of image) - 38x38px
           Positioned(
-            top: (imageHeight - 48) / 2,
+            top: (imageHeight - 38) / 2,
             left: 0,
             right: 0,
             child: Center(child: _buildPlayButton()),
@@ -487,7 +400,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
     );
   }
 
-  /// Builds the centered play button
+  /// Builds the centered play button - 38x38px per Figma
   Widget _buildPlayButton() {
     return GestureDetector(
       onTap: () {
@@ -507,10 +420,10 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
         );
       },
       child: Container(
-        width: 48,
-        height: 48,
+        width: 38,
+        height: 38,
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Colors.white,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
@@ -523,8 +436,8 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
         child: const Center(
           child: Icon(
             Icons.play_arrow_rounded,
-            color: AppColors.textPrimary,
-            size: 28,
+            color: Color(0xFF1B4332),
+            size: 22,
           ),
         ),
       ),
@@ -693,23 +606,6 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
         return const Color(0xFFAB47BC); // Violet
       case WorkoutType.other:
         return AppColors.primary;
-    }
-  }
-
-  String _getTypeName(WorkoutType type) {
-    switch (type) {
-      case WorkoutType.yoga:
-        return 'Yoga';
-      case WorkoutType.meal:
-        return 'Bữa ăn';
-      case WorkoutType.medicine:
-        return 'Thuốc';
-      case WorkoutType.exercise:
-        return 'Tập luyện';
-      case WorkoutType.rest:
-        return 'Nghỉ ngơi';
-      case WorkoutType.other:
-        return 'Khác';
     }
   }
 }

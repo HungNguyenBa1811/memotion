@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/theme.dart';
 import '../models/workout_model.dart';
 
@@ -15,11 +16,19 @@ class CalendarDayPicker extends StatelessWidget {
     required this.onDaySelected,
   });
 
+  String _getMonthName(DateTime date) {
+    return DateFormat('MMM').format(date);
+  }
+
+  String _getDayOfWeekShort(DateTime date) {
+    return DateFormat('E').format(date);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 90,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: List.generate(days.length, (index) {
@@ -31,49 +40,57 @@ class CalendarDayPicker extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
-              width: 56,
-              height: 80,
+              width: 64,
+              height: 84,
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.primary : Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(15),
                 boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
+                    ? []
                     : [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 32,
+                          offset: const Offset(0, 4),
                         ),
                       ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Day name (e.g., "T3", "T4")
+                  // Month name (e.g., "May")
                   Text(
-                    day.dayOfWeek,
-                    style: GoogleFonts.lexend(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                    _getMonthName(day.date),
+                    style: GoogleFonts.lexendDeca(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
                       color: isSelected
-                          ? Colors.white.withOpacity(0.85)
-                          : AppColors.textSecondary,
+                          ? Colors.white
+                          : const Color(0xFF24252C),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   // Day number
                   Text(
-                    day.date.day.toString().padLeft(2, '0'),
-                    style: GoogleFonts.lexend(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                    day.date.day.toString(),
+                    style: GoogleFonts.lexendDeca(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF24252C),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Day of week (e.g., "Sun", "Mon")
+                  Text(
+                    _getDayOfWeekShort(day.date),
+                    style: GoogleFonts.lexendDeca(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF24252C),
                     ),
                   ),
                 ],

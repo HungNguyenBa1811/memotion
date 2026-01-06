@@ -1,18 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/theme.dart';
-import 'package:memotion/shared/widgets/bottom_pill_nav.dart';
-import '../../auth/providers/auth_provider.dart';
-import '../viewmodels/profile_view_model.dart';
-import '../../../core/router/app_router.dart';
 
+import '../../../core/router/app_router.dart';
+import '../../../core/theme/theme.dart';
+import '../viewmodels/profile_view_model.dart';
+
+/// Original screen - kept for backwards compatibility
 class ProfileScreen extends ConsumerWidget {
   final VoidCallback onLogout;
 
   const ProfileScreen({super.key, required this.onLogout});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ProfileScreenContent(onLogout: onLogout);
+  }
+}
+
+/// Content version without bottom nav - used inside MainShell
+class ProfileScreenContent extends ConsumerWidget {
+  final VoidCallback? onLogout;
+
+  const ProfileScreenContent({super.key, this.onLogout});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,10 +51,6 @@ class ProfileScreen extends ConsumerWidget {
             },
           ),
         ],
-      ),
-      bottomNavigationBar: BottomPillNav(
-        currentIndex: 3,
-        onTap: (index) => _handleNavTap(context, index),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -122,6 +130,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  // ignore: unused_element
   Widget _buildStatItem(String label, String value, IconData icon) {
     return Column(
       children: [
@@ -137,10 +146,12 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  // ignore: unused_element
   Widget _buildDivider() {
     return Container(height: 40, width: 1, color: AppColors.divider);
   }
 
+  // ignore: unused_element
   Widget _buildMenuSection() {
     final menuItems = [
       _MenuItem(
@@ -292,7 +303,11 @@ class ProfileScreen extends ConsumerWidget {
 
           if (confirmed == true) {
             await vm.logout();
-            onLogout();
+            if (onLogout != null) {
+              onLogout!();
+            } else {
+              context.go(AppRoutes.onboarding);
+            }
           }
         },
       },
@@ -300,6 +315,7 @@ class ProfileScreen extends ConsumerWidget {
 
     return Column(
       children: items.map((it) {
+        // ignore: unused_local_variable
         final isLogout = it['title'] == 'Đăng xuất';
         return Column(
           children: [
@@ -414,26 +430,6 @@ class _SvgAssetWithFallbackState extends State<SvgAssetWithFallback> {
         );
       },
     );
-  }
-}
-
-void _handleNavTap(BuildContext context, int index) {
-  switch (index) {
-    case 0:
-      context.go(AppRoutes.home);
-      break;
-    case 1:
-      // Calendar - not implemented yet
-      break;
-    case 2:
-      context.go(AppRoutes.nutrition);
-      break;
-    case 3:
-      // Already on Profile
-      break;
-    case 4:
-      // Settings - not implemented yet
-      break;
   }
 }
 

@@ -12,8 +12,12 @@ class BottomPillNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       {'asset': 'assets/images/BottomNavHomeIcon.svg', 'label': 'Home'},
-      {'asset': 'assets/images/BottomNavCalendarIcon.svg', 'label': 'Calendar'},
-      {'asset': 'assets/images/BottomNavDocumentIcon.svg', 'label': 'Nutrition'},
+      {'asset': 'assets/images/HeartbeatIcon.svg', 'label': 'Medication'},
+      {
+        'asset': 'assets/images/BottomNavDocumentIcon.svg',
+        'label': 'Nutrition',
+      },
+      {'asset': 'assets/images/FireIcon.svg', 'label': 'Workout'},
       {'asset': 'assets/images/ProfileIcon.svg', 'label': 'Profile'},
       {'asset': 'assets/images/NavSettingsIcon.svg', 'label': 'Settings'},
     ];

@@ -6,12 +6,14 @@ import '../../features/auth/screens/registration_screen.dart';
 import '../../features/auth/screens/sign_in_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen_new.dart';
-import '../../features/onboarding/providers/onboarding_provider.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/nutrition/screens/nutrition_screen.dart';
 import '../../features/nutrition/screens/nutrition_detail_screen.dart';
 import '../../features/workout/screens/workout_screen.dart';
 import '../../features/workout/screens/workout_detail_screen.dart';
+import '../../features/medication/screens/medication_main_screen.dart';
+import '../../features/medication/screens/medication_scan_screen.dart';
+import '../../shared/widgets/main_shell.dart';
 
 // Route names
 class AppRoutes {
@@ -28,6 +30,8 @@ class AppRoutes {
   static const String nutritionDetail = '/nutrition-detail';
   static const String workout = '/workout';
   static const String workoutDetail = '/workout-detail';
+  static const String medication = '/medication';
+  static const String medicationScan = '/medication-scan';
 }
 
 // Router provider
@@ -110,40 +114,119 @@ final routerProvider = Provider<GoRouter>((ref) {
           const OnboardingScreenNew(initialStep: 4),
         ),
       ),
-      GoRoute(
-        path: AppRoutes.profile,
-        builder: (context, state) =>
-            ProfileScreen(onLogout: () => context.go(AppRoutes.onboarding)),
-      ),
-      GoRoute(
-        path: AppRoutes.home,
-        builder: (context, state) => const NutritionScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.nutrition,
-        builder: (context, state) => const NutritionScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.nutritionDetail,
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          return NutritionDetailScreen(
-            title: extra?['title'] ?? 'Keto Salad',
-            subtitle: extra?['subtitle'] ?? 'Beans, mandarin and avocado salad',
-            kcal: extra?['kcal']?.replaceAll(' Kcal', '') ?? '370',
-          );
+
+      // Main shell with persistent bottom navigation
+      // Uses StatefulShellRoute.indexedStack to preserve state of each tab
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainShell(navigationShell: navigationShell);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.workout,
-        builder: (context, state) => const WorkoutScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.workoutDetail,
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          return WorkoutDetailScreen(workoutId: extra?['workoutId'] ?? '');
-        },
+        branches: [
+          // Branch 0: Home/Nutrition
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.home,
+                builder: (context, state) => const NutritionScreenContent(),
+                routes: [
+                  GoRoute(
+                    path: 'detail',
+                    builder: (context, state) {
+                      final extra = state.extra as Map<String, dynamic>?;
+                      return NutritionDetailScreen(
+                        title: extra?['title'] ?? 'Keto Salad',
+                        subtitle:
+                            extra?['subtitle'] ??
+                            'Beans, mandarin and avocado salad',
+                        kcal: extra?['kcal']?.replaceAll(' Kcal', '') ?? '370',
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // Branch 1: Medication
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.medication,
+                builder: (context, state) =>
+                    const MedicationMainScreenContent(),
+                routes: [
+                  GoRoute(
+                    path: 'scan',
+                    builder: (context, state) => const MedicationScanScreen(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // Branch 2: Nutrition
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.nutrition,
+                builder: (context, state) => const NutritionScreenContent(),
+                routes: [
+                  GoRoute(
+                    path: 'detail',
+                    builder: (context, state) {
+                      final extra = state.extra as Map<String, dynamic>?;
+                      return NutritionDetailScreen(
+                        title: extra?['title'] ?? 'Keto Salad',
+                        subtitle:
+                            extra?['subtitle'] ??
+                            'Beans, mandarin and avocado salad',
+                        kcal: extra?['kcal']?.replaceAll(' Kcal', '') ?? '370',
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // Branch 3: Workout
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.workout,
+                builder: (context, state) => const WorkoutScreenContent(),
+                routes: [
+                  GoRoute(
+                    path: 'detail',
+                    builder: (context, state) {
+                      final extra = state.extra as Map<String, dynamic>?;
+                      return WorkoutDetailScreen(
+                        workoutId: extra?['workoutId'] ?? '',
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // Branch 4: Profile
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.profile,
+                builder: (context, state) => const ProfileScreenContent(),
+              ),
+            ],
+          ),
+          // Branch 5: Settings (placeholder)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/settings',
+                builder: (context, state) => const Scaffold(
+                  body: Center(child: Text('Settings - Coming Soon')),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );

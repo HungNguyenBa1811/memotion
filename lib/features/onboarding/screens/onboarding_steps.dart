@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/theme.dart';
+
 import '../../../core/router/app_router.dart';
 
 /// Onboarding step screen following the Figma design:

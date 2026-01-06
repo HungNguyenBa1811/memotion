@@ -1,0 +1,578 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/theme.dart';
+import '../providers/medication_provider.dart';
+import '../models/medication.dart';
+
+/// Original screen with bottom nav - kept for backwards compatibility
+class MedicationMainScreen extends ConsumerStatefulWidget {
+  const MedicationMainScreen({super.key});
+
+  @override
+  ConsumerState<MedicationMainScreen> createState() =>
+      _MedicationMainScreenState();
+}
+
+class _MedicationMainScreenState extends ConsumerState<MedicationMainScreen> {
+  @override
+  Widget build(BuildContext context) {
+    // Redirect to the shell route version
+    return const MedicationMainScreenContent();
+  }
+}
+
+/// Content version without bottom nav - used inside MainShell
+class MedicationMainScreenContent extends ConsumerStatefulWidget {
+  const MedicationMainScreenContent({super.key});
+
+  @override
+  ConsumerState<MedicationMainScreenContent> createState() =>
+      _MedicationMainScreenContentState();
+}
+
+class _MedicationMainScreenContentState
+    extends ConsumerState<MedicationMainScreenContent> {
+  @override
+  Widget build(BuildContext context) {
+    final selectedFilter = ref.watch(selectedFilterProvider);
+    final medicationsAsync = ref.watch(
+      filteredMedicationsProvider(selectedFilter),
+    );
+    final selectedDate = ref.watch(selectedDateProvider);
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/medication/scan'),
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.qr_code_scanner, color: Colors.white),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // Header
+            _buildHeader(context),
+
+            // Date selector
+            _buildDateSelector(selectedDate),
+
+            const SizedBox(height: 16),
+
+            // Filter tabs
+            _buildFilterTabs(selectedFilter),
+
+            const SizedBox(height: 16),
+
+            // Medication list
+            Expanded(
+              child: medicationsAsync.when(
+                data: (medications) => _buildMedicationList(medications),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(child: Text('Error: $error')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => context.pop(),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.arrow_back_ios_new, size: 18),
+            ),
+          ),
+          Stack(
+            children: [
+              const Icon(Icons.notifications_outlined, size: 24),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFD87659),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateSelector(DateTime selectedDate) {
+    final now = DateTime.now();
+    final dates = List.generate(7, (i) => now.add(Duration(days: i - 2)));
+
+    return SizedBox(
+      height: 84,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        itemCount: dates.length,
+        itemBuilder: (context, index) {
+          final date = dates[index];
+          final isSelected =
+              date.day == selectedDate.day &&
+              date.month == selectedDate.month &&
+              date.year == selectedDate.year;
+
+          return GestureDetector(
+            onTap: () {
+              ref.read(selectedDateProvider.notifier).state = date;
+            },
+            child: Container(
+              width: 64,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: isSelected
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 32,
+                        ),
+                      ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _getMonthName(date.month),
+                    style: GoogleFonts.lexendDeca(
+                      fontSize: 11,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF24252C),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    date.day.toString(),
+                    style: GoogleFonts.lexendDeca(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF24252C),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _getDayName(date.weekday),
+                    style: GoogleFonts.lexendDeca(
+                      fontSize: 11,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF24252C),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildFilterTabs(MedicationFilter selectedFilter) {
+    final medicationsAsync = ref.watch(medicationsProvider);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        height: 56,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: MedicationFilter.values.map((filter) {
+            final isSelected = filter == selectedFilter;
+            final count =
+                medicationsAsync.whenOrNull(
+                  data: (meds) {
+                    switch (filter) {
+                      case MedicationFilter.all:
+                        return meds.length;
+                      case MedicationFilter.taken:
+                        return meds
+                            .where((m) => m.status == MedicationStatus.taken)
+                            .length;
+                      case MedicationFilter.missed:
+                        return meds
+                            .where((m) => m.status == MedicationStatus.missed)
+                            .length;
+                    }
+                  },
+                ) ??
+                0;
+
+            return Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  ref.read(selectedFilterProvider.notifier).state = filter;
+                },
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.primary : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        filter.displayText,
+                        style: GoogleFonts.roboto(
+                          fontSize: 14,
+                          color: isSelected
+                              ? Colors.white
+                              : const Color(0xFF353535),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFF0B2455)
+                              : const Color(0xFFF7F7F7),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          count.toString(),
+                          style: GoogleFonts.roboto(
+                            fontSize: 14,
+                            color: isSelected
+                                ? Colors.white
+                                : const Color(0xFF353535),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMedicationList(List<Medication> medications) {
+    if (medications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.medication_outlined, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'No medications found',
+              style: GoogleFonts.lexend(fontSize: 16, color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 160),
+      itemCount: medications.length,
+      itemBuilder: (context, index) {
+        return _buildMedicationCard(medications[index]);
+      },
+    );
+  }
+
+  Widget _buildMedicationCard(Medication medication) {
+    // Get pill image based on index
+    final pillImages = [
+      'assets/images/medication/pill_1.png',
+      'assets/images/medication/pill_2.png',
+      'assets/images/medication/pill_3.png',
+    ];
+    final imageIndex = medication.id.hashCode % pillImages.length;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      height: 110,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(70),
+          bottomLeft: Radius.circular(70),
+          topRight: Radius.circular(27),
+          bottomRight: Radius.circular(27),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 36,
+              top: 12,
+              bottom: 12,
+              right: 12,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Medication image
+                Container(
+                  width: 100,
+                  height: 75,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF7F7F7),
+                    borderRadius: BorderRadius.circular(27),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(27),
+                    child: Image.asset(
+                      pillImages[imageIndex],
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.medication,
+                          size: 40,
+                          color: AppColors.primary,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 22),
+
+                // Medication info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        medication.name,
+                        style: GoogleFonts.lexend(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          letterSpacing: -0.3,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        medication.dosage,
+                        style: GoogleFonts.lexend(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            medication.time,
+                            style: GoogleFonts.lexend(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF353535),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '|',
+                            style: GoogleFonts.roboto(
+                              fontSize: 12,
+                              color: const Color(0xFF9E9E9E),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            medication.frequency,
+                            style: GoogleFonts.lexend(
+                              fontSize: 12,
+                              color: const Color(0xFF353535),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Status badge (top right)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.only(
+                left: 14,
+                right: 16,
+                top: 4,
+                bottom: 4,
+              ),
+              decoration: BoxDecoration(
+                color: _getStatusColor(medication.status),
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(21),
+                  bottomLeft: Radius.circular(16),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (medication.remainingTime != null) ...[
+                    const Icon(
+                      Icons.access_time,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      medication.remainingTime!,
+                      style: GoogleFonts.roboto(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ] else
+                    Text(
+                      medication.status.displayText,
+                      style: GoogleFonts.roboto(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+          // Action button (bottom right)
+          Positioned(
+            bottom: 6,
+            right: 8,
+            child: GestureDetector(
+              onTap: medication.status == MedicationStatus.pending
+                  ? () => _takeMedication(medication.id)
+                  : null,
+              child: Container(
+                width: 80,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: medication.status == MedicationStatus.pending
+                      ? AppColors.primary
+                      : _getStatusColor(medication.status),
+                  borderRadius: BorderRadius.circular(27),
+                ),
+                child: Center(
+                  child: Text(
+                    medication.status == MedicationStatus.pending
+                        ? 'Take'
+                        : medication.status.displayText,
+                    style: GoogleFonts.roboto(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(MedicationStatus status) {
+    switch (status) {
+      case MedicationStatus.pending:
+        return AppColors.primary;
+      case MedicationStatus.taken:
+        return AppColors.primary;
+      case MedicationStatus.missed:
+        return const Color(0xFFD87659);
+    }
+  }
+
+  void _takeMedication(String medicationId) {
+    ref.read(medicationNotifierProvider.notifier).takeMedication(medicationId);
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return months[month - 1];
+  }
+
+  String _getDayName(int weekday) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[weekday - 1];
+  }
+}
