@@ -13,7 +13,7 @@ class AppTheme {
         onSurface: AppColors.textPrimary,
       ),
       scaffoldBackgroundColor: AppColors.background,
-      textTheme: GoogleFonts.lexendDecaTextTheme(),
+      textTheme: GoogleFonts.lexendTextTheme(),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -23,7 +23,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(32),
           ),
-          textStyle: GoogleFonts.lexendDeca(
+          textStyle: GoogleFonts.lexend(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -37,7 +37,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(32),
           ),
-          textStyle: GoogleFonts.lexendDeca(
+          textStyle: GoogleFonts.lexend(
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -62,7 +62,7 @@ class AppTheme {
           horizontal: 16,
           vertical: 14,
         ),
-        hintStyle: GoogleFonts.lexendDeca(
+        hintStyle: GoogleFonts.lexend(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColors.inputHint,
@@ -72,7 +72,7 @@ class AppTheme {
         backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.lexendDeca(
+        titleTextStyle: GoogleFonts.lexend(
           fontSize: 19,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,

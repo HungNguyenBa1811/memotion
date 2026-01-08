@@ -44,39 +44,49 @@ class _MedicationMainScreenContentState
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/medication/scan'),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.qr_code_scanner, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // Header
-            _buildHeader(context),
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                // Header
+                _buildHeader(context),
 
-            // Date selector
-            _buildDateSelector(selectedDate),
+                // Date selector
+                _buildDateSelector(selectedDate),
 
-            const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-            // Filter tabs
-            _buildFilterTabs(selectedFilter),
+                // Filter tabs
+                _buildFilterTabs(selectedFilter),
 
-            const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-            // Medication list
-            Expanded(
-              child: medicationsAsync.when(
-                data: (medications) => _buildMedicationList(medications),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Center(child: Text('Error: $error')),
-              ),
+                // Medication list
+                Expanded(
+                  child: medicationsAsync.when(
+                    data: (medications) => _buildMedicationList(medications),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, _) => Center(child: Text('Error: $error')),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          // Floating QR button - positioned bottom right, above navbar
+          Positioned(
+            right: 20,
+            bottom: 100, // Above the bottom navbar
+            child: FloatingActionButton(
+              onPressed: () => context.push('/medication/scan'),
+              backgroundColor: AppColors.primary,
+              elevation: 4,
+              child: const Icon(Icons.qr_code_scanner, color: Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -93,34 +103,42 @@ class _MedicationMainScreenContentState
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color(0xFF00695C),
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                  ),
-                ],
               ),
-              child: const Icon(Icons.arrow_back_ios_new, size: 18),
-            ),
-          ),
-          Stack(
-            children: [
-              const Icon(Icons.notifications_outlined, size: 24),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFD87659),
-                    shape: BoxShape.circle,
-                  ),
+              child: Center(
+                child: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Colors.white,
+                  size: 18,
                 ),
               ),
-            ],
+            ),
+          ),
+          Container(
+            width: 24,
+            height: 24,
+            child: Stack(
+              children: [
+                Icon(
+                  Icons.notifications,
+                  color: AppColors.textPrimary,
+                  size: 24,
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -168,7 +186,7 @@ class _MedicationMainScreenContentState
                 children: [
                   Text(
                     _getMonthName(date.month),
-                    style: GoogleFonts.lexendDeca(
+                    style: GoogleFonts.lexend(
                       fontSize: 11,
                       color: isSelected
                           ? Colors.white
@@ -178,7 +196,7 @@ class _MedicationMainScreenContentState
                   const SizedBox(height: 4),
                   Text(
                     date.day.toString(),
-                    style: GoogleFonts.lexendDeca(
+                    style: GoogleFonts.lexend(
                       fontSize: 19,
                       fontWeight: FontWeight.w600,
                       color: isSelected
@@ -189,7 +207,7 @@ class _MedicationMainScreenContentState
                   const SizedBox(height: 4),
                   Text(
                     _getDayName(date.weekday),
-                    style: GoogleFonts.lexendDeca(
+                    style: GoogleFonts.lexend(
                       fontSize: 11,
                       color: isSelected
                           ? Colors.white
@@ -254,7 +272,7 @@ class _MedicationMainScreenContentState
                     children: [
                       Text(
                         filter.displayText,
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.lexend(
                           fontSize: 14,
                           color: isSelected
                               ? Colors.white
@@ -275,7 +293,7 @@ class _MedicationMainScreenContentState
                         ),
                         child: Text(
                           count.toString(),
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.lexend(
                             fontSize: 14,
                             color: isSelected
                                 ? Colors.white
@@ -429,7 +447,7 @@ class _MedicationMainScreenContentState
                           const SizedBox(width: 4),
                           Text(
                             '|',
-                            style: GoogleFonts.roboto(
+                            style: GoogleFonts.lexend(
                               fontSize: 12,
                               color: const Color(0xFF9E9E9E),
                             ),
@@ -481,7 +499,7 @@ class _MedicationMainScreenContentState
                     const SizedBox(width: 4),
                     Text(
                       medication.remainingTime!,
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.lexend(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: Colors.white,
@@ -490,7 +508,7 @@ class _MedicationMainScreenContentState
                   ] else
                     Text(
                       medication.status.displayText,
-                      style: GoogleFonts.roboto(
+                      style: GoogleFonts.lexend(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: Colors.white,
@@ -523,7 +541,7 @@ class _MedicationMainScreenContentState
                     medication.status == MedicationStatus.pending
                         ? 'Take'
                         : medication.status.displayText,
-                    style: GoogleFonts.roboto(
+                    style: GoogleFonts.lexend(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Colors.white,

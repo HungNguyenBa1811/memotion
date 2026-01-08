@@ -58,25 +58,27 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Back button - circular with primary color
+                    // Back button - circular with teal color (matching nutrition)
                     GestureDetector(
                       onTap: () => context.pop(),
                       child: Container(
-                        width: 56,
-                        height: 56,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.primary,
+                          color: const Color(0xFF00695C),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.white,
-                          size: 20,
+                        child: Center(
+                          child: Icon(
+                            Icons.arrow_back_ios_new,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ),
                     // Notification icon
-                    Container(
+                    SizedBox(
                       width: 24,
                       height: 24,
                       child: Stack(

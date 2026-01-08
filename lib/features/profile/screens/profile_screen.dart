@@ -38,33 +38,20 @@ class ProfileScreenContent extends ConsumerWidget {
         elevation: 0,
         title: Text('Profile', style: AppTextStyles.headline2),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: SvgPicture.asset(
-              'assets/images/NavSettingsIcon.svg',
-              width: 22,
-              height: 22,
-              color: AppColors.primary,
-            ),
-            onPressed: () {
-              // TODO: Navigate to settings
-            },
-          ),
-        ],
+        actions: [],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
           child: Column(
             children: [
+              const SizedBox(height: 20),
               // Profile avatar
               Container(
-                width: 100,
-                height: 100,
+                width: 90,
+                height: 90,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.primary, width: 2),
+                  border: Border.all(color: Colors.grey.shade300, width: 2),
                 ),
                 child: user?.avatarUrl != null
                     ? ClipOval(
@@ -73,56 +60,69 @@ class ProfileScreenContent extends ConsumerWidget {
                           fit: BoxFit.cover,
                         ),
                       )
-                    : Icon(
-                        Icons.person,
-                        size: 50,
-                        color: AppColors.primary.withValues(alpha: 0.5),
+                    : ClipOval(
+                        child: Image.asset(
+                          'assets/images/Avatar.png',
+                          fit: BoxFit.cover,
+                        ),
                       ),
+              ),
+              const SizedBox(height: 18),
+
+              // User name
+              Text(
+                user?.nickname ?? 'Hieu Dinh Vu',
+                style: AppTextStyles.headline2.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 16),
 
-              // User name
-              Text(user?.nickname ?? 'User', style: AppTextStyles.headline1),
-              const SizedBox(height: 4),
-
-              // User email
-              Text(
-                user?.email ?? '',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+              // Health stats row (Nhịp tim / Năng lượng / Cân nặng)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildHealthStat(
+                      svgAsset: 'assets/images/heartbeat_icon.svg',
+                      fallbackIcon: Icons.favorite,
+                      label: 'Nhịp tim',
+                      value: '215bpm',
+                    ),
+                    Container(
+                      width: 1,
+                      height: 44,
+                      color: AppColors.background,
+                    ),
+                    _buildHealthStat(
+                      svgAsset: 'assets/images/fire_icon.svg',
+                      fallbackIcon: Icons.local_fire_department,
+                      label: 'Năng lượng',
+                      value: '756cal',
+                    ),
+                    Container(
+                      width: 1,
+                      height: 44,
+                      color: AppColors.background,
+                    ),
+                    _buildHealthStat(
+                      svgAsset: 'assets/images/weight_icon.svg',
+                      fallbackIcon: Icons.fitness_center,
+                      label: 'Cân nặng',
+                      value: '103lbs',
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
-
-              // Figma-alike stats row (Nhịp tim / Năng lượng / Cân nặng)
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildHealthStat(
-                    svgAsset: 'assets/images/HeartbeatIcon.svg',
-                    fallbackIcon: Icons.favorite,
-                    label: 'Nhịp tim',
-                    value: '215bpm',
-                  ),
-                  _buildHealthStat(
-                    svgAsset: 'assets/images/FireIcon.svg',
-                    fallbackIcon: Icons.local_fire_department,
-                    label: 'Năng lượng',
-                    value: '756cal',
-                  ),
-                  _buildHealthStat(
-                    svgAsset: 'assets/images/WeightIcon.svg',
-                    fallbackIcon: Icons.fitness_center,
-                    label: 'Cân nặng',
-                    value: '103lbs',
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
 
               // Menu items matching Figma order
-              _buildFigmaMenu(context, ref),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _buildFigmaMenu(context, ref),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -224,38 +224,45 @@ class ProfileScreenContent extends ConsumerWidget {
     required String label,
     required String value,
   }) {
-    return Column(
-      children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: AppColors.secondary.withValues(alpha: 0.15),
-            shape: BoxShape.circle,
+    return Expanded(
+      child: Column(
+        children: [
+          // Icon
+          Container(
+            width: 32,
+            height: 32,
+            child: Center(
+              child: svgAsset != null
+                  ? SvgPicture.asset(svgAsset, width: 32, height: 32)
+                  : Icon(
+                      fallbackIcon ?? Icons.help_outline,
+                      color: AppColors.primary,
+                      size: 32,
+                    ),
+            ),
           ),
-          child: Center(
-            child: svgAsset != null
-                ? SvgPicture.asset(
-                    svgAsset,
-                    width: 22,
-                    height: 22,
-                    color: AppColors.primary,
-                  )
-                : Icon(
-                    fallbackIcon ?? Icons.help_outline,
-                    color: AppColors.primary,
-                    size: 22,
-                  ),
+          const SizedBox(height: 8),
+          // Label
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: AppTextStyles.headline3.copyWith(color: AppColors.primary),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: AppTextStyles.caption),
-      ],
+          const SizedBox(height: 2),
+          // Value
+          Text(
+            value,
+            style: AppTextStyles.bodyLarge.copyWith(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
@@ -265,23 +272,23 @@ class ProfileScreenContent extends ConsumerWidget {
     final items = [
       {
         'title': 'Chỉnh sửa hồ sơ',
-        'iconAsset': 'assets/images/icon_user.png',
+        'iconAssetSvg': 'assets/images/heart_icon.svg',
         'action': () {},
       },
       {
         'title': 'Thông tin về người bệnh',
-        'iconAssetSvg': 'assets/images/DocumentIcon.svg',
+        'iconAssetSvg': 'assets/images/document_icon.svg',
         'action': () {},
       },
       {
         'title': 'Trợ giúp',
-        'iconAssetSvg': 'assets/images/ChatIcon.svg',
+        'iconAssetSvg': 'assets/images/chat_icon.svg',
         'action': () {},
       },
       {
         'title': 'Đăng xuất',
-        'iconAssetSvgPrimary': 'assets/images/LogoutIcon.svg',
-        'iconAssetSvgFallback': 'assets/images/LogoutIcon.svg',
+        'iconAssetSvgPrimary': 'assets/images/logout_icon.svg',
+        'iconAssetSvgFallback': 'assets/images/logout_icon.svg',
         'action': () async {
           final confirmed = await showDialog<bool>(
             context: context,
@@ -314,17 +321,23 @@ class ProfileScreenContent extends ConsumerWidget {
     ];
 
     return Column(
-      children: items.map((it) {
-        // ignore: unused_local_variable
-        final isLogout = it['title'] == 'Đăng xuất';
+      children: items.asMap().entries.map((entry) {
+        final index = entry.key;
+        final it = entry.value;
+        final isLast = index == items.length - 1;
+
         return Column(
           children: [
             ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 4,
+              ),
               leading: Container(
-                width: 44,
-                height: 44,
+                width: 43,
+                height: 43,
                 decoration: BoxDecoration(
-                  color: AppColors.secondary,
+                  color: const Color(0xFF4DB6AC),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -333,7 +346,7 @@ class ProfileScreenContent extends ConsumerWidget {
                           it['iconAsset'] as String,
                           width: 20,
                           height: 20,
-                          color: AppColors.surface,
+                          color: Colors.white,
                         )
                       : it.containsKey('iconAssetSvgPrimary')
                       ? SvgAssetWithFallback(
@@ -341,34 +354,41 @@ class ProfileScreenContent extends ConsumerWidget {
                           fallback: it['iconAssetSvgFallback'] as String?,
                           width: 20,
                           height: 20,
-                          color: AppColors.surface,
+                          color: Colors.white,
                         )
                       : it.containsKey('iconAssetSvg')
                       ? SvgPicture.asset(
                           it['iconAssetSvg'] as String,
                           width: 20,
                           height: 20,
-                          color: AppColors.surface,
+                          color: Colors.white,
                         )
-                      : Icon(it['icon'] as IconData, color: AppColors.surface),
+                      : Icon(it['icon'] as IconData, color: Colors.white),
                 ),
               ),
               title: Text(
                 it['title'] as String,
-                style: AppTextStyles.bodyLarge,
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
               ),
-              trailing: SvgPicture.asset(
-                'assets/images/ChevronListIcon.svg',
-                width: 18,
-                height: 18,
+              trailing: Icon(
+                Icons.chevron_right,
                 color: AppColors.textSecondary,
+                size: 24,
               ),
               onTap: it['action'] as void Function(),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Divider(height: 1, color: AppColors.divider),
-            ),
+            if (!isLast)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 37),
+                child: Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Colors.blue.withValues(alpha: 0.13),
+                ),
+              ),
           ],
         );
       }).toList(),

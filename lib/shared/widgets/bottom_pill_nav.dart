@@ -19,7 +19,6 @@ class BottomPillNav extends StatelessWidget {
       },
       {'asset': 'assets/images/FireIcon.svg', 'label': 'Workout'},
       {'asset': 'assets/images/ProfileIcon.svg', 'label': 'Profile'},
-      {'asset': 'assets/images/NavSettingsIcon.svg', 'label': 'Settings'},
     ];
 
     return SafeArea(

@@ -82,7 +82,7 @@ class NutritionDetailScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
                       title,
-                      style: GoogleFonts.glory(
+                      style: GoogleFonts.lexend(
                         fontSize: 40,
                         fontWeight: FontWeight.w700,
                         color: _textDarkGreen,
@@ -97,7 +97,7 @@ class NutritionDetailScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
                       subtitle,
-                      style: GoogleFonts.glory(
+                      style: GoogleFonts.lexend(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: _subtitleOrange,
@@ -314,7 +314,7 @@ class NutritionDetailScreen extends StatelessWidget {
                         ),
                         child: Text(
                           'Watch Video',
-                          style: GoogleFonts.glory(
+                          style: GoogleFonts.lexend(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: Colors.black,
@@ -394,7 +394,7 @@ class NutritionDetailScreen extends StatelessWidget {
               ),
               child: Text(
                 label,
-                style: GoogleFonts.glory(
+                style: GoogleFonts.lexend(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: Colors.black,
@@ -424,7 +424,7 @@ class NutritionDetailScreen extends StatelessWidget {
               child: Center(
                 child: Text(
                   value,
-                  style: GoogleFonts.glory(
+                  style: GoogleFonts.lexend(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: Colors.black,

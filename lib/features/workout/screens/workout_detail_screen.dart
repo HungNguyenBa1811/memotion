@@ -100,20 +100,22 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Back button - circular with primary color
+                // Back button - circular with teal color (matching nutrition)
                 GestureDetector(
                   onTap: () => context.pop(),
                   child: Container(
-                    width: 56,
-                    height: 56,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: const Color(0xFF00695C),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.white,
-                      size: 20,
+                    child: Center(
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ),
@@ -158,10 +160,10 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title - Lato ExtraBold 24px
+                // Title - lexend ExtraBold 24px
                 Text(
                   workout.title,
-                  style: GoogleFonts.lato(
+                  style: GoogleFonts.lexend(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF1B4332),
@@ -172,13 +174,13 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Description - Lato Regular 15px, line-height 22px
+          // Description - lexend Regular 15px, line-height 22px
           if (workout.description != null) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Text(
                 workout.description!,
-                style: GoogleFonts.lato(
+                style: GoogleFonts.lexend(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
                   height: 22 / 15,
@@ -238,7 +240,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                 child: Center(
                   child: Text(
                     workout.isCompleted ? 'Completed' : 'Lets Workout',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.lexend(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFFFAFAF5),
@@ -249,7 +251,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             ),
           ),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 140),
         ],
       ),
     );
@@ -535,7 +537,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.lexend(
                     fontSize: 9,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFFFAFAF5),
@@ -543,7 +545,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                 ),
                 Text(
                   value,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.lexend(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFFFAFAF5),

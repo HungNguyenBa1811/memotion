@@ -326,7 +326,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
                       const SizedBox(width: 4),
                       Text(
                         '|',
-                        style: GoogleFonts.roboto(
+                        style: GoogleFonts.lexend(
                           fontSize: 14,
                           color: const Color(0xFF9E9E9E),
                         ),
@@ -367,7 +367,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
                 ),
                 child: Text(
                   'Chi tiết',
-                  style: GoogleFonts.roboto(
+                  style: GoogleFonts.lexend(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: Colors.white,

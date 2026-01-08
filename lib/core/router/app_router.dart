@@ -14,6 +14,7 @@ import '../../features/workout/screens/workout_detail_screen.dart';
 import '../../features/medication/screens/medication_main_screen.dart';
 import '../../features/medication/screens/medication_scan_screen.dart';
 import '../../shared/widgets/main_shell.dart';
+import 'route_config.dart';
 
 // Route names
 class AppRoutes {
@@ -34,30 +35,58 @@ class AppRoutes {
   static const String medicationScan = '/medication-scan';
 }
 
-// Router provider
+/// Listenable để notify router khi auth state thay đổi
+class AuthNotifierListenable extends ChangeNotifier {
+  AuthNotifierListenable(this._ref) {
+    _ref.listen<AuthState>(authProvider, (_, __) {
+      notifyListeners();
+    });
+  }
+
+  final Ref _ref;
+
+  AuthStatus get status => _ref.read(authProvider).status;
+}
+
+/// Provider cho auth listenable
+final authListenableProvider = Provider<AuthNotifierListenable>((ref) {
+  return AuthNotifierListenable(ref);
+});
+
+// Router provider - SỬ DỤNG refreshListenable thay vì watch
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  final authListenable = ref.watch(authListenableProvider);
 
   return GoRouter(
     initialLocation: AppRoutes.onboarding,
     debugLogDiagnostics: true,
+    refreshListenable: authListenable,
     redirect: (context, state) {
-      final isAuthenticated = authState.status == AuthStatus.authenticated;
-      final isOnAuthPage =
-          state.matchedLocation == AppRoutes.signIn ||
-          state.matchedLocation == AppRoutes.registration;
+      final status = authListenable.status;
+      final currentPath = state.matchedLocation;
+      final isPublicRoute = RouteConfig.isPublicRoute(currentPath);
 
-      // If authenticated and on auth pages, redirect to onboarding step 1
-      // to allow users to complete the onboarding flow after login/registration.
-      if (isAuthenticated && isOnAuthPage) {
-        return AppRoutes.onboardingStep1;
+      // Không redirect khi đang loading hoặc initial state
+      if (status == AuthStatus.loading || status == AuthStatus.initial) {
+        return null;
       }
 
-      // If not authenticated and trying to access profile, redirect to onboarding
-      if (!isAuthenticated && state.matchedLocation == AppRoutes.profile) {
-        return AppRoutes.onboarding;
+      final isAuthenticated = status == AuthStatus.authenticated;
+
+      // Case 1: Đã authenticated nhưng đang ở public route (sign-in, registration, landing)
+      // -> Redirect đến authenticated area
+      if (isAuthenticated && isPublicRoute) {
+        return RouteConfig.authenticatedRedirect;
       }
 
+      // Case 2: Chưa authenticated nhưng đang ở protected route
+      // -> Redirect về public landing page
+      // CHÚ Ý: Chỉ redirect khi KHÔNG ở public route
+      if (!isAuthenticated && !isPublicRoute) {
+        return RouteConfig.unauthenticatedRedirect;
+      }
+
+      // Không cần redirect
       return null;
     },
     routes: [
@@ -216,16 +245,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           // Branch 5: Settings (placeholder)
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/settings',
-                builder: (context, state) => const Scaffold(
-                  body: Center(child: Text('Settings - Coming Soon')),
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     ],

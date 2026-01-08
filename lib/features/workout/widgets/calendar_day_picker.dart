@@ -61,7 +61,7 @@ class CalendarDayPicker extends StatelessWidget {
                   // Month name (e.g., "May")
                   Text(
                     _getMonthName(day.date),
-                    style: GoogleFonts.lexendDeca(
+                    style: GoogleFonts.lexend(
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
                       color: isSelected
@@ -73,7 +73,7 @@ class CalendarDayPicker extends StatelessWidget {
                   // Day number
                   Text(
                     day.date.day.toString(),
-                    style: GoogleFonts.lexendDeca(
+                    style: GoogleFonts.lexend(
                       fontSize: 19,
                       fontWeight: FontWeight.w600,
                       color: isSelected
@@ -85,7 +85,7 @@ class CalendarDayPicker extends StatelessWidget {
                   // Day of week (e.g., "Sun", "Mon")
                   Text(
                     _getDayOfWeekShort(day.date),
-                    style: GoogleFonts.lexendDeca(
+                    style: GoogleFonts.lexend(
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
                       color: isSelected
