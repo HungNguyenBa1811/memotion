@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/network.dart';
+import '../../../core/storage/token_storage.dart';
 import '../data/data.dart';
 import '../data/providers/auth_providers.dart';
 import '../models/user_model.dart';
@@ -37,11 +38,52 @@ class AuthState {
   }
 }
 
-// Auth Notifier - Uses real AuthRepository
+// Auth Notifier - Uses real AuthRepository with Secure Storage
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _authRepository;
+  final TokenStorage _tokenStorage;
 
-  AuthNotifier(this._authRepository) : super(const AuthState());
+  AuthNotifier(this._authRepository, {TokenStorage? tokenStorage})
+      : _tokenStorage = tokenStorage ?? TokenStorage.instance,
+        super(const AuthState()) {
+    // Setup global 401 handler
+    _setupUnauthorizedHandler();
+    // Check for existing token on init
+    _initializeFromStorage();
+  }
+
+  /// Setup callback khi gặp 401 Unauthorized từ bất kỳ API nào
+  void _setupUnauthorizedHandler() {
+    AuthInterceptor.globalOnUnauthorized = () async {
+      debugPrint('🔒 AuthNotifier: Received 401 from interceptor, logging out');
+      await _handleUnauthorized();
+    };
+  }
+
+  /// Khởi tạo auth state từ stored token
+  Future<void> _initializeFromStorage() async {
+    final hasToken = await _tokenStorage.hasToken();
+    if (hasToken) {
+      final token = await _tokenStorage.getAccessToken();
+      debugPrint('🔐 AuthNotifier: Found stored token, restoring session');
+      state = state.copyWith(
+        status: AuthStatus.authenticated,
+        accessToken: token,
+      );
+    } else {
+      debugPrint('🔐 AuthNotifier: No stored token found');
+      state = state.copyWith(status: AuthStatus.unauthenticated);
+    }
+  }
+
+  /// Xử lý khi bị 401 Unauthorized
+  Future<void> _handleUnauthorized() async {
+    await _tokenStorage.clearAll();
+    state = const AuthState(
+      status: AuthStatus.unauthenticated,
+      error: 'Session expired. Please login again.',
+    );
+  }
 
   /// Login with email and password
   Future<bool> login(String email, String password) async {
@@ -59,7 +101,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   /// Register new user
-  /// Note: API requires phone, using email as phone for now
   Future<bool> register(String nickname, String email, String password) async {
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
@@ -67,7 +108,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       fullName: nickname,
       email: email,
       password: password,
-      phone: '', // API requires phone, can be empty or implement phone input
+      phone: '',
       role: UserRole.patient,
     );
 
@@ -77,22 +118,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
     };
   }
 
-  bool _handleLoginSuccess(LoginResponseDto data, String email) {
+  Future<bool> _handleLoginSuccess(LoginResponseDto data, String email) async {
     debugPrint(
       '┌─────────────────────────────────────────────────────────────',
     );
-    debugPrint('│ 🎉 AUTH PROVIDER: Login state updated');
+    debugPrint('│ 🎉 AUTH PROVIDER: Login successful');
     debugPrint('│ Email: $email');
-    debugPrint('│ Token saved: ${data.accessToken.substring(0, 20)}...');
+    debugPrint('│ Token: ${data.accessToken.substring(0, 20)}...');
+    debugPrint('│ Saving token to secure storage...');
     debugPrint(
       '└─────────────────────────────────────────────────────────────',
     );
 
+    // Lưu token vào secure storage
+    await _tokenStorage.saveAccessToken(data.accessToken);
+    await _tokenStorage.saveTokenType(data.tokenType);
+
     // Create user from login response
     final user = User(
-      id: '', // Login response doesn't include user ID
+      id: '',
       email: email,
-      nickname: email.split('@').first, // Use email prefix as nickname
+      nickname: email.split('@').first,
       createdAt: DateTime.now(),
     );
 
@@ -104,18 +150,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return true;
   }
 
-  bool _handleRegisterSuccess(RegisterResponseDto data) {
+  Future<bool> _handleRegisterSuccess(RegisterResponseDto data) async {
     debugPrint(
       '┌─────────────────────────────────────────────────────────────',
     );
-    debugPrint('│ 🎉 AUTH PROVIDER: Registration state updated');
+    debugPrint('│ 🎉 AUTH PROVIDER: Registration successful');
     debugPrint('│ User ID: ${data.userId}');
     debugPrint('│ Email: ${data.email}');
     debugPrint(
       '└─────────────────────────────────────────────────────────────',
     );
 
-    // Create user from register response
+    // Note: Register response không có access_token theo spec
+    // User cần login sau khi register
     final user = User(
       id: data.userId,
       email: data.email,
@@ -146,9 +193,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return false;
   }
 
-  /// Logout - clear token and state
+  /// Logout - clear token from storage and reset state
   Future<void> logout() async {
-    ApiClient.instance.clearAuthToken();
+    debugPrint('🔐 AuthNotifier: Logging out, clearing tokens');
+    await _tokenStorage.clearAll();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
@@ -163,3 +211,4 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
   return AuthNotifier(authRepository);
 });
+

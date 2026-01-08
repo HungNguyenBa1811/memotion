@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'api_constants.dart';
 import 'api_interceptors.dart';
+import 'auth_interceptor.dart';
 
 /// Singleton API Client using Dio
 class ApiClient {
@@ -21,7 +22,15 @@ class ApiClient {
       ),
     );
 
-    _dio.interceptors.addAll([LoggingInterceptor(), ErrorInterceptor()]);
+    // Thứ tự interceptors quan trọng:
+    // 1. AuthInterceptor - Gắn token vào request, xử lý 401
+    // 2. LoggingInterceptor - Log request/response
+    // 3. ErrorInterceptor - Xử lý các lỗi khác
+    _dio.interceptors.addAll([
+      AuthInterceptor(),
+      LoggingInterceptor(),
+      ErrorInterceptor(),
+    ]);
   }
 
   static ApiClient get instance {
@@ -31,13 +40,16 @@ class ApiClient {
 
   Dio get dio => _dio;
 
-  /// Set Authorization token
+  /// Set Authorization token (deprecated - sử dụng TokenStorage thay thế)
+  @Deprecated('Sử dụng TokenStorage.instance.saveAccessToken() thay thế')
   void setAuthToken(String token) {
     _dio.options.headers['Authorization'] = 'Bearer $token';
   }
 
-  /// Clear Authorization token
+  /// Clear Authorization token (deprecated - sử dụng TokenStorage thay thế)
+  @Deprecated('Sử dụng TokenStorage.instance.clearAll() thay thế')
   void clearAuthToken() {
     _dio.options.headers.remove('Authorization');
   }
 }
+

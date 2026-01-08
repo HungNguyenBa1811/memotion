@@ -115,7 +115,7 @@ class _MedicationMainScreenContentState
               ),
             ),
           ),
-          Container(
+          SizedBox(
             width: 24,
             height: 24,
             child: Stack(

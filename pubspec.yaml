@@ -45,6 +45,8 @@ dependencies:
   # Data models & serialization
   freezed_annotation: ^2.4.1
   json_annotation: ^4.9.0
+  camera: ^0.11.3
+  flutter_secure_storage: ^10.0.0
 
 dev_dependencies:
   flutter_test:

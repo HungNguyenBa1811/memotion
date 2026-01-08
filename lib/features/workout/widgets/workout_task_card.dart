@@ -28,6 +28,13 @@ class WorkoutTaskCard extends StatelessWidget {
             topRight: Radius.circular(27),
             bottomRight: Radius.circular(27),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Stack(
           children: [
@@ -70,7 +77,7 @@ class WorkoutTaskCard extends StatelessWidget {
             // Title and Description
             Positioned(
               left: 110,
-              top: 20,
+              top: 15,
               right: 80,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,19 +85,19 @@ class WorkoutTaskCard extends StatelessWidget {
                   Text(
                     workout.title,
                     style: GoogleFonts.lexend(
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: Colors.black,
                       letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   if (workout.description != null &&
                       workout.description!.isNotEmpty)
                     Text(
                       workout.description!,
                       style: GoogleFonts.lexend(
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w300,
                         color: Colors.black,
                         letterSpacing: -0.3,

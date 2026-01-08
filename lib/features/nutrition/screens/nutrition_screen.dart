@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/theme.dart';
@@ -421,12 +420,13 @@ class NutritionScreenContent extends StatelessWidget {
                 padding: const EdgeInsets.only(
                   left: 100,
                   right: 16,
-                  top: 20,
-                  bottom: 16,
+                  top: 12,
+                  bottom: 12,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       title,
@@ -436,7 +436,7 @@ class NutritionScreenContent extends StatelessWidget {
                         color: Colors.black,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       subtitle,
                       style: GoogleFonts.glory(
@@ -444,8 +444,10 @@ class NutritionScreenContent extends StatelessWidget {
                         fontWeight: FontWeight.w300,
                         color: Colors.black,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
