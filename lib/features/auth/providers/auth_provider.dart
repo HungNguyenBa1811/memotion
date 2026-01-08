@@ -44,8 +44,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final TokenStorage _tokenStorage;
 
   AuthNotifier(this._authRepository, {TokenStorage? tokenStorage})
-      : _tokenStorage = tokenStorage ?? TokenStorage.instance,
-        super(const AuthState()) {
+    : _tokenStorage = tokenStorage ?? TokenStorage.instance,
+      super(const AuthState()) {
     // Setup global 401 handler
     _setupUnauthorizedHandler();
     // Check for existing token on init
@@ -211,4 +211,3 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
   return AuthNotifier(authRepository);
 });
-

@@ -52,4 +52,3 @@ class ApiClient {
     _dio.options.headers.remove('Authorization');
   }
 }
-

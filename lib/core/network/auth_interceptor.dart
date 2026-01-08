@@ -21,8 +21,8 @@ class AuthInterceptor extends Interceptor {
   AuthInterceptor({
     TokenStorage? tokenStorage,
     OnUnauthorizedCallback? onUnauthorized,
-  })  : _tokenStorage = tokenStorage ?? TokenStorage.instance,
-        _onUnauthorized = onUnauthorized;
+  }) : _tokenStorage = tokenStorage ?? TokenStorage.instance,
+       _onUnauthorized = onUnauthorized;
 
   @override
   Future<void> onRequest(
