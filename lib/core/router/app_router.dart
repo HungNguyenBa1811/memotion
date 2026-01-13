@@ -110,7 +110,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => RegistrationScreen(
           onBackPressed: () => context.go(AppRoutes.onboarding),
           onLoginPressed: () => context.go(AppRoutes.signIn),
-          onRegisterSuccess: () => context.go(AppRoutes.onboardingStep1),
+          onRegisterSuccess: () => context.go(AppRoutes.signIn),
         ),
       ),
       // Onboarding step routes (sequence after auth)

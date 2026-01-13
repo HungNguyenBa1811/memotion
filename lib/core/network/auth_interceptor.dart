@@ -78,7 +78,7 @@ class AuthInterceptor extends Interceptor {
   bool _isPublicEndpoint(String path) {
     const publicPaths = [
       '/api/auth/login',
-      '/api/auth/register',
+      '/api/auth/register/v2',
       '/api/auth/forgot-password',
       '/api/auth/reset-password',
     ];

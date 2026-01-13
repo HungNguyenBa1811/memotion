@@ -109,7 +109,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       email: email,
       password: password,
       phone: '',
-      role: UserRole.patient,
     );
 
     return switch (result) {
@@ -170,7 +169,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       createdAt: DateTime.now(),
     );
 
-    state = state.copyWith(status: AuthStatus.authenticated, user: user);
+    // Sau khi đăng ký thành công, API không trả về access token theo spec,
+    // người dùng cần đăng nhập bằng credentials vừa tạo. Không thiết lập
+    // trạng thái `authenticated` để tránh router redirect tới onboarding.
+    state = state.copyWith(status: AuthStatus.unauthenticated, user: user);
     return true;
   }
 

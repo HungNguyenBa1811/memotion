@@ -46,3 +46,7 @@ app.*.map.json
 
 .vscode/
 *.json
+
+.vscode/
+.github/
+.shared/

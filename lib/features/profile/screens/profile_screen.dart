@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme.dart';
-import '../viewmodels/profile_view_model.dart';
+import '../providers/profile_provider.dart';
 
 /// Original screen - kept for backwards compatibility
 class ProfileScreen extends ConsumerWidget {
@@ -71,12 +71,21 @@ class ProfileScreenContent extends ConsumerWidget {
 
               // User name
               Text(
-                user?.nickname ?? 'Hieu Dinh Vu',
+                vm.displayName,
                 style: AppTextStyles.headline2.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
+
+              // User email
+              Text(
+                vm.displayEmail,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 8),
 
               // Health stats row (Nhịp tim / Năng lượng / Cân nặng)
               Padding(

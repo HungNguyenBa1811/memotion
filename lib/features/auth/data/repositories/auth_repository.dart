@@ -24,11 +24,7 @@ abstract class AuthRepository {
     required String fullName,
     required String email,
     required String password,
-    required String phone,
-    UserRole role = UserRole.patient,
-    String? patientFullName,
-    String? patientEmail,
-    String? patientPhone,
+    String? phone,
   });
 }
 
@@ -60,11 +56,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String fullName,
     required String email,
     required String password,
-    required String phone,
-    UserRole role = UserRole.patient,
-    String? patientFullName,
-    String? patientEmail,
-    String? patientPhone,
+    String? phone,
   }) async {
     return Result.guard(() async {
       final request = RegisterRequestDto(
@@ -72,10 +64,6 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email,
         password: password,
         phone: phone,
-        role: role,
-        patientFullName: patientFullName,
-        patientEmail: patientEmail,
-        patientPhone: patientPhone,
       );
 
       return await _dataSource.register(request);

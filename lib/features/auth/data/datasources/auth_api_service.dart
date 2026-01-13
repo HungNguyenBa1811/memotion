@@ -62,14 +62,13 @@ class AuthApiService extends BaseApiService {
 
   /// Register a new user
   ///
-  /// POST /api/auth/register
+  /// POST /api/auth/register/v2
   Future<RegisterResponseDto> register(RegisterRequestDto request) async {
     debugPrint(
       '┌─────────────────────────────────────────────────────────────',
     );
     debugPrint('│ 📝 AUTH: Attempting registration for ${request.email}');
     debugPrint('│ Full name: ${request.fullName}');
-    debugPrint('│ Role: ${request.role}');
     debugPrint(
       '└─────────────────────────────────────────────────────────────',
     );

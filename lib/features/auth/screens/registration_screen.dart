@@ -59,8 +59,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         );
 
     if (success && mounted) {
-      // Navigate to onboarding step 1 after successful registration
-      context.go(AppRoutes.onboardingStep1);
+      // After successful registration, navigate to the sign-in screen
+      context.go(AppRoutes.signIn);
     }
   }
 

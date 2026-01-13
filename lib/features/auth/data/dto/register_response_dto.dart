@@ -31,7 +31,7 @@ class PatientDto {
 
 /// Register Response DTO
 ///
-/// Response data for POST /api/auth/register
+/// Response data for POST /api/auth/register/v2
 /// ```json
 /// {
 ///   "full_name": "string",
