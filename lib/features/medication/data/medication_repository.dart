@@ -1,41 +1,52 @@
+import '../../../core/network/services/task_api_service.dart';
 import '../models/medication.dart';
+import '../models/mappers/task_dto_mapper.dart';
 
 /// Repository for medication data
-/// TODO: Replace fake data with real API calls when backend is ready
+/// Uses shared TaskApiService for real API calls
 class MedicationRepository {
-  /// Fetches all medications for the current user
-  /// This is a placeholder that returns fake data
-  Future<List<Medication>> getMedications() async {
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 500));
+  final TaskApiService _apiService;
 
-    // Return fake medication data
-    return _fakeMedications;
+  MedicationRepository({TaskApiService? apiService})
+    : _apiService = apiService ?? TaskApiService();
+
+  /// Fetches all medications for the current user
+  /// Returns medications for today's date
+  Future<List<Medication>> getMedications() async {
+    final today = DateTime.now();
+    return getMedicationsForDate(today);
   }
 
   /// Fetches medications for a specific date
   Future<List<Medication>> getMedicationsForDate(DateTime date) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    // Filter medications for the date (placeholder logic)
-    return _fakeMedications;
+    try {
+      final taskDtos = await _apiService.getMedicationTasksByDate(date);
+      return TaskDtoMapper.toMedicationList(taskDtos);
+    } catch (e) {
+      // Log error and return empty list or rethrow
+      print('Error fetching medications: $e');
+      rethrow;
+    }
   }
 
-  /// Updates the status of a medication
+  /// Updates the status of a medication by completing the task
   Future<Medication> updateMedicationStatus(
     String medicationId,
     MedicationStatus status,
   ) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-
-    final index = _fakeMedications.indexWhere((m) => m.id == medicationId);
-    if (index != -1) {
-      _fakeMedications[index] = _fakeMedications[index].copyWith(
-        status: status,
-      );
-      return _fakeMedications[index];
+    try {
+      // For now, we only support marking as completed via the API
+      if (status == MedicationStatus.taken) {
+        final taskDto = await _apiService.completeTask(medicationId);
+        return TaskDtoMapper.toMedication(taskDto);
+      } else {
+        // TODO: Backend might need API for marking as missed
+        throw Exception('Only "taken" status is supported via API');
+      }
+    } catch (e) {
+      print('Error updating medication status: $e');
+      rethrow;
     }
-    throw Exception('Medication not found');
   }
 
   /// Scans a medication barcode/image and returns medication info
@@ -43,7 +54,8 @@ class MedicationRepository {
   Future<Medication?> scanMedication(String imagePath) async {
     await Future.delayed(const Duration(seconds: 1));
 
-    // Return a fake scanned medication
+    // Placeholder: Return a fake scanned medication
+    // This should be replaced with actual API call when available
     return const Medication(
       id: 'scanned_1',
       name: 'Vitamin C',
@@ -56,67 +68,18 @@ class MedicationRepository {
   }
 
   /// Adds a new medication
+  /// TODO: Implement API endpoint for adding medications
   Future<Medication> addMedication(Medication medication) async {
+    // Placeholder: Simulate network delay
     await Future.delayed(const Duration(milliseconds: 300));
-    _fakeMedications.add(medication);
-    return medication;
+    throw UnimplementedError('Add medication API not yet implemented');
   }
 
   /// Deletes a medication
+  /// TODO: Implement API endpoint for deleting medications
   Future<void> deleteMedication(String medicationId) async {
+    // Placeholder: Simulate network delay
     await Future.delayed(const Duration(milliseconds: 200));
-    _fakeMedications.removeWhere((m) => m.id == medicationId);
+    throw UnimplementedError('Delete medication API not yet implemented');
   }
 }
-
-/// Fake medication data for development
-List<Medication> _fakeMedications = [
-  Medication(
-    id: '1',
-    name: 'Metformin',
-    dosage: '250mg',
-    frequency: 'Daily',
-    time: '09:00',
-    status: MedicationStatus.pending,
-    remainingTime: '2h 23m',
-    scheduledDate: DateTime.now(),
-  ),
-  Medication(
-    id: '2',
-    name: 'Vitamin D',
-    dosage: '1000 IU',
-    frequency: 'Daily',
-    time: '09:00',
-    status: MedicationStatus.taken,
-    scheduledDate: DateTime.now(),
-  ),
-  Medication(
-    id: '3',
-    name: 'Aspirin',
-    dosage: '100mg',
-    frequency: 'Daily',
-    time: '14:00',
-    status: MedicationStatus.missed,
-    scheduledDate: DateTime.now(),
-  ),
-  Medication(
-    id: '4',
-    name: 'Omega-3',
-    dosage: '1000mg',
-    frequency: 'Daily',
-    time: '18:00',
-    status: MedicationStatus.pending,
-    remainingTime: '6h 10m',
-    scheduledDate: DateTime.now(),
-  ),
-  Medication(
-    id: '5',
-    name: 'Calcium',
-    dosage: '500mg',
-    frequency: 'Daily',
-    time: '21:00',
-    status: MedicationStatus.pending,
-    remainingTime: '9h 30m',
-    scheduledDate: DateTime.now(),
-  ),
-];

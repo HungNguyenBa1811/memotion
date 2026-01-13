@@ -46,6 +46,7 @@ dependencies:
   freezed_annotation: ^2.4.1
   json_annotation: ^4.9.0
   camera: ^0.11.3
+  image_picker: ^1.0.7
   flutter_secure_storage: ^10.0.0
 
 dev_dependencies:

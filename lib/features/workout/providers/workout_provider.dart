@@ -1,11 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/network/api_exceptions.dart';
 import '../data/workout_repository.dart';
+import '../data/api_workout_repository.dart';
 import '../models/workout_model.dart';
 
 /// Provider for the workout repository
-/// TODO: Replace FakeWorkoutRepository with real API implementation
+/// Using real API implementation
 final workoutRepositoryProvider = Provider<WorkoutRepository>((ref) {
-  return FakeWorkoutRepository();
+  return ApiWorkoutRepository();
 });
 
 /// State class for workout list
@@ -14,12 +16,14 @@ class WorkoutListState {
   final bool isLoading;
   final String? error;
   final DateTime selectedDate;
+  final bool isPatientProfileNotFound;
 
   const WorkoutListState({
     this.workouts = const [],
     this.isLoading = false,
     this.error,
     DateTime? selectedDate,
+    this.isPatientProfileNotFound = false,
   }) : selectedDate = selectedDate ?? const _DefaultDate();
 
   WorkoutListState copyWith({
@@ -27,12 +31,15 @@ class WorkoutListState {
     bool? isLoading,
     String? error,
     DateTime? selectedDate,
+    bool? isPatientProfileNotFound,
   }) {
     return WorkoutListState(
       workouts: workouts ?? this.workouts,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       selectedDate: selectedDate ?? this.selectedDate,
+      isPatientProfileNotFound:
+          isPatientProfileNotFound ?? this.isPatientProfileNotFound,
     );
   }
 }
@@ -101,7 +108,12 @@ class WorkoutListNotifier extends StateNotifier<WorkoutListState> {
 
   /// Load workouts for a specific date
   Future<void> loadWorkoutsForDate(DateTime date) async {
-    state = state.copyWith(isLoading: true, error: null, selectedDate: date);
+    state = state.copyWith(
+      isLoading: true,
+      error: null,
+      selectedDate: date,
+      isPatientProfileNotFound: false,
+    );
 
     try {
       final workouts = await _repository.getWorkoutsByDate(date);
@@ -109,11 +121,20 @@ class WorkoutListNotifier extends StateNotifier<WorkoutListState> {
         workouts: workouts,
         isLoading: false,
         selectedDate: date,
+        isPatientProfileNotFound: false,
+      );
+    } on PatientProfileNotFoundException catch (e) {
+      // Handle patient profile not found - show friendly message
+      state = state.copyWith(
+        isLoading: false,
+        error: e.message,
+        isPatientProfileNotFound: true,
       );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to load workouts: $e',
+        isPatientProfileNotFound: false,
       );
     }
   }
@@ -125,7 +146,10 @@ class WorkoutListNotifier extends StateNotifier<WorkoutListState> {
       // Reload the list
       await loadWorkoutsForDate(state.selectedDate);
     } catch (e) {
-      state = state.copyWith(error: 'Failed to mark workout as completed: $e');
+      state = state.copyWith(
+        error: 'Failed to mark workout as completed: $e',
+        isPatientProfileNotFound: false,
+      );
     }
   }
 

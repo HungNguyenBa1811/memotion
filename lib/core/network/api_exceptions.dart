@@ -107,6 +107,17 @@ class BadRequestException extends ApiException {
   });
 }
 
+/// Patient Profile Not Found Exception - 400 specific for task endpoints
+/// Thrown when user doesn't have a patient profile linked to their account
+class PatientProfileNotFoundException extends ApiException {
+  const PatientProfileNotFoundException({
+    super.message =
+        'Không tìm thấy hồ sơ bệnh nhân. Vui lòng liên hệ bác sĩ để được tạo hồ sơ.',
+    super.statusCode = 400,
+    super.data,
+  });
+}
+
 /// Unknown Exception
 class UnknownApiException extends ApiException {
   const UnknownApiException({

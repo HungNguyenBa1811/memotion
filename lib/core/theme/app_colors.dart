@@ -6,6 +6,8 @@ class AppColors {
   static const Color primaryLight = Color(0xFF439889);
   // Secondary color from design (#4DB6AC)
   static const Color secondary = Color(0xFF4DB6AC);
+  // Accent teal used across UI
+  static const Color tealAccent = Color(0xFF00BFA5);
   static const Color primaryDark = Color(0xFF003D33);
 
   // Background colors

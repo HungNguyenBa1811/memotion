@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/network/api_exceptions.dart';
 import '../../../core/theme/theme.dart';
 import '../providers/medication_provider.dart';
 import '../models/medication.dart';
@@ -69,7 +70,7 @@ class _MedicationMainScreenContentState
                     data: (medications) => _buildMedicationList(medications),
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (error, _) => Center(child: Text('Error: $error')),
+                    error: (error, _) => _buildErrorWidget(error),
                   ),
                 ),
               ],
@@ -307,6 +308,57 @@ class _MedicationMainScreenContentState
               ),
             );
           }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(Object error) {
+    final isPatientNotFound = error is PatientProfileNotFoundException;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isPatientNotFound ? Icons.person_off : Icons.error_outline,
+              size: 64,
+              color: isPatientNotFound
+                  ? AppColors.primary
+                  : Colors.red.shade300,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              isPatientNotFound
+                  ? 'Chưa có hồ sơ bệnh nhân'
+                  : 'Không thể tải dữ liệu thuốc',
+              style: GoogleFonts.lexend(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isPatientNotFound
+                  ? 'Vui lòng liên hệ bác sĩ để được tạo hồ sơ bệnh nhân và nhận lịch uống thuốc.'
+                  : error.toString(),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.lexend(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 20),
+            if (!isPatientNotFound)
+              ElevatedButton.icon(
+                onPressed: () => ref.invalidate(medicationsProvider),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Thử lại'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+          ],
         ),
       ),
     );

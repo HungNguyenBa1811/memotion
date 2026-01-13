@@ -168,19 +168,51 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                     child: Column(
                       children: [
                         Icon(
-                          Icons.error_outline,
+                          workoutState.isPatientProfileNotFound
+                              ? Icons.person_off
+                              : Icons.error_outline,
                           size: 48,
-                          color: AppColors.error,
+                          color: workoutState.isPatientProfileNotFound
+                              ? AppColors.primary
+                              : AppColors.error,
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          workoutState.error!,
+                          workoutState.isPatientProfileNotFound
+                              ? 'Chưa có hồ sơ bệnh nhân'
+                              : 'Không thể tải dữ liệu',
                           style: GoogleFonts.lexend(
-                            fontSize: 14,
-                            color: AppColors.error,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
                           ),
                           textAlign: TextAlign.center,
                         ),
+                        const SizedBox(height: 8),
+                        Text(
+                          workoutState.isPatientProfileNotFound
+                              ? 'Vui lòng liên hệ bác sĩ để được tạo hồ sơ bệnh nhân và nhận kế hoạch tập luyện.'
+                              : workoutState.error!,
+                          style: GoogleFonts.lexend(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (!workoutState.isPatientProfileNotFound) ...[
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () => ref
+                                .read(workoutListProvider.notifier)
+                                .loadWorkoutsForDate(workoutState.selectedDate),
+                            icon: const Icon(Icons.refresh, size: 18),
+                            label: const Text('Thử lại'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

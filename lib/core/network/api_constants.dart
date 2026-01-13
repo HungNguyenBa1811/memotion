@@ -7,7 +7,14 @@ class ApiConstants {
 
   // Auth Endpoints
   static const String login = '/api/auth/login';
-  static const String register = '/api/auth/register';
+  static const String register = '/api/auth/register/v2';
+
+  // Task Endpoints
+  static const String medicationTasks = '/api/tasks/patient/medication-tasks';
+  static const String nutritionTasks = '/api/tasks/patient/nutrition-tasks';
+  static const String exerciseTasks = '/api/tasks/patient/exercise-tasks';
+  static const String taskDetail = '/api/tasks';
+  static const String completeTask = '/api/tasks/patient';
 
   // Timeout durations
   static const Duration connectionTimeout = Duration(seconds: 30);
