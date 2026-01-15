@@ -120,7 +120,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                   ),
                 ),
                 // Notification icon
-                Container(
+                SizedBox(
                   width: 24,
                   height: 24,
                   child: Stack(

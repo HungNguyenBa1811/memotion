@@ -38,7 +38,14 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
     }
   }
 
-  /// ========== Step 2: Personal Information ==========
+  /// ========== Step 1.1 (Step 2): Username/Phone Number ==========
+
+  /// Cập nhật username hoặc số điện thoại
+  void setUsernameOrPhone(String value) {
+    state = state.copyWith(usernameOrPhone: value.trim());
+  }
+
+  /// ========== Step 3 (old Step 2): Personal Information ==========
 
   /// Cập nhật tên người dùng
   void setFullName(String name) {
@@ -150,7 +157,11 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
         return true; // Step 1 chỉ là giới thiệu
 
       case 2:
-        // Step 2 yêu cầu: tên, năm sinh, giới tính, chiều cao, cân nặng
+        // Step 2 (1.1): Username/Phone
+        return true;
+
+      case 3:
+        // Step 3 (old Step 2) yêu cầu: tên, năm sinh, giới tính, chiều cao, cân nặng
         return state.fullName != null &&
             state.fullName!.isNotEmpty &&
             state.birthYear != null &&
@@ -160,32 +171,32 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
             state.weight != null &&
             state.weight! > 0;
 
-      case 3:
-        // Step 3 yêu cầu chọn ít nhất 1 mục tiêu
+      case 4:
+        // Step 4 (old Step 3) yêu cầu chọn ít nhất 1 mục tiêu
         return state.selectedObjectives.isNotEmpty;
 
-      case 4:
-        // Step 4 yêu cầu chọn ít nhất 1 vị trí đau (doctor advice là optional)
+      case 5:
+        // Step 5 (old Step 4) yêu cầu chọn ít nhất 1 vị trí đau (doctor advice là optional)
         return state.selectedPainLocations.isNotEmpty;
 
-      case 5:
+      case 6:
         // require pain level selected
         return state.painLevel != null;
 
-      case 6:
+      case 7:
         // require pain type
         return state.painType != null;
 
-      case 7:
+      case 8:
         // require weakness selection
         return state.weaknessType != null;
 
-      case 8:
+      case 9:
         // require stand ability selection
         return state.standAbility != null;
 
       default:
-        return false;
+        return true; // Steps 10-18 are optional/info screens
     }
   }
 
@@ -193,6 +204,10 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
   String? getValidationError() {
     switch (state.currentStep) {
       case 2:
+        // Step 2 (1.1): Username/Phone - optional
+        return null;
+
+      case 3:
         if (state.fullName == null || state.fullName!.isEmpty) {
           return 'Vui lòng nhập tên';
         }
@@ -210,37 +225,37 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
         }
         return null;
 
-      case 3:
+      case 4:
         if (state.selectedObjectives.isEmpty) {
           return 'Vui lòng chọn mục tiêu phục hồi';
         }
         return null;
 
-      case 4:
+      case 5:
         if (state.selectedPainLocations.isEmpty) {
           return 'Vui lòng chọn vị trí đau';
         }
         return null;
 
-      case 5:
+      case 6:
         if (state.painLevel == null) {
           return 'Vui lòng cho biết mức đau (0-10)';
         }
         return null;
 
-      case 6:
+      case 7:
         if (state.painType == null) {
           return 'Vui lòng chọn đặc tính cơn đau';
         }
         return null;
 
-      case 7:
+      case 8:
         if (state.weaknessType == null) {
           return 'Vui lòng chọn tình trạng yếu/cứng';
         }
         return null;
 
-      case 8:
+      case 9:
         if (state.standAbility == null) {
           return 'Vui lòng chọn một đáp án';
         }

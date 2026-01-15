@@ -36,6 +36,7 @@ class AppRoutes {
   static const String onboardingStep15 = '/onboarding/15';
   static const String onboardingStep16 = '/onboarding/16';
   static const String onboardingStep17 = '/onboarding/17';
+  static const String onboardingStep18 = '/onboarding/18';
   static const String signIn = '/sign-in';
   static const String registration = '/registration';
   static const String profile = '/profile';
@@ -245,6 +246,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _buildOnboardingPage(
           state,
           const OnboardingScreenNew(initialStep: 17),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep18,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 18),
         ),
       ),
 

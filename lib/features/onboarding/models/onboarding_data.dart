@@ -51,10 +51,23 @@ class OnboardingStep1Config extends OnboardingStepConfig {
       );
 }
 
+/// Step 1.1 (becomes Step 2): Username/Phone Number input
+/// Figma: Bxer3DnXLQcxg5HSArHa8w node 453:1691
+class OnboardingStep1_1Config extends OnboardingStepConfig {
+  const OnboardingStep1_1Config()
+    : super(
+        step: 2,
+        title: 'Bác hãy nhập thông tin đăng nhập vào đây nhé',
+        subtitle: null,
+        imagePath: 'assets/images/onboarding/elderly4.png',
+        titleAlignment: TitleAlignment.center,
+      );
+}
+
 class OnboardingStep2Config extends OnboardingStepConfig {
   const OnboardingStep2Config()
     : super(
-        step: 2,
+        step: 3,
         title: 'Thông tin cơ bản của người được chăm sóc',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly4.png',
@@ -144,10 +157,14 @@ class OnboardingStep10Config extends OnboardingStepConfig {
         title: 'Hiện tại ông/bà đang sống cùng với ai cho vui vầy ạ?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly_couple2.png',
-        options: const ['Sống một mình', 'Sống cùng vợ/chồng', 'Sống cùng con cháu'],
+        options: const [
+          'Sống một mình',
+          'Sống cùng vợ/chồng',
+          'Sống cùng con cháu',
+        ],
       );
 }
- 
+
 class OnboardingStep11Config extends OnboardingStepConfig {
   const OnboardingStep11Config()
     : super(
@@ -193,7 +210,7 @@ class OnboardingStep14Config extends OnboardingStepConfig {
           'Hoàn toàn tự làm được',
           'Cần hỗ trợ một chút.',
           'Cần người làm giúp hoàn toàn.',
-        ], 
+        ],
       );
 }
 
@@ -237,27 +254,28 @@ class OnboardingStep17Config extends OnboardingStepConfig {
 class OnboardingConfig {
   static final Map<int, OnboardingStepConfig> _steps = {
     1: const OnboardingStep1Config(),
-    2: const OnboardingStep2Config(),
-    3: const OnboardingStep3Config(),
-    4: const OnboardingStep4Config(),
-    5: const OnboardingStep5Config(),
-    6: const OnboardingStep6Config(),
-    7: const OnboardingStep7Config(),
-    8: const OnboardingStep8Config(),
-    9: const OnboardingStep9Config(),
-    10: const OnboardingStep10Config(),
-    11: const OnboardingStep11Config(),
-    12: const OnboardingStep12Config(),
-    13: const OnboardingStep13Config(),
-    14: const OnboardingStep14Config(),
-    15: const OnboardingStep15Config(),
-    16: const OnboardingStep16Config(),
-    17: const OnboardingStep17Config(),
+    2: const OnboardingStep1_1Config(), // New Step 1.1: Username/Phone
+    3: const OnboardingStep2Config(),
+    4: const OnboardingStep3Config(),
+    5: const OnboardingStep4Config(),
+    6: const OnboardingStep5Config(),
+    7: const OnboardingStep6Config(),
+    8: const OnboardingStep7Config(),
+    9: const OnboardingStep8Config(),
+    10: const OnboardingStep9Config(),
+    11: const OnboardingStep10Config(),
+    12: const OnboardingStep11Config(),
+    13: const OnboardingStep12Config(),
+    14: const OnboardingStep13Config(),
+    15: const OnboardingStep14Config(),
+    16: const OnboardingStep15Config(),
+    17: const OnboardingStep16Config(),
+    18: const OnboardingStep17Config(),
   };
 
   static OnboardingStepConfig getStep(int step) => _steps[step] ?? _steps[1]!;
 
-  static const int totalSteps = 17;
+  static const int totalSteps = 18;
 
   static List<OnboardingStepConfig> getAll() =>
       List.generate(totalSteps, (i) => getStep(i + 1));
@@ -267,7 +285,10 @@ class OnboardingConfig {
 class OnboardingData {
   final int currentStep;
 
-  // Step 2 - Personal info
+  // Step 1.1 (Step 2) - Username/Phone
+  final String? usernameOrPhone;
+
+  // Step 3 - Personal info
   final String? fullName;
   final int? birthYear;
   final Gender? gender;
@@ -306,6 +327,7 @@ class OnboardingData {
 
   const OnboardingData({
     this.currentStep = 1,
+    this.usernameOrPhone,
     this.fullName,
     this.birthYear,
     this.gender,
@@ -325,6 +347,7 @@ class OnboardingData {
 
   OnboardingData copyWith({
     int? currentStep,
+    String? usernameOrPhone,
     String? fullName,
     int? birthYear,
     Gender? gender,
@@ -343,6 +366,7 @@ class OnboardingData {
   }) {
     return OnboardingData(
       currentStep: currentStep ?? this.currentStep,
+      usernameOrPhone: usernameOrPhone ?? this.usernameOrPhone,
       fullName: fullName ?? this.fullName,
       birthYear: birthYear ?? this.birthYear,
       gender: gender ?? this.gender,
@@ -365,6 +389,7 @@ class OnboardingData {
   Map<String, dynamic> toJson() {
     return {
       'currentStep': currentStep,
+      'usernameOrPhone': usernameOrPhone,
       'fullName': fullName,
       'birthYear': birthYear,
       'gender': gender?.name,

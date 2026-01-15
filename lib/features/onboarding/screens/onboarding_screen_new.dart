@@ -158,6 +158,9 @@ class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew>
       case 17:
         context.go(AppRoutes.onboardingStep17);
         break;
+      case 18:
+        context.go(AppRoutes.onboardingStep18);
+        break;
       default:
         context.go(AppRoutes.profile);
     }
@@ -244,9 +247,7 @@ class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew>
   Widget _buildBottomNavigation(OnboardingData state, bool canProceed) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-      decoration: BoxDecoration(
-        color: const Color.fromARGB(0, 0, 0, 0),
-      ),
+      decoration: BoxDecoration(color: const Color.fromARGB(0, 0, 0, 0)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
