@@ -260,7 +260,7 @@ class _OnboardingStepScreenState extends State<OnboardingStepScreen> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Image.asset(
-              'assets/images/onboarding/body_image.png',
+              'assets/images/onboarding/elderly3.png',
               width: 280,
               height: 280,
               fit: BoxFit.cover,

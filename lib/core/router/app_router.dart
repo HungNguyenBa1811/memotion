@@ -23,6 +23,19 @@ class AppRoutes {
   static const String onboardingStep2 = '/onboarding/2';
   static const String onboardingStep3 = '/onboarding/3';
   static const String onboardingStep4 = '/onboarding/4';
+  static const String onboardingStep5 = '/onboarding/5';
+  static const String onboardingStep6 = '/onboarding/6';
+  static const String onboardingStep7 = '/onboarding/7';
+  static const String onboardingStep8 = '/onboarding/8';
+  static const String onboardingStep9 = '/onboarding/9';
+  static const String onboardingStep10 = '/onboarding/10';
+  static const String onboardingStep11 = '/onboarding/11';
+  static const String onboardingStep12 = '/onboarding/12';
+  static const String onboardingStep13 = '/onboarding/13';
+  static const String onboardingStep14 = '/onboarding/14';
+  static const String onboardingStep15 = '/onboarding/15';
+  static const String onboardingStep16 = '/onboarding/16';
+  static const String onboardingStep17 = '/onboarding/17';
   static const String signIn = '/sign-in';
   static const String registration = '/registration';
   static const String profile = '/profile';
@@ -141,6 +154,97 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _buildOnboardingPage(
           state,
           const OnboardingScreenNew(initialStep: 4),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep5,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 5),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep6,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 6),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep7,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 7),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep8,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 8),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep9,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 9),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep10,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 10),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep11,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 11),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep12,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 12),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep13,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 13),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep14,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 14),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep15,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 15),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep16,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 16),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingStep17,
+        pageBuilder: (context, state) => _buildOnboardingPage(
+          state,
+          const OnboardingScreenNew(initialStep: 17),
         ),
       ),
 

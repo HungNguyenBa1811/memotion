@@ -16,28 +16,56 @@ class OnboardingProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(totalSteps, (index) => _buildDot(index + 1)),
-    );
-  }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final baseActive = 24.0;
+        final baseInactive = 8.0;
+        final baseMargin = 4.0;
+        final n = totalSteps.toDouble();
 
-  Widget _buildDot(int step) {
-    final bool isActive = step == currentStep;
-    final bool isPast = step < currentStep;
+        final requiredWidth =
+            baseActive + (n - 1) * baseInactive + n * (baseMargin * 2);
+        final avail = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : requiredWidth;
+        final scale = (requiredWidth <= avail)
+            ? 1.0
+            : (avail / requiredWidth).clamp(0.4, 1.0);
 
-    return AnimatedContainer(
-      duration: animationDuration,
-      curve: Curves.easeInOut,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      width: isActive ? 24 : 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: isActive || isPast
-            ? AppColors.primary
-            : AppColors.primary.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(4),
-      ),
+        final activeWidth = baseActive * scale;
+        final inactiveWidth = baseInactive * scale;
+        final margin = baseMargin * scale;
+
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const NeverScrollableScrollPhysics(),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(totalSteps, (index) {
+              final step = index + 1;
+              final bool isActive = step == currentStep;
+              final bool isPast = step < currentStep;
+              final width = isActive ? activeWidth : inactiveWidth;
+              final height = inactiveWidth;
+
+              return AnimatedContainer(
+                duration: animationDuration,
+                curve: Curves.easeInOut,
+                margin: EdgeInsets.symmetric(horizontal: margin),
+                width: width,
+                height: height,
+                decoration: BoxDecoration(
+                  color: isActive || isPast
+                      ? AppColors.primary
+                      : AppColors.primary.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(4 * scale),
+                ),
+              );
+            }),
+          ),
+        );
+      },
     );
   }
 }

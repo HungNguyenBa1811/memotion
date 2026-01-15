@@ -69,13 +69,6 @@ class TaskDtoMapper {
     }
   }
 
-  /// Format DateTime to time string (HH:MM)
-  static String _formatTime(DateTime dateTime) {
-    final hour = dateTime.hour.toString().padLeft(2, '0');
-    final minute = dateTime.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
-  }
-
   /// Calculate remaining time until task due date
   static String? _calculateRemainingTime(DateTime dueDate) {
     final now = DateTime.now();

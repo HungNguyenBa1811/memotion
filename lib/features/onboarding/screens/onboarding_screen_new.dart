@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../core/router/app_router.dart';
 import '../providers/onboarding_provider.dart';
 import '../models/onboarding_data.dart';
@@ -106,15 +105,6 @@ class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew>
     }
   }
 
-  void _onBack() {
-    final state = ref.read(onboardingProvider);
-    if (state.currentStep > 1) {
-      _animateStepChange();
-      ref.read(onboardingProvider.notifier).previousStep();
-      _navigateToStep(state.currentStep - 1);
-    }
-  }
-
   void _navigateToStep(int step) {
     switch (step) {
       case 1:
@@ -128,6 +118,45 @@ class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew>
         break;
       case 4:
         context.go(AppRoutes.onboardingStep4);
+        break;
+      case 5:
+        context.go(AppRoutes.onboardingStep5);
+        break;
+      case 6:
+        context.go(AppRoutes.onboardingStep6);
+        break;
+      case 7:
+        context.go(AppRoutes.onboardingStep7);
+        break;
+      case 8:
+        context.go(AppRoutes.onboardingStep8);
+        break;
+      case 9:
+        context.go(AppRoutes.onboardingStep9);
+        break;
+      case 10:
+        context.go(AppRoutes.onboardingStep10);
+        break;
+      case 11:
+        context.go(AppRoutes.onboardingStep11);
+        break;
+      case 12:
+        context.go(AppRoutes.onboardingStep12);
+        break;
+      case 13:
+        context.go(AppRoutes.onboardingStep13);
+        break;
+      case 14:
+        context.go(AppRoutes.onboardingStep14);
+        break;
+      case 15:
+        context.go(AppRoutes.onboardingStep15);
+        break;
+      case 16:
+        context.go(AppRoutes.onboardingStep16);
+        break;
+      case 17:
+        context.go(AppRoutes.onboardingStep17);
         break;
       default:
         context.go(AppRoutes.profile);
@@ -175,14 +204,15 @@ class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew>
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
       child: Row(
         children: [
-          if (currentStep > 1)
-            OnboardingBackButton(onPressed: _onBack)
-          else
-            const SizedBox(width: 40),
+          const SizedBox(width: 40),
           const Spacer(),
-          OnboardingProgressIndicator(
-            currentStep: currentStep,
-            totalSteps: OnboardingConfig.totalSteps,
+          Expanded(
+            child: Center(
+              child: OnboardingProgressIndicator(
+                currentStep: currentStep,
+                totalSteps: OnboardingConfig.totalSteps,
+              ),
+            ),
           ),
           const Spacer(),
           const SizedBox(width: 40), // Balance với back button
@@ -192,237 +222,35 @@ class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew>
   }
 
   Widget _buildStepContent(OnboardingData state) {
-    switch (state.currentStep) {
-      case 1:
-        return _buildStep1();
-      case 2:
-        return _buildStep2(state);
-      case 3:
-        return _buildStep3(state);
-      case 4:
-        return _buildStep4();
-      default:
-        return const SizedBox.shrink();
-    }
+    // Use the step builder factory for modular step rendering
+    return StepBuilderFactory.buildStep(state.currentStep);
   }
 
   // Step 1: Introduction
-  Widget _buildStep1() {
-    final config = OnboardingConfig.getStep(1);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 40),
-        _buildStepImage(config.imagePath!, 280),
-        const SizedBox(height: 48),
-        Text(
-          config.title,
-          style: AppTextStyles.headline1.copyWith(
-            color: AppColors.textPrimary,
-            height: 1.35,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Chào mừng bác đến với Memotion - ứng dụng hỗ trợ phục hồi chức năng dành riêng cho người cao tuổi.',
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textSecondary,
-            height: 1.5,
-          ),
-        ),
-      ],
-    );
-  }
+  // (Step 1 rendered by `Step1Builder` now)
 
-  // Step 2: Choose rehabilitation type
-  Widget _buildStep2(OnboardingData state) {
-    final config = OnboardingConfig.getStep(2);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 32),
-        Text(
-          config.title,
-          style: AppTextStyles.headline1.copyWith(color: AppColors.textPrimary),
-        ),
-        const SizedBox(height: 24),
-        ...RehabilitationType.values.map((type) {
-          final isSelected = state.selectedRehabTypes.contains(type);
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: OnboardingOptionCell(
-              text: type.displayName,
-              isSelected: isSelected,
-              leadingIcon: _buildRehabIcon(type),
-              onTap: () {
-                ref.read(onboardingProvider.notifier).toggleRehabType(type);
-              },
-            ),
-          );
-        }),
-        const SizedBox(height: 32),
-        _buildStepImage(config.imagePath!, 240),
-      ],
-    );
-  }
+  // Step 2 handled by modular step builders (Step2Builder)
 
   // Step 3: Pain location
-  Widget _buildStep3(OnboardingData state) {
-    final config = OnboardingConfig.getStep(3);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 24),
-        _buildStepImage(config.imagePath!, 240),
-        const SizedBox(height: 32),
-        Text(
-          config.title,
-          style: AppTextStyles.headline2.copyWith(color: AppColors.textPrimary),
-        ),
-        const SizedBox(height: 20),
-        // Grid của các options
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 2.5,
-          children: PainLocation.values.take(4).map((location) {
-            final isSelected = state.selectedPainLocations.contains(location);
-            return OnboardingOptionCell(
-              text: location.displayName,
-              isSelected: isSelected,
-              onTap: () {
-                ref
-                    .read(onboardingProvider.notifier)
-                    .togglePainLocation(location);
-              },
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
+  // (Step 3 rendered by `Step3Builder` now)
 
   // Step 4: Doctor's advice
-  Widget _buildStep4() {
-    final config = OnboardingConfig.getStep(4);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 24),
-        _buildStepImage(config.imagePath!, 280),
-        const SizedBox(height: 32),
-        Text(
-          config.title,
-          style: AppTextStyles.headline1.copyWith(color: AppColors.textPrimary),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Nếu bác có lời khuyên nào từ bác sĩ, xin hãy chia sẻ để chúng tôi có thể hỗ trợ tốt hơn.',
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 20),
-        OnboardingTextInput(
-          controller: _adviceController,
-          focusNode: _adviceFocusNode,
-          hintText: 'Nhập lời khuyên từ bác sĩ (không bắt buộc)...',
-          onChanged: (value) {
-            ref.read(onboardingProvider.notifier).setDoctorAdvice(value);
-          },
-        ),
-      ],
-    );
-  }
+  // (Step 4 rendered by `Step4Builder` now)
 
-  Widget _buildStepImage(String imagePath, double size) {
-    return Center(
-      child: Hero(
-        tag: 'onboarding_image_${imagePath.hashCode}',
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Image.asset(
-            imagePath,
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(
-                Icons.image_not_supported_outlined,
-                size: size * 0.3,
-                color: AppColors.primary.withOpacity(0.5),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Image helper removed — step builders render their own images now.
 
-  Widget _buildRehabIcon(RehabilitationType type) {
-    final IconData icon;
-    switch (type) {
-      case RehabilitationType.physicalTherapy:
-        icon = Icons.accessibility_new;
-        break;
-      case RehabilitationType.neurology:
-        icon = Icons.psychology;
-        break;
-    }
-
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE7EFFF),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Icon(icon, color: const Color(0xFF4E6AFF), size: 24),
-    );
-  }
+  // Rehab icons are provided inside step builders when needed
 
   Widget _buildBottomNavigation(OnboardingData state, bool canProceed) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
       decoration: BoxDecoration(
-        color: AppColors.background,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
+        color: const Color.fromARGB(0, 0, 0, 0),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Skip button (chỉ hiển thị ở step 2, 3)
-          if (state.currentStep > 1 && state.currentStep < 4)
-            TextButton(
-              onPressed: () {
-                _animateStepChange();
-                ref.read(onboardingProvider.notifier).nextStep();
-                _navigateToStep(state.currentStep + 1);
-              },
-              child: Text(
-                'Bỏ qua',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            )
-          else
-            const SizedBox(width: 70),
+          const SizedBox(width: 70),
           // Next button
           OnboardingNextButton(onPressed: _onNext, isEnabled: canProceed),
         ],

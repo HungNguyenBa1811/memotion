@@ -31,10 +31,4 @@ class OnboardingConstants {
 
   // Text
   static const String skipButtonText = 'Bỏ qua';
-  static const String doctorAdviceHint =
-      'Nhập lời khuyên từ bác sĩ (không bắt buộc)...';
-  static const String welcomeSubtitle =
-      'Chào mừng bác đến với Memotion - ứng dụng hỗ trợ phục hồi chức năng dành riêng cho người cao tuổi.';
-  static const String doctorAdviceSubtitle =
-      'Nếu bác có lời khuyên nào từ bác sĩ, xin hãy chia sẻ để chúng tôi có thể hỗ trợ tốt hơn.';
 }
