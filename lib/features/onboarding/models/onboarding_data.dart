@@ -294,6 +294,8 @@ class OnboardingData {
   final Gender? gender;
   final double? height;
   final double? weight;
+  // Calculated BMI (kg/m^2)
+  final double? bmi;
 
   // Step 3 - Health objectives
   final Set<HealthObjective> selectedObjectives;
@@ -333,6 +335,7 @@ class OnboardingData {
     this.gender,
     this.height,
     this.weight,
+    this.bmi,
     this.selectedObjectives = const <HealthObjective>{},
     this.selectedPainLocations = const <PainLocation>{},
     this.painLevel,
@@ -353,6 +356,7 @@ class OnboardingData {
     Gender? gender,
     double? height,
     double? weight,
+    double? bmi,
     Set<HealthObjective>? selectedObjectives,
     Set<PainLocation>? selectedPainLocations,
     int? painLevel,
@@ -372,6 +376,7 @@ class OnboardingData {
       gender: gender ?? this.gender,
       height: height ?? this.height,
       weight: weight ?? this.weight,
+      bmi: bmi ?? this.bmi,
       selectedObjectives: selectedObjectives ?? this.selectedObjectives,
       selectedPainLocations:
           selectedPainLocations ?? this.selectedPainLocations,
@@ -395,6 +400,7 @@ class OnboardingData {
       'gender': gender?.name,
       'height': height,
       'weight': weight,
+      'bmi': bmi,
       'selectedObjectives': selectedObjectives.map((e) => e.name).toList(),
       'selectedPainLocations': selectedPainLocations
           .map((e) => e.name)

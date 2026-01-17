@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/onboarding_data.dart';
+import '../../providers/onboarding_notifier.dart';
 import '../onboarding_option_cell.dart';
 
-/// Builder cho Step 10: Example follow-up
+/// Builder cho Step 10: Living arrangement selection
 class Step10Builder extends ConsumerWidget {
   const Step10Builder({super.key});
 
@@ -12,6 +13,11 @@ class Step10Builder extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     const config = OnboardingStep10Config();
     final options = config.options ?? const <String>[];
+
+    // Watch the current livingArrangement value from the onboarding state
+    final current = ref.watch(
+      onboardingNotifierProvider.select((s) => s.livingArrangement),
+    );
 
     return SingleChildScrollView(
       child: Padding(
@@ -44,8 +50,13 @@ class Step10Builder extends ConsumerWidget {
             for (var i = 0; i < options.length; i++) ...[
               OnboardingOptionCell(
                 text: options[i],
-                isSelected: false,
-                onTap: () {},
+                isSelected: current == options[i],
+                onTap: () {
+                  // Update notifier with selected living arrangement
+                  ref
+                      .read(onboardingNotifierProvider.notifier)
+                      .setLivingArrangement(options[i]);
+                },
               ),
               if (i != options.length - 1) const SizedBox(height: 12),
             ],

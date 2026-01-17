@@ -64,12 +64,24 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
 
   /// Cập nhật chiều cao (cm)
   void setHeight(double height) {
-    state = state.copyWith(height: height);
+    double? bmi;
+    final currentWeight = state.weight;
+    if (currentWeight != null && height > 0) {
+      final meters = height / 100.0;
+      bmi = currentWeight / (meters * meters);
+    }
+    state = state.copyWith(height: height, bmi: bmi);
   }
 
   /// Cập nhật cân nặng (kg)
   void setWeight(double weight) {
-    state = state.copyWith(weight: weight);
+    double? bmi;
+    final currentHeight = state.height;
+    if (currentHeight != null && currentHeight > 0) {
+      final meters = currentHeight / 100.0;
+      bmi = weight / (meters * meters);
+    }
+    state = state.copyWith(weight: weight, bmi: bmi);
   }
 
   /// ========== Step 3: Health Objectives ==========

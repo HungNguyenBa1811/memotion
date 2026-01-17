@@ -52,7 +52,7 @@ class AppRoutes {
 /// Listenable để notify router khi auth state thay đổi
 class AuthNotifierListenable extends ChangeNotifier {
   AuthNotifierListenable(this._ref) {
-    _ref.listen<AuthState>(authProvider, (_, __) {
+    _ref.listen<AuthState>(authProvider, (_, _) {
       notifyListeners();
     });
   }
