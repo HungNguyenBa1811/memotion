@@ -30,6 +30,8 @@ mixin _$OnboardingState {
       throw _privateConstructorUsedError; // Patient Info (Onboarding 1-2)
   String? get patientFullName => throw _privateConstructorUsedError;
   String? get patientPhone =>
+      throw _privateConstructorUsedError; // ID returned after creating patient via caretaker API
+  String? get createdPatientId =>
       throw _privateConstructorUsedError; // Assessment Data (Onboarding 3-16)
   String? get painLocation => throw _privateConstructorUsedError;
   int? get painScaleScore => throw _privateConstructorUsedError;
@@ -59,6 +61,7 @@ mixin _$OnboardingState {
   String get diseaseType => throw _privateConstructorUsedError;
   String? get conditionNote => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
+  int get currentStep => throw _privateConstructorUsedError;
 
   /// Serializes this OnboardingState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -85,6 +88,7 @@ abstract class $OnboardingStateCopyWith<$Res> {
     String? token,
     String? patientFullName,
     String? patientPhone,
+    String? createdPatientId,
     String? painLocation,
     int? painScaleScore,
     String? painCharacter,
@@ -112,6 +116,7 @@ abstract class $OnboardingStateCopyWith<$Res> {
     String diseaseType,
     String? conditionNote,
     bool isLoading,
+    int currentStep,
   });
 }
 
@@ -137,6 +142,7 @@ class _$OnboardingStateCopyWithImpl<$Res, $Val extends OnboardingState>
     Object? token = freezed,
     Object? patientFullName = freezed,
     Object? patientPhone = freezed,
+    Object? createdPatientId = freezed,
     Object? painLocation = freezed,
     Object? painScaleScore = freezed,
     Object? painCharacter = freezed,
@@ -164,6 +170,7 @@ class _$OnboardingStateCopyWithImpl<$Res, $Val extends OnboardingState>
     Object? diseaseType = null,
     Object? conditionNote = freezed,
     Object? isLoading = null,
+    Object? currentStep = null,
   }) {
     return _then(
       _value.copyWith(
@@ -194,6 +201,10 @@ class _$OnboardingStateCopyWithImpl<$Res, $Val extends OnboardingState>
             patientPhone: freezed == patientPhone
                 ? _value.patientPhone
                 : patientPhone // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            createdPatientId: freezed == createdPatientId
+                ? _value.createdPatientId
+                : createdPatientId // ignore: cast_nullable_to_non_nullable
                       as String?,
             painLocation: freezed == painLocation
                 ? _value.painLocation
@@ -303,6 +314,10 @@ class _$OnboardingStateCopyWithImpl<$Res, $Val extends OnboardingState>
                 ? _value.isLoading
                 : isLoading // ignore: cast_nullable_to_non_nullable
                       as bool,
+            currentStep: null == currentStep
+                ? _value.currentStep
+                : currentStep // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -326,6 +341,7 @@ abstract class _$$OnboardingStateImplCopyWith<$Res>
     String? token,
     String? patientFullName,
     String? patientPhone,
+    String? createdPatientId,
     String? painLocation,
     int? painScaleScore,
     String? painCharacter,
@@ -353,6 +369,7 @@ abstract class _$$OnboardingStateImplCopyWith<$Res>
     String diseaseType,
     String? conditionNote,
     bool isLoading,
+    int currentStep,
   });
 }
 
@@ -377,6 +394,7 @@ class __$$OnboardingStateImplCopyWithImpl<$Res>
     Object? token = freezed,
     Object? patientFullName = freezed,
     Object? patientPhone = freezed,
+    Object? createdPatientId = freezed,
     Object? painLocation = freezed,
     Object? painScaleScore = freezed,
     Object? painCharacter = freezed,
@@ -404,6 +422,7 @@ class __$$OnboardingStateImplCopyWithImpl<$Res>
     Object? diseaseType = null,
     Object? conditionNote = freezed,
     Object? isLoading = null,
+    Object? currentStep = null,
   }) {
     return _then(
       _$OnboardingStateImpl(
@@ -434,6 +453,10 @@ class __$$OnboardingStateImplCopyWithImpl<$Res>
         patientPhone: freezed == patientPhone
             ? _value.patientPhone
             : patientPhone // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        createdPatientId: freezed == createdPatientId
+            ? _value.createdPatientId
+            : createdPatientId // ignore: cast_nullable_to_non_nullable
                   as String?,
         painLocation: freezed == painLocation
             ? _value.painLocation
@@ -543,6 +566,10 @@ class __$$OnboardingStateImplCopyWithImpl<$Res>
             ? _value.isLoading
             : isLoading // ignore: cast_nullable_to_non_nullable
                   as bool,
+        currentStep: null == currentStep
+            ? _value.currentStep
+            : currentStep // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -559,6 +586,7 @@ class _$OnboardingStateImpl implements _OnboardingState {
     this.token,
     this.patientFullName,
     this.patientPhone,
+    this.createdPatientId,
     this.painLocation,
     this.painScaleScore,
     this.painCharacter,
@@ -586,6 +614,7 @@ class _$OnboardingStateImpl implements _OnboardingState {
     this.diseaseType = 'PHYSICAL_THERAPY',
     this.conditionNote,
     this.isLoading = false,
+    this.currentStep = 1,
   });
 
   factory _$OnboardingStateImpl.fromJson(Map<String, dynamic> json) =>
@@ -607,6 +636,9 @@ class _$OnboardingStateImpl implements _OnboardingState {
   final String? patientFullName;
   @override
   final String? patientPhone;
+  // ID returned after creating patient via caretaker API
+  @override
+  final String? createdPatientId;
   // Assessment Data (Onboarding 3-16)
   @override
   final String? painLocation;
@@ -665,10 +697,13 @@ class _$OnboardingStateImpl implements _OnboardingState {
   @override
   @JsonKey()
   final bool isLoading;
+  @override
+  @JsonKey()
+  final int currentStep;
 
   @override
   String toString() {
-    return 'OnboardingState(userId: $userId, email: $email, fullName: $fullName, phone: $phone, token: $token, patientFullName: $patientFullName, patientPhone: $patientPhone, painLocation: $painLocation, painScaleScore: $painScaleScore, painCharacter: $painCharacter, painAssessment: $painAssessment, muscleTone: $muscleTone, muscleStrength: $muscleStrength, balancedValuation: $balancedValuation, fallRisk: $fallRisk, selfStandAbility: $selfStandAbility, tugTime: $tugTime, previousIllness: $previousIllness, previousTreatments: $previousTreatments, dailyActivities: $dailyActivities, doctorRecommended: $doctorRecommended, doctorTreatmentPlan: $doctorTreatmentPlan, note: $note, gender: $gender, livingArrangement: $livingArrangement, bmiScore: $bmiScore, mapScore: $mapScore, rhrScore: $rhrScore, bloodGlucoseLevel: $bloodGlucoseLevel, adlScore: $adlScore, iadlScore: $iadlScore, diseaseType: $diseaseType, conditionNote: $conditionNote, isLoading: $isLoading)';
+    return 'OnboardingState(userId: $userId, email: $email, fullName: $fullName, phone: $phone, token: $token, patientFullName: $patientFullName, patientPhone: $patientPhone, createdPatientId: $createdPatientId, painLocation: $painLocation, painScaleScore: $painScaleScore, painCharacter: $painCharacter, painAssessment: $painAssessment, muscleTone: $muscleTone, muscleStrength: $muscleStrength, balancedValuation: $balancedValuation, fallRisk: $fallRisk, selfStandAbility: $selfStandAbility, tugTime: $tugTime, previousIllness: $previousIllness, previousTreatments: $previousTreatments, dailyActivities: $dailyActivities, doctorRecommended: $doctorRecommended, doctorTreatmentPlan: $doctorTreatmentPlan, note: $note, gender: $gender, livingArrangement: $livingArrangement, bmiScore: $bmiScore, mapScore: $mapScore, rhrScore: $rhrScore, bloodGlucoseLevel: $bloodGlucoseLevel, adlScore: $adlScore, iadlScore: $iadlScore, diseaseType: $diseaseType, conditionNote: $conditionNote, isLoading: $isLoading, currentStep: $currentStep)';
   }
 
   @override
@@ -686,6 +721,8 @@ class _$OnboardingStateImpl implements _OnboardingState {
                 other.patientFullName == patientFullName) &&
             (identical(other.patientPhone, patientPhone) ||
                 other.patientPhone == patientPhone) &&
+            (identical(other.createdPatientId, createdPatientId) ||
+                other.createdPatientId == createdPatientId) &&
             (identical(other.painLocation, painLocation) ||
                 other.painLocation == painLocation) &&
             (identical(other.painScaleScore, painScaleScore) ||
@@ -736,7 +773,9 @@ class _$OnboardingStateImpl implements _OnboardingState {
             (identical(other.conditionNote, conditionNote) ||
                 other.conditionNote == conditionNote) &&
             (identical(other.isLoading, isLoading) ||
-                other.isLoading == isLoading));
+                other.isLoading == isLoading) &&
+            (identical(other.currentStep, currentStep) ||
+                other.currentStep == currentStep));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -750,6 +789,7 @@ class _$OnboardingStateImpl implements _OnboardingState {
     token,
     patientFullName,
     patientPhone,
+    createdPatientId,
     painLocation,
     painScaleScore,
     painCharacter,
@@ -777,6 +817,7 @@ class _$OnboardingStateImpl implements _OnboardingState {
     diseaseType,
     conditionNote,
     isLoading,
+    currentStep,
   ]);
 
   /// Create a copy of OnboardingState
@@ -805,6 +846,7 @@ abstract class _OnboardingState implements OnboardingState {
     final String? token,
     final String? patientFullName,
     final String? patientPhone,
+    final String? createdPatientId,
     final String? painLocation,
     final int? painScaleScore,
     final String? painCharacter,
@@ -832,6 +874,7 @@ abstract class _OnboardingState implements OnboardingState {
     final String diseaseType,
     final String? conditionNote,
     final bool isLoading,
+    final int currentStep,
   }) = _$OnboardingStateImpl;
 
   factory _OnboardingState.fromJson(Map<String, dynamic> json) =
@@ -851,7 +894,9 @@ abstract class _OnboardingState implements OnboardingState {
   @override
   String? get patientFullName;
   @override
-  String? get patientPhone; // Assessment Data (Onboarding 3-16)
+  String? get patientPhone; // ID returned after creating patient via caretaker API
+  @override
+  String? get createdPatientId; // Assessment Data (Onboarding 3-16)
   @override
   String? get painLocation;
   @override
@@ -906,6 +951,8 @@ abstract class _OnboardingState implements OnboardingState {
   String? get conditionNote;
   @override
   bool get isLoading;
+  @override
+  int get currentStep;
 
   /// Create a copy of OnboardingState
   /// with the given fields replaced by the non-null parameter values.

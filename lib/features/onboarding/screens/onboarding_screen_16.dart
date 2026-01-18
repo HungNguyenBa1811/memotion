@@ -52,8 +52,13 @@ class OnboardingScreen16 extends ConsumerWidget {
                 onPressed: state.isLoading
                     ? null
                     : () async {
-                        final ok = await notifier.submitFinalProfile(context);
-                        if (!ok) {
+                        final ok = await notifier.submitFinalProfile(
+                          context,
+                          ref,
+                        );
+                        if (ok) {
+                          // Navigation is handled inside submitFinalProfile
+                        } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Submission failed')),
                           );

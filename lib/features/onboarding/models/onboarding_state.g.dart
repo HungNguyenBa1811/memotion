@@ -16,6 +16,7 @@ _$OnboardingStateImpl _$$OnboardingStateImplFromJson(
   token: json['token'] as String?,
   patientFullName: json['patientFullName'] as String?,
   patientPhone: json['patientPhone'] as String?,
+  createdPatientId: json['createdPatientId'] as String?,
   painLocation: json['painLocation'] as String?,
   painScaleScore: (json['painScaleScore'] as num?)?.toInt(),
   painCharacter: json['painCharacter'] as String?,
@@ -43,6 +44,7 @@ _$OnboardingStateImpl _$$OnboardingStateImplFromJson(
   diseaseType: json['diseaseType'] as String? ?? 'PHYSICAL_THERAPY',
   conditionNote: json['conditionNote'] as String?,
   isLoading: json['isLoading'] as bool? ?? false,
+  currentStep: (json['currentStep'] as num?)?.toInt() ?? 1,
 );
 
 Map<String, dynamic> _$$OnboardingStateImplToJson(
@@ -55,6 +57,7 @@ Map<String, dynamic> _$$OnboardingStateImplToJson(
   'token': instance.token,
   'patientFullName': instance.patientFullName,
   'patientPhone': instance.patientPhone,
+  'createdPatientId': instance.createdPatientId,
   'painLocation': instance.painLocation,
   'painScaleScore': instance.painScaleScore,
   'painCharacter': instance.painCharacter,
@@ -82,4 +85,5 @@ Map<String, dynamic> _$$OnboardingStateImplToJson(
   'diseaseType': instance.diseaseType,
   'conditionNote': instance.conditionNote,
   'isLoading': instance.isLoading,
+  'currentStep': instance.currentStep,
 };

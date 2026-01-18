@@ -306,11 +306,20 @@ class OnboardingData {
   // Step 5 - Pain level (0-10)
   final int? painLevel;
 
+  // Step 14 - ADL score (0,1,2)
+  final int? adlScore;
+
+  // Step 15 - IADL score (0,1,2)
+  final int? iadlScore;
+
   // Step 12 - Resting heart rate (beats per minute)
   final int? heartRate;
 
   // Step 13 - Blood glucose (e.g., mg/dL)
   final int? bloodSugar;
+
+  // Step 11 - MAP score / blood pressure input
+  final double? mapScore;
 
   // Step 6 - Pain type
   final PainType? painType;
@@ -320,6 +329,9 @@ class OnboardingData {
 
   // Step 8 - Functional: stand from chair
   final StandAbility? standAbility;
+
+  // Step 10 - Living arrangement (UI choices: 'Sống một mình', 'Sống cùng vợ/chồng', 'Sống cùng con cháu')
+  final String? livingArrangement;
 
   // Optional doctor advice
   final String? doctorAdvice;
@@ -336,6 +348,10 @@ class OnboardingData {
     this.height,
     this.weight,
     this.bmi,
+    this.livingArrangement,
+    this.mapScore,
+    this.adlScore,
+    this.iadlScore,
     this.selectedObjectives = const <HealthObjective>{},
     this.selectedPainLocations = const <PainLocation>{},
     this.painLevel,
@@ -357,6 +373,10 @@ class OnboardingData {
     double? height,
     double? weight,
     double? bmi,
+    String? livingArrangement,
+    double? mapScore,
+    int? adlScore,
+    int? iadlScore,
     Set<HealthObjective>? selectedObjectives,
     Set<PainLocation>? selectedPainLocations,
     int? painLevel,
@@ -377,6 +397,10 @@ class OnboardingData {
       height: height ?? this.height,
       weight: weight ?? this.weight,
       bmi: bmi ?? this.bmi,
+      livingArrangement: livingArrangement ?? this.livingArrangement,
+      mapScore: mapScore ?? this.mapScore,
+      adlScore: adlScore ?? this.adlScore,
+      iadlScore: iadlScore ?? this.iadlScore,
       selectedObjectives: selectedObjectives ?? this.selectedObjectives,
       selectedPainLocations:
           selectedPainLocations ?? this.selectedPainLocations,
@@ -401,6 +425,10 @@ class OnboardingData {
       'height': height,
       'weight': weight,
       'bmi': bmi,
+      'livingArrangement': livingArrangement,
+      'mapScore': mapScore,
+      'adlScore': adlScore,
+      'iadlScore': iadlScore,
       'selectedObjectives': selectedObjectives.map((e) => e.name).toList(),
       'selectedPainLocations': selectedPainLocations
           .map((e) => e.name)

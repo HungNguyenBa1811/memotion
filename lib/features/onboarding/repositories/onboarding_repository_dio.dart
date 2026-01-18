@@ -1,11 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import '../../../core/network/api_constants.dart';
+import '../../../core/network/api_client.dart';
 
 class OnboardingRepositoryDio {
   final Dio _dio;
 
-  OnboardingRepositoryDio({Dio? dio})
-    : _dio = dio ?? Dio(BaseOptions(baseUrl: 'https://your.api.base'));
+  OnboardingRepositoryDio({Dio? dio}) : _dio = dio ?? ApiClient.instance.dio {
+    // Ensure baseUrl is set consistently with ApiConstants if ApiClient wasn't configured
+    _dio.options.baseUrl = ApiConstants.baseUrl;
+  }
 
   Future<Map<String, dynamic>?> fetchUserProfile() async {
     try {

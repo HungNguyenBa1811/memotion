@@ -16,6 +16,8 @@ class OnboardingState with _$OnboardingState {
     // Patient Info (Onboarding 1-2)
     String? patientFullName,
     String? patientPhone,
+    // ID returned after creating patient via caretaker API
+    String? createdPatientId,
 
     // Assessment Data (Onboarding 3-16)
     String? painLocation,
@@ -48,6 +50,7 @@ class OnboardingState with _$OnboardingState {
     String? conditionNote,
 
     @Default(false) bool isLoading,
+    @Default(1) int currentStep,
   }) = _OnboardingState;
 
   factory OnboardingState.fromJson(Map<String, dynamic> json) =>
