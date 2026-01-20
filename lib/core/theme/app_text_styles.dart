@@ -83,4 +83,40 @@ class AppTextStyles {
     color: AppColors.primary,
     decoration: TextDecoration.underline,
   );
+
+  // Figma design tokens - Homepage text styles
+  // style_MAQJSS: Lexend, 18pt, weight 700, center — card titles
+  static TextStyle get cardTitle => GoogleFonts.lexend(
+    fontSize: 18,
+    fontWeight: FontWeight.w700,
+    color: AppColors.primaryBlack,
+  );
+
+  // style_ZVHPF7: Lexend, 20pt, weight 700 — section heading
+  static TextStyle get sectionHeading => GoogleFonts.lexend(
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+    color: AppColors.primaryBlack,
+  );
+
+  // style_LVCGSZ: Lexend, 17pt, weight 700 — numeric stat
+  static TextStyle get numericStat => GoogleFonts.lexend(
+    fontSize: 17,
+    fontWeight: FontWeight.w700,
+    color: AppColors.primaryBlack,
+  );
+
+  // style_2PE3HI: Lexend, 24pt, weight 700 — large stat
+  static TextStyle get largeStat => GoogleFonts.lexend(
+    fontSize: 24,
+    fontWeight: FontWeight.w700,
+    color: AppColors.primaryBlack,
+  );
+
+  // style_A0AN4H: Lexend, 12pt, weight 300 — body/description
+  static TextStyle get lightDescription => GoogleFonts.lexend(
+    fontSize: 12,
+    fontWeight: FontWeight.w300,
+    color: AppColors.textSecondary,
+  );
 }

@@ -10,6 +10,15 @@ class AppColors {
   static const Color tealAccent = Color(0xFF00BFA5);
   static const Color primaryDark = Color(0xFF003D33);
 
+  // Figma design tokens - Homepage colors
+  static const Color accent = Color(0xFF5F33E1); // Color/Primary from Figma
+  static const Color lightGreen = Color(0xFFF1F8E9); // Background
+  static const Color cardBackground = Color(0xFFFFFFFF); // Surface/Cards
+  static const Color primaryBlack = Color(0xFF000000); // Primary black/typography
+  static const Color tealGreen = Color(0xFF4DB6AC); // Green-ish accent
+  static const Color lightGreenAccent = Color(0xFFA0FFD5); // Green/200
+  static const Color sosButton = Color(0xFFD77658); // SOS CTA background
+
   // Background colors
   static const Color background = Color(0xFFF1F8E9);
   static const Color surface = Color(0xFFFFFFFF);
@@ -33,4 +42,5 @@ class AppColors {
   // Other colors
   static const Color divider = Color(0xFFE0E0E0);
   static const Color shadow = Color(0x1A000000);
+  static const Color cardShadow = Color(0x40000000); // rgba(0,0,0,0.25)
 }

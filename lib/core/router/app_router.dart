@@ -7,6 +7,7 @@ import '../../features/auth/screens/sign_in_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen_new.dart';
 import '../../features/profile/screens/profile_screen.dart';
+import '../../features/home/screens/home_screen.dart';
 import '../../features/nutrition/screens/nutrition_screen.dart';
 import '../../features/nutrition/screens/nutrition_detail_screen.dart';
 import '../../features/workout/screens/workout_screen.dart';
@@ -263,27 +264,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           return MainShell(navigationShell: navigationShell);
         },
         branches: [
-          // Branch 0: Home/Nutrition
+          // Branch 0: Home
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: AppRoutes.home,
-                builder: (context, state) => const NutritionScreenContent(),
-                routes: [
-                  GoRoute(
-                    path: 'detail',
-                    builder: (context, state) {
-                      final extra = state.extra as Map<String, dynamic>?;
-                      return NutritionDetailScreen(
-                        title: extra?['title'] ?? 'Keto Salad',
-                        subtitle:
-                            extra?['subtitle'] ??
-                            'Beans, mandarin and avocado salad',
-                        kcal: extra?['kcal']?.replaceAll(' Kcal', '') ?? '370',
-                      );
-                    },
-                  ),
-                ],
+                builder: (context, state) => const HomeScreenContent(),
               ),
             ],
           ),
