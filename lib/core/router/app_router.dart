@@ -12,6 +12,10 @@ import '../../features/nutrition/screens/nutrition_screen.dart';
 import '../../features/nutrition/screens/nutrition_detail_screen.dart';
 import '../../features/workout/screens/workout_screen.dart';
 import '../../features/workout/screens/workout_detail_screen.dart';
+import '../../features/workout/screens/workout_exercise_screen.dart';
+import '../../features/workout/screens/workout_calibration_complete_screen.dart';
+import '../../features/workout/screens/workout_training_screen.dart';
+import '../../features/workout/screens/workout_training_complete_screen.dart';
 import '../../features/medication/screens/medication_main_screen.dart';
 import '../../features/medication/screens/medication_scan_screen.dart';
 import '../../shared/widgets/main_shell.dart';
@@ -46,6 +50,11 @@ class AppRoutes {
   static const String nutritionDetail = '/nutrition-detail';
   static const String workout = '/workout';
   static const String workoutDetail = '/workout-detail';
+  static const String workoutExercise = '/workout-exercise';
+  static const String workoutCalibrationComplete =
+      '/workout-calibration-complete';
+  static const String workoutTraining = '/workout-training';
+  static const String workoutTrainingComplete = '/workout-training-complete';
   static const String medication = '/medication';
   static const String medicationScan = '/medication-scan';
 }
@@ -266,6 +275,51 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
 
+      // Workout Detail and Exercise routes - OUTSIDE shell (no bottom nav)
+      GoRoute(
+        path: '/workout-detail',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return WorkoutDetailScreen(workoutId: extra?['workoutId'] ?? '');
+        },
+      ),
+      GoRoute(
+        path: '/workout-exercise',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return WorkoutExerciseScreen(workoutId: extra?['workoutId'] ?? '');
+        },
+      ),
+      GoRoute(
+        path: '/workout-calibration-complete',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return WorkoutCalibrationCompleteScreen(
+            workoutId: extra?['workoutId'] ?? '',
+            minAngle: extra?['currentAngle'] ?? 20,
+            maxAngle: extra?['safeLimit'] ?? 140,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/workout-training',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return WorkoutTrainingScreen(workoutId: extra?['workoutId'] ?? '');
+        },
+      ),
+      GoRoute(
+        path: '/workout-training-complete',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return WorkoutTrainingCompleteScreen(
+            workoutId: extra?['workoutId'] ?? '',
+            duration: extra?['duration'] ?? '12:30',
+            durationSeconds: extra?['durationSeconds'] ?? 750,
+          );
+        },
+      ),
+
       // Main shell with persistent bottom navigation
       // Uses StatefulShellRoute.indexedStack to preserve state of each tab
       StatefulShellRoute.indexedStack(
@@ -322,23 +376,12 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // Branch 3: Workout
+          // Branch 3: Workout (only list screen has bottom nav)
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: AppRoutes.workout,
                 builder: (context, state) => const WorkoutScreenContent(),
-                routes: [
-                  GoRoute(
-                    path: 'detail',
-                    builder: (context, state) {
-                      final extra = state.extra as Map<String, dynamic>?;
-                      return WorkoutDetailScreen(
-                        workoutId: extra?['workoutId'] ?? '',
-                      );
-                    },
-                  ),
-                ],
               ),
             ],
           ),

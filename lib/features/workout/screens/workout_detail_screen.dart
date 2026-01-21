@@ -227,7 +227,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             child: GestureDetector(
               onTap: workout.isCompleted
                   ? null
-                  : () => _markAsCompleted(workout),
+                  : () => _startWorkoutExercise(workout),
               child: Container(
                 width: 163,
                 height: 36,
@@ -559,6 +559,12 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
     );
   }
 
+  void _startWorkoutExercise(WorkoutTask workout) {
+    // Navigate to workout exercise flow (calibration -> training)
+    context.push('/workout-exercise', extra: {'workoutId': workout.id});
+  }
+
+  // ignore: unused_element
   void _markAsCompleted(WorkoutTask workout) {
     ref.read(workoutDetailProvider.notifier).markCompleted();
     ScaffoldMessenger.of(context).showSnackBar(

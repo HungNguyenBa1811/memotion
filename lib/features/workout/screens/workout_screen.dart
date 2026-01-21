@@ -260,7 +260,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                           workout: workout,
                           onTap: () {
                             context.push(
-                              '/workout/detail',
+                              '/workout-detail',
                               extra: {'workoutId': workout.id},
                             );
                           },
