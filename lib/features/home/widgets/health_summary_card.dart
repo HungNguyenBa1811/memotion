@@ -44,7 +44,7 @@ class HealthSummaryCard extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppColors.primary, AppColors.primary],
+                    colors: [AppColors.primary, AppColors.tealAccent],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
@@ -53,7 +53,7 @@ class HealthSummaryCard extends StatelessWidget {
             ),
             // Content
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
                   // Left section: Status
@@ -62,11 +62,12 @@ class HealthSummaryCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'Chỉ số hôm nay',
                           style: AppTextStyles.bodySmall.copyWith(
-                            fontSize: 15,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF889D93),
                           ),
@@ -75,7 +76,7 @@ class HealthSummaryCard extends StatelessWidget {
                         Text(
                           statusLabel,
                           style: AppTextStyles.largeStat.copyWith(
-                            fontSize: 24,
+                            fontSize: 20,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFFDDE2DF),
                           ),
@@ -89,11 +90,12 @@ class HealthSummaryCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'HUYẾT ÁP',
                           style: AppTextStyles.caption.copyWith(
-                            fontSize: 11,
+                            fontSize: 7,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF799087),
                           ),
@@ -102,7 +104,7 @@ class HealthSummaryCard extends StatelessWidget {
                         Text(
                           bloodPressure,
                           style: AppTextStyles.headline2.copyWith(
-                            fontSize: 19,
+                            fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFFC3CCC7),
                           ),
@@ -123,11 +125,12 @@ class HealthSummaryCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'NHỊP TIM',
                           style: AppTextStyles.caption.copyWith(
-                            fontSize: 11,
+                            fontSize: 7,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF81968D),
                           ),
@@ -135,13 +138,14 @@ class HealthSummaryCard extends StatelessWidget {
                         const SizedBox(height: 6),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
                             Text(
                               heartRate,
                               style: AppTextStyles.numericStat.copyWith(
-                                fontSize: 17,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFFC6CFCA),
                               ),
@@ -150,7 +154,7 @@ class HealthSummaryCard extends StatelessWidget {
                             Text(
                               'bpm',
                               style: AppTextStyles.bodySmall.copyWith(
-                                fontSize: 13,
+                                fontSize: 9,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFFABB7B0),
                               ),

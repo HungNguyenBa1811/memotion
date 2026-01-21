@@ -70,10 +70,43 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (hasToken) {
       final token = await _tokenStorage.getAccessToken();
       debugPrint('🔐 AuthNotifier: Found stored token, restoring session');
+      debugPrint('🔐 AuthNotifier: Fetching user details from /api/users/me');
+
+      // Set loading state
       state = state.copyWith(
-        status: AuthStatus.authenticated,
+        status: AuthStatus.loading,
         accessToken: token,
       );
+
+      // Gọi API /api/users/me để lấy thông tin user và is_first_login
+      final userDetailResult = await _authRepository.getUserDetails();
+
+      switch (userDetailResult) {
+        case Success(:final data):
+          debugPrint('🔐 AuthNotifier: Session restored successfully');
+          debugPrint('🔐 AuthNotifier: is_first_login = ${data.isFirstLogin}');
+
+          final user = User(
+            id: data.userId,
+            email: data.email,
+            nickname: data.fullName,
+            createdAt: DateTime.now(),
+          );
+
+          state = state.copyWith(
+            status: AuthStatus.authenticated,
+            user: user,
+            accessToken: token,
+            isFirstLogin: data.isFirstLogin,
+          );
+
+        case Failure(:final exception):
+          debugPrint('🔐 AuthNotifier: Failed to restore session: ${exception.message}');
+          debugPrint('🔐 AuthNotifier: Token might be expired, clearing storage');
+          // Token invalid hoặc expired, clear storage
+          await _tokenStorage.clearAll();
+          state = state.copyWith(status: AuthStatus.unauthenticated);
+      }
     } else {
       debugPrint('🔐 AuthNotifier: No stored token found');
       state = state.copyWith(status: AuthStatus.unauthenticated);

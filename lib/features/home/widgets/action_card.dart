@@ -68,7 +68,7 @@ class ActionCard extends StatelessWidget {
               ),
             // Icon centered
             Positioned(
-              top: 30,
+              top: 20,
               left: 0,
               right: 0,
               child: Center(
@@ -79,7 +79,7 @@ class ActionCard extends StatelessWidget {
             Positioned(
               left: 10,
               right: 10,
-              bottom: 20,
+              bottom: 10,
               child: Text(
                 title,
                 style: AppTextStyles.cardTitle.copyWith(
@@ -100,35 +100,13 @@ class ActionCard extends StatelessWidget {
   Widget _buildIcon() {
     // SVG asset
     if (svgAsset != null) {
-      return SvgPicture.asset(
-        svgAsset!,
-        fit: BoxFit.contain,
-        placeholderBuilder: (context) => Icon(
-          icon ?? Icons.category,
-          size: 60,
-          color: iconColor ?? AppColors.tealGreen,
-        ),
-      );
+      return SvgPicture.asset(svgAsset!, fit: BoxFit.contain);
     }
     // PNG/image asset
     if (iconAsset != null) {
-      return Image.asset(
-        iconAsset!,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) {
-          return Icon(
-            icon ?? Icons.category,
-            size: 60,
-            color: iconColor ?? AppColors.tealGreen,
-          );
-        },
-      );
+      return Image.asset(iconAsset!, fit: BoxFit.contain);
     }
-    // Fallback icon
-    return Icon(
-      icon ?? Icons.category,
-      size: 60,
-      color: iconColor ?? AppColors.tealGreen,
-    );
+    // No fallback
+    return const SizedBox.shrink();
   }
 }
