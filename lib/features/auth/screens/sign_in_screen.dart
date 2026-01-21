@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/theme.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../providers/auth_provider.dart';
-import 'package:go_router/go_router.dart';
-import '../../../core/router/app_router.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   final VoidCallback onBackPressed;
@@ -41,9 +39,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         .read(authProvider.notifier)
         .login(_emailController.text.trim(), _passwordController.text);
 
+    // Router sẽ tự động redirect dựa trên is_first_login
+    // Nếu is_first_login = true -> /onboarding/1
+    // Nếu is_first_login = false -> /home
     if (success && mounted) {
-      // Navigate to onboarding step 1 after successful login
-      context.go(AppRoutes.onboardingStep1);
+      // Do nothing - let router redirect handle it automatically
     }
   }
 
@@ -101,11 +101,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
                     }
-                    if (!RegExp(
-                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    ).hasMatch(value)) {
-                      return 'Invalid email';
-                    }
+                    // if (!RegExp(
+                    //   r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    // ).hasMatch(value)) {
+                    //   return 'Invalid email';
+                    // }
                     return null;
                   },
                 ),

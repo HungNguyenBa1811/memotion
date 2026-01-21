@@ -77,7 +77,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: true,
     refreshListenable: authListenable,
     redirect: (context, state) {
-      final status = authListenable.status;
+      final authState = ref.read(authProvider);
+      final status = authState.status;
       final currentPath = state.matchedLocation;
       final isPublicRoute = RouteConfig.isPublicRoute(currentPath);
 
@@ -89,9 +90,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthenticated = status == AuthStatus.authenticated;
 
       // Case 1: Đã authenticated nhưng đang ở public route (sign-in, registration, landing)
-      // -> Redirect đến authenticated area
+      // -> Redirect đến authenticated area dựa trên is_first_login
       if (isAuthenticated && isPublicRoute) {
-        return RouteConfig.authenticatedRedirect;
+        final isFirstLogin = authState.isFirstLogin ?? true;
+
+        // Nếu is_first_login = true -> đi onboarding
+        // Nếu is_first_login = false -> đi home/profile
+        if (isFirstLogin) {
+          return RouteConfig.authenticatedRedirect; // /onboarding/1
+        } else {
+          return RouteConfig.homeRoute; // /home
+        }
       }
 
       // Case 2: Chưa authenticated nhưng đang ở protected route

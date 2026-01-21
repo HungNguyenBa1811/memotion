@@ -11,7 +11,7 @@ class MedicationApiService extends BaseApiService {
     final dateString = _formatDate(date);
 
     return await get<List<TaskDto>>(
-      '/api/tasks/patient/medication-tasks',
+      '/api/tasks/medication-tasks',
       queryParameters: {'task_date': dateString},
       parser: (json) {
         // Parse base response
@@ -50,7 +50,7 @@ class MedicationApiService extends BaseApiService {
   /// PUT /api/tasks/patient/{task_id}/complete
   Future<TaskDto> completeTask(String taskId) async {
     return await put<TaskDto>(
-      '/api/tasks/patient/$taskId/complete',
+      '/api/tasks/$taskId/complete',
       parser: (json) {
         final baseResponse = BaseResponse.fromJson(
           json as Map<String, dynamic>,

@@ -9,8 +9,8 @@ import '../widgets/action_card.dart';
 import '../widgets/upcoming_medication_card.dart';
 import '../widgets/health_summary_card.dart';
 
-/// Homepage screen for elderly users
-/// Displays greeting, SOS button, quick actions, medication, and health summary
+/// Homepage screen for Caregiver users (Figma design)
+/// Displays greeting, situation handling button, medication reminder, quick actions, and health summary
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -32,9 +32,7 @@ class HomeScreenContent extends ConsumerWidget {
       return const Scaffold(
         backgroundColor: AppColors.lightGreen,
         body: Center(
-          child: CircularProgressIndicator(
-            color: AppColors.tealGreen,
-          ),
+          child: CircularProgressIndicator(color: AppColors.tealGreen),
         ),
       );
     }
@@ -53,104 +51,119 @@ class HomeScreenContent extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Status bar spacing
-                const SizedBox(height: 8),
-
-                // Top navigation icons
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.menu),
-                        onPressed: () {},
-                        color: AppColors.primaryBlack,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.notifications_outlined),
-                        onPressed: () {},
-                        color: AppColors.primaryBlack,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Greeting Hero with SOS button
+                // Greeting Hero with situation handling button (includes header, mood card, action button)
                 GreetingHero(
-                  userName: dashboardData?.userName ?? 'User',
-                  greeting: dashboardData?.greeting ?? 'Hello',
+                  userName: 'Anh/Chị',
+                  greeting: _getGreeting(),
                   avatarUrl: dashboardData?.avatarUrl,
-                  onSOSPressed: () {
+                  moodMessage: 'Hôm nay cần để ý đến tâm trạng của bác nhé',
+                  actionButtonText: 'XỬ LÝ TÌNH HUỐNG',
+                  onActionPressed: () {
                     homeNotifier.triggerSOS();
-                    _showSOSDialog(context);
+                    _showSituationHandlingDialog(context);
                   },
                 ),
 
                 const SizedBox(height: 24),
 
-                // Upcoming Medication Card
-                if (dashboardData?.upcomingMedication != null)
-                  UpcomingMedicationCard(
-                    title: dashboardData!.upcomingMedication!.name,
-                    time: dashboardData.upcomingMedication!.time,
-                    dosage: dashboardData.upcomingMedication!.dosage,
-                    imageUrl: dashboardData.upcomingMedication!.imageUrl,
-                    onDetailsPressed: () {
-                      context.go('/medication');
-                    },
-                  ),
+                // Upcoming Medication Card (Caregiver perspective)
+                UpcomingMedicationCard(
+                  title: 'Nhắc ông/bà uống thuốc',
+                  time: dashboardData?.upcomingMedication?.time ?? '10:00 AM',
+                  dosage:
+                      dashboardData?.upcomingMedication?.dosage ??
+                      'Uống 1 viên Vitamin C sau ăn',
+                  imageUrl: dashboardData?.upcomingMedication?.imageUrl,
+                  onTakenPressed: () {
+                    // Mark as taken
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Đã đánh dấu uống thuốc!'),
+                        backgroundColor: AppColors.tealGreen,
+                      ),
+                    );
+                  },
+                  onDetailsPressed: () {
+                    context.go('/medication');
+                  },
+                ),
 
                 const SizedBox(height: 24),
 
-                // Quick Actions Grid
+                // Section title: "Dành cho Caregiver"
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Text(
+                    'Dành cho Caregiver',
+                    style: AppTextStyles.headline1.copyWith(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Quick Actions Grid (2x2)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Quick Actions',
-                        style: AppTextStyles.sectionHeading,
-                      ),
-                      const SizedBox(height: 16),
-                      // 2x2 Grid of action cards
-                      Wrap(
-                        spacing: 16,
-                        runSpacing: 16,
+                      // First row
+                      Row(
                         children: [
-                          ActionCard(
-                            title: 'Medication',
-                            icon: Icons.medication,
-                            iconColor: AppColors.accent,
-                            onTap: () {
-                              context.go('/medication');
-                            },
+                          Expanded(
+                            child: ActionCard(
+                              title: 'Kiểm tra\nsức khoẻ',
+                              svgAsset: 'assets/images/icon_heart_beat.svg',
+                              icon: Icons.health_and_safety,
+                              iconColor: AppColors.primary,
+                              onTap: () {
+                                // Navigate to health check
+                              },
+                            ),
                           ),
-                          ActionCard(
-                            title: 'Nutrition',
-                            icon: Icons.restaurant,
-                            iconColor: AppColors.tealGreen,
-                            onTap: () {
-                              context.go('/nutrition');
-                            },
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ActionCard(
+                              title: 'Nhắc uống\nthuốc',
+                              svgAsset: 'assets/images/icon_medicine_file.svg',
+                              icon: Icons.medication,
+                              iconColor: AppColors.primary,
+                              onTap: () {
+                                context.go('/medication');
+                              },
+                            ),
                           ),
-                          ActionCard(
-                            title: 'Workout',
-                            icon: Icons.fitness_center,
-                            iconColor: AppColors.warning,
-                            onTap: () {
-                              context.go('/workout');
-                            },
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // Second row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ActionCard(
+                              title: 'Trò chuyện\ngia đình',
+                              svgAsset: 'assets/images/icon_calls.svg',
+                              icon: Icons.chat_bubble,
+                              iconColor: AppColors.primary,
+                              onTap: () {
+                                // Navigate to family chat
+                              },
+                            ),
                           ),
-                          ActionCard(
-                            title: 'Appointment',
-                            icon: Icons.calendar_today,
-                            iconColor: AppColors.error,
-                            onTap: () {
-                              // Navigate to appointments
-                            },
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ActionCard(
+                              title: 'Sổ sức\nkhoẻ',
+                              svgAsset: 'assets/images/icon_health_check.svg',
+                              icon: Icons.book,
+                              iconColor: AppColors.primary,
+                              onTap: () {
+                                context.go('/profile');
+                              },
+                            ),
                           ),
                         ],
                       ),
@@ -163,14 +176,14 @@ class HomeScreenContent extends ConsumerWidget {
                 // Health Summary Card
                 HealthSummaryCard(
                   heartRate: dashboardData?.healthVitals?.heartRate ?? '72',
-                  bloodPressure: dashboardData?.healthVitals?.bloodPressure ?? '120/80',
+                  bloodPressure:
+                      dashboardData?.healthVitals?.bloodPressure ?? '120/80',
                   steps: dashboardData?.healthVitals?.steps ?? '0',
+                  statusLabel: 'Rất tốt',
                 ),
 
-                const SizedBox(height: 32),
-
                 // Bottom padding for navigation bar
-                const SizedBox(height: 100),
+                const SizedBox(height: 120),
               ],
             ),
           ),
@@ -179,26 +192,37 @@ class HomeScreenContent extends ConsumerWidget {
     );
   }
 
-  void _showSOSDialog(BuildContext context) {
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Chào buổi sáng';
+    } else if (hour < 18) {
+      return 'Chào buổi chiều';
+    } else {
+      return 'Chào buổi tối';
+    }
+  }
+
+  void _showSituationHandlingDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Emergency SOS'),
+        title: const Text('Xử lý tình huống'),
         content: const Text(
-          'Are you sure you want to send an emergency alert to your caregivers?',
+          'Bạn có chắc chắn muốn gửi thông báo xử lý tình huống đến người thân?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Huỷ'),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              // Trigger SOS action
+              // Trigger situation handling action
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Emergency alert sent!'),
+                  content: Text('Đã gửi thông báo xử lý tình huống!'),
                   backgroundColor: AppColors.sosButton,
                 ),
               );
@@ -206,7 +230,7 @@ class HomeScreenContent extends ConsumerWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.sosButton,
             ),
-            child: const Text('Send SOS'),
+            child: const Text('Xác nhận'),
           ),
         ],
       ),

@@ -15,12 +15,14 @@ class AuthState {
   final User? user;
   final String? accessToken;
   final String? error;
+  final bool? isFirstLogin;
 
   const AuthState({
     this.status = AuthStatus.initial,
     this.user,
     this.accessToken,
     this.error,
+    this.isFirstLogin,
   });
 
   AuthState copyWith({
@@ -28,12 +30,14 @@ class AuthState {
     User? user,
     String? accessToken,
     String? error,
+    bool? isFirstLogin,
   }) {
     return AuthState(
       status: status ?? this.status,
       user: user ?? this.user,
       accessToken: accessToken ?? this.accessToken,
       error: error,
+      isFirstLogin: isFirstLogin ?? this.isFirstLogin,
     );
   }
 }
@@ -129,22 +133,47 @@ class AuthNotifier extends StateNotifier<AuthState> {
       '└─────────────────────────────────────────────────────────────',
     );
 
-    // Lưu token vào secure storage
-    await _tokenStorage.saveAccessToken(data.accessToken);
+    // Lưu token vào secure storage và giữ lại để dùng
+    final accessToken = data.accessToken;
+    await _tokenStorage.saveAccessToken(accessToken);
     await _tokenStorage.saveTokenType(data.tokenType);
 
-    // Create user from login response
+    // Gọi API /api/users/me để lấy thông tin user và is_first_login
+    final userDetailResult = await _authRepository.getUserDetails();
+
+    return switch (userDetailResult) {
+      Success(:final data) => _handleUserDetailSuccess(data, accessToken),
+      Failure(:final exception) => _handleError(exception),
+    };
+  }
+
+  Future<bool> _handleUserDetailSuccess(
+    UserDetailDto userDetail,
+    String accessToken,
+  ) async {
+    debugPrint(
+      '┌─────────────────────────────────────────────────────────────',
+    );
+    debugPrint('│ 🎉 AUTH PROVIDER: User details fetched');
+    debugPrint('│ User ID: ${userDetail.userId}');
+    debugPrint('│ Is First Login: ${userDetail.isFirstLogin}');
+    debugPrint(
+      '└─────────────────────────────────────────────────────────────',
+    );
+
+    // Create user from user detail response
     final user = User(
-      id: '',
-      email: email,
-      nickname: email.split('@').first,
+      id: userDetail.userId,
+      email: userDetail.email,
+      nickname: userDetail.fullName,
       createdAt: DateTime.now(),
     );
 
     state = state.copyWith(
       status: AuthStatus.authenticated,
       user: user,
-      accessToken: data.accessToken,
+      accessToken: accessToken,
+      isFirstLogin: userDetail.isFirstLogin,
     );
     return true;
   }

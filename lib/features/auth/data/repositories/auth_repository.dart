@@ -26,6 +26,12 @@ abstract class AuthRepository {
     required String password,
     String? phone,
   });
+
+  /// Get current user details
+  ///
+  /// Returns [Success] with [UserDetailDto] on success
+  /// Returns [Failure] with [ApiException] on failure
+  Future<Result<UserDetailDto>> getUserDetails();
 }
 
 /// Implementation of AuthRepository
@@ -67,6 +73,13 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       return await _dataSource.register(request);
+    });
+  }
+
+  @override
+  Future<Result<UserDetailDto>> getUserDetails() async {
+    return Result.guard(() async {
+      return await _dataSource.getUserDetails();
     });
   }
 }

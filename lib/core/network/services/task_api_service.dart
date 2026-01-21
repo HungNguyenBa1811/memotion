@@ -14,7 +14,7 @@ class TaskApiService extends BaseApiService {
   /// Get medication tasks for a specific date
   /// GET /api/tasks/patient/medication-tasks?task_date=YYYY-MM-DD
   Future<List<TaskDto>> getMedicationTasksByDate(DateTime date) async {
-    return _getTasksByDate('/api/tasks/patient/medication-tasks', date);
+    return _getTasksByDate('/api/tasks/medication-tasks', date);
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ class TaskApiService extends BaseApiService {
   /// Get nutrition tasks for a specific date
   /// GET /api/tasks/patient/nutrition-tasks?task_date=YYYY-MM-DD
   Future<List<TaskDto>> getNutritionTasksByDate(DateTime date) async {
-    return _getTasksByDate('/api/tasks/patient/nutrition-tasks', date);
+    return _getTasksByDate('/api/tasks/nutrition-tasks', date);
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ class TaskApiService extends BaseApiService {
   /// Get exercise tasks for a specific date
   /// GET /api/tasks/patient/exercise-tasks?task_date=YYYY-MM-DD
   Future<List<TaskDto>> getExerciseTasksByDate(DateTime date) async {
-    return _getTasksByDate('/api/tasks/patient/exercise-tasks', date);
+    return _getTasksByDate('/api/tasks/exercise-tasks', date);
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -45,7 +45,7 @@ class TaskApiService extends BaseApiService {
   /// PUT /api/tasks/patient/{task_id}/complete
   Future<TaskDto> completeTask(String taskId) async {
     return await put<TaskDto>(
-      '/api/tasks/patient/$taskId/complete',
+      '/api/tasks/$taskId/complete',
       parser: (json) {
         final response = ApiResponse.fromJson(
           json as Map<String, dynamic>,

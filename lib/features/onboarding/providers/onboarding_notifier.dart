@@ -304,6 +304,8 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       debugPrint('[NOTIFIER] submitFinalProfile() general result: $genOk');
       if (!genOk) {
         debugPrint('[NOTIFIER] submitFinalProfile() general POST failed');
+        // Navigate back to onboarding step 1
+        _navigateToOnboardingStep1(context);
         return false;
       }
       debugPrint('[NOTIFIER] submitFinalProfile() general POST succeeded');
@@ -339,11 +341,31 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       debugPrint('[NOTIFIER] submitFinalProfile() physical result: $physOk');
       if (!physOk) {
         debugPrint('[NOTIFIER] submitFinalProfile() physical POST failed');
+        // Navigate back to onboarding step 1
+        _navigateToOnboardingStep1(context);
         return false;
       }
       debugPrint('[NOTIFIER] submitFinalProfile() physical POST succeeded');
 
-      // Completed both API calls successfully
+      // Step 3: Generate AI care plan
+      debugPrint('[NOTIFIER] submitFinalProfile() generating care plan...');
+      final carePlanResult = await _repo.generateCarePlan(
+        planDurationDays: 7,
+        regenerate: false,
+      );
+      if (carePlanResult == null) {
+        debugPrint(
+          '[NOTIFIER] submitFinalProfile() care plan generation failed',
+        );
+        // Navigate back to onboarding step 1
+        _navigateToOnboardingStep1(context);
+        return false;
+      }
+      debugPrint(
+        '[NOTIFIER] submitFinalProfile() care plan generated: $carePlanResult',
+      );
+
+      // Completed all 3 API calls successfully
       debugPrint(
         '[NOTIFIER] submitFinalProfile() Completed - navigating to /profile',
       );
@@ -379,9 +401,26 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       }
       debugPrint('[NOTIFIER] submitFinalProfile() exception: $e');
       debugPrint(st.toString());
+      // On any exception, navigate back to onboarding step 1
+      _navigateToOnboardingStep1(context);
       return false;
     } finally {
       state = state.copyWith(isLoading: false);
+    }
+  }
+
+  /// Navigate back to onboarding step 1 when any API fails
+  void _navigateToOnboardingStep1(BuildContext context) {
+    debugPrint('[NOTIFIER] Navigating back to onboarding step 1');
+    state = state.copyWith(currentStep: 1);
+    try {
+      if (context.mounted) {
+        GoRouter.of(context).go('/onboarding/1');
+      }
+    } catch (e) {
+      debugPrint(
+        '[NOTIFIER] _navigateToOnboardingStep1() navigation error: $e',
+      );
     }
   }
 }

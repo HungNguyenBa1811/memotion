@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-/// Floating health summary card with vitals
+/// Floating health summary card with vitals (Figma design)
+/// Shows: "Chỉ số hôm nay" label, status text, blood pressure, heart rate
 class HealthSummaryCard extends StatelessWidget {
   final String heartRate;
   final String bloodPressure;
   final String steps;
+  final String statusLabel;
   final String? backgroundImageUrl;
 
   const HealthSummaryCard({
@@ -14,24 +16,17 @@ class HealthSummaryCard extends StatelessWidget {
     this.heartRate = '72',
     this.bloodPressure = '120/80',
     this.steps = '5,420',
+    this.statusLabel = 'Rất tốt',
     this.backgroundImageUrl,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      height: 140,
+      margin: const EdgeInsets.symmetric(horizontal: 14),
+      height: 99,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.tealGreen,
-            AppColors.tealGreen.withOpacity(0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(27),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: AppColors.cardShadow,
@@ -40,88 +35,137 @@ class HealthSummaryCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          // Background pattern or image would go here
-          // For now, using a semi-transparent overlay
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(27),
-              color: Colors.white.withOpacity(0.1),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          children: [
+            // Use app color gradient (from Figma) instead of image background
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.primary],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                ),
+              ),
             ),
-          ),
-          // Health metrics
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildHealthMetric(
-                  icon: Icons.favorite,
-                  label: 'Heart Rate',
-                  value: heartRate,
-                  unit: 'bpm',
-                ),
-                Container(
-                  width: 1,
-                  height: 60,
-                  color: Colors.white.withOpacity(0.3),
-                ),
-                _buildHealthMetric(
-                  icon: Icons.monitor_heart,
-                  label: 'Blood Pressure',
-                  value: bloodPressure,
-                  unit: 'mmHg',
-                ),
-                Container(
-                  width: 1,
-                  height: 60,
-                  color: Colors.white.withOpacity(0.3),
-                ),
-                _buildHealthMetric(
-                  icon: Icons.directions_walk,
-                  label: 'Steps',
-                  value: steps,
-                  unit: 'today',
-                ),
-              ],
+            // Content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  // Left section: Status
+                  Expanded(
+                    flex: 3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Chỉ số hôm nay',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF889D93),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          statusLabel,
+                          style: AppTextStyles.largeStat.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFFDDE2DF),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Middle section: Blood Pressure
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'HUYẾT ÁP',
+                          style: AppTextStyles.caption.copyWith(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF799087),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          bloodPressure,
+                          style: AppTextStyles.headline2.copyWith(
+                            fontSize: 19,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFFC3CCC7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Divider
+                  Container(
+                    width: 2,
+                    height: 45,
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                  const SizedBox(width: 12),
+                  // Right section: Heart Rate
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'NHỊP TIM',
+                          style: AppTextStyles.caption.copyWith(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF81968D),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              heartRate,
+                              style: AppTextStyles.numericStat.copyWith(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFFC6CFCA),
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              'bpm',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFFABB7B0),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildHealthMetric({
-    required IconData icon,
-    required String label,
-    required String value,
-    required String unit,
-  }) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          icon,
-          color: Colors.white,
-          size: 28,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: AppTextStyles.numericStat.copyWith(
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          unit,
-          style: AppTextStyles.lightDescription.copyWith(
-            color: Colors.white.withOpacity(0.8),
-            fontSize: 10,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -405,8 +405,8 @@ class _MedicationMainScreenContentState
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(70),
-          bottomLeft: Radius.circular(70),
+          topLeft: Radius.circular(27),
+          bottomLeft: Radius.circular(27),
           topRight: Radius.circular(27),
           bottomRight: Radius.circular(27),
         ),

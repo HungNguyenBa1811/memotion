@@ -113,4 +113,56 @@ class AuthApiService extends BaseApiService {
           : 'Registration failed',
     );
   }
+
+  /// Get current user details
+  ///
+  /// GET /api/users/me
+  Future<UserDetailDto> getUserDetails() async {
+    debugPrint(
+      '┌─────────────────────────────────────────────────────────────',
+    );
+    debugPrint('│ 👤 AUTH: Fetching user details');
+    debugPrint(
+      '└─────────────────────────────────────────────────────────────',
+    );
+
+    final response = await get(
+      ApiConstants.userMe,
+      parser: (json) => BaseResponse<UserDetailDto>.fromJson(
+        json as Map<String, dynamic>,
+        (data) => UserDetailDto.fromJson(data as Map<String, dynamic>),
+      ),
+    );
+
+    if (response.isSuccess && response.data != null) {
+      debugPrint(
+        '┌─────────────────────────────────────────────────────────────',
+      );
+      debugPrint('│ ✅ AUTH: User details fetched successfully');
+      debugPrint('│ User ID: ${response.data!.userId}');
+      debugPrint('│ Email: ${response.data!.email}');
+      debugPrint('│ Is First Login: ${response.data!.isFirstLogin}');
+      debugPrint('│ Role: ${response.data!.role}');
+      debugPrint(
+        '└─────────────────────────────────────────────────────────────',
+      );
+      return response.data!;
+    }
+
+    debugPrint(
+      '┌─────────────────────────────────────────────────────────────',
+    );
+    debugPrint('│ ❌ AUTH: Failed to fetch user details');
+    debugPrint('│ Code: ${response.code}');
+    debugPrint('│ Message: ${response.message}');
+    debugPrint(
+      '└─────────────────────────────────────────────────────────────',
+    );
+
+    throw BadRequestException(
+      message: response.message.isNotEmpty
+          ? response.message
+          : 'Failed to fetch user details',
+    );
+  }
 }

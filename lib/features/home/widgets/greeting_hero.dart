@@ -2,109 +2,214 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-/// Hero section with greeting, avatar, and SOS button
+/// Hero section with greeting, mood card, avatar, and action button (Caregiver version)
 class GreetingHero extends StatelessWidget {
   final String userName;
   final String greeting;
   final String? avatarUrl;
-  final VoidCallback? onSOSPressed;
+  final String? moodMessage;
+  final String actionButtonText;
+  final VoidCallback? onActionPressed;
 
   const GreetingHero({
     super.key,
     required this.userName,
-    this.greeting = 'Good Morning',
+    this.greeting = 'Chào buổi sáng',
     this.avatarUrl,
-    this.onSOSPressed,
+    this.moodMessage,
+    this.actionButtonText = 'XỬ LÝ TÌNH HUỐNG',
+    this.onActionPressed,
   });
+
+  String _getFormattedDate() {
+    final now = DateTime.now();
+    final weekdays = [
+      'Chủ Nhật',
+      'Thứ Hai',
+      'Thứ Ba',
+      'Thứ Tư',
+      'Thứ Năm',
+      'Thứ Sáu',
+      'Thứ Bảy',
+    ];
+    final weekday = weekdays[now.weekday % 7];
+    return '$weekday, ngày ${now.day} tháng ${now.month}';
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 280,
-      child: Stack(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Background avatar illustration (top section)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 200,
-              decoration: const BoxDecoration(
-                color: AppColors.lightGreen,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 40),
-                  // Avatar placeholder
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: AppColors.tealGreen.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      size: 48,
-                      color: AppColors.tealGreen,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Greeting text
-                  Text(
-                    greeting,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    userName,
-                    style: AppTextStyles.headline1,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // SOS Button (overlapping bottom)
-          Positioned(
-            left: 24,
-            right: 24,
-            bottom: 0,
-            child: GestureDetector(
-              onTap: onSOSPressed,
-              child: Container(
-                height: 80,
+          // Header row: Avatar + Greeting + Date + Notification
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Avatar with caregiver image
+              Container(
+                width: 59,
+                height: 58,
                 decoration: BoxDecoration(
-                  color: AppColors.sosButton,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.cardShadow,
-                      offset: const Offset(0, 4),
-                      blurRadius: 10,
-                    ),
-                  ],
+                  shape: BoxShape.circle,
+                  color: AppColors.tealGreen.withOpacity(0.2),
+                  image: avatarUrl != null
+                      ? DecorationImage(
+                          image: NetworkImage(avatarUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : const DecorationImage(
+                          image: AssetImage(
+                            'assets/images/caregiver_avatar.png',
+                          ),
+                          fit: BoxFit.cover,
+                        ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              ),
+              const SizedBox(width: 12),
+              // Greeting and date
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.warning_rounded,
-                      color: Colors.white,
-                      size: 32,
-                    ),
-                    const SizedBox(width: 12),
                     Text(
-                      'SOS Emergency',
-                      style: AppTextStyles.sectionHeading.copyWith(
-                        color: Colors.white,
+                      '$greeting,',
+                      style: AppTextStyles.headline2.copyWith(
+                        fontSize: 18,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    Text(
+                      userName,
+                      style: AppTextStyles.headline2.copyWith(
+                        fontSize: 18,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _getFormattedDate(),
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
                       ),
                     ),
                   ],
                 ),
+              ),
+              // Notification icon
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.tealGreen,
+                ),
+                child: const Icon(
+                  Icons.notifications,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 32),
+
+          // Mood Card with elderly illustration
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Green mood card
+              Container(
+                width: 320,
+                height: 140,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(26),
+                  border: Border.all(color: AppColors.primary),
+                ),
+                padding: const EdgeInsets.only(left: 20, top: 20, right: 160),
+                child: Text(
+                  moodMessage ?? 'Hôm nay cần để ý đến tâm trạng của bác nhé',
+                  style: AppTextStyles.headline3.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+              // Elderly illustration positioned at right (Caregiver version)
+              Positioned(
+                right: -70,
+                top: -50,
+                child: Image.asset(
+                  'assets/images/caregiver_elderly.png',
+                  width: 200,
+                  height: 200,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: AppColors.tealGreen.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.elderly,
+                        size: 80,
+                        color: AppColors.tealGreen,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          // const SizedBox(height: 16),
+
+          // Action Button (Situation Handling)
+          GestureDetector(
+            onTap: onActionPressed,
+            child: Container(
+              width: double.infinity,
+              height: 75,
+              decoration: BoxDecoration(
+                color: AppColors.sosButton,
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: const Color(0xFFC28F79)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white24,
+                    ),
+                    child: const Icon(
+                      Icons.phone,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    actionButtonText,
+                    style: AppTextStyles.sectionHeading.copyWith(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

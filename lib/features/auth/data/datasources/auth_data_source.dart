@@ -10,6 +10,9 @@ abstract class AuthDataSource {
 
   /// Register a new user
   Future<RegisterResponseDto> register(RegisterRequestDto request);
+
+  /// Get current user details
+  Future<UserDetailDto> getUserDetails();
 }
 
 /// Implementation of AuthDataSource
@@ -29,5 +32,10 @@ class AuthDataSourceImpl implements AuthDataSource {
   @override
   Future<RegisterResponseDto> register(RegisterRequestDto request) {
     return _apiService.register(request);
+  }
+
+  @override
+  Future<UserDetailDto> getUserDetails() {
+    return _apiService.getUserDetails();
   }
 }
