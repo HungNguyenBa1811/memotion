@@ -332,7 +332,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.home,
-                builder: (context, state) => const HomeScreenContent(),
+                builder: (context, state) => const HomeScreen(),
               ),
             ],
           ),

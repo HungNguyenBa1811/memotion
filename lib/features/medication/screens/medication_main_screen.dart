@@ -401,7 +401,7 @@ class _MedicationMainScreenContentState
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      height: 110,
+      height: 140,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.only(
@@ -410,22 +410,15 @@ class _MedicationMainScreenContentState
           topRight: Radius.circular(27),
           bottomRight: Radius.circular(27),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           Padding(
             padding: const EdgeInsets.only(
-              left: 36,
-              top: 12,
-              bottom: 12,
+              left: 24,
+              top: 24,
+              bottom: 24,
               right: 12,
             ),
             child: Row(
@@ -434,7 +427,7 @@ class _MedicationMainScreenContentState
                 // Medication image
                 Container(
                   width: 100,
-                  height: 75,
+                  height: 85,
                   decoration: BoxDecoration(
                     color: const Color(0xFFF7F7F7),
                     borderRadius: BorderRadius.circular(27),

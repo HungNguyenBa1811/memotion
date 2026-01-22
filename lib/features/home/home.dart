@@ -1,8 +1,10 @@
-/// Home feature exports
 export 'models/home_data.dart';
 export 'providers/home_provider.dart';
 export 'screens/home_screen.dart';
+export 'screens/caretaker/caretaker_home_screen.dart';
+export 'screens/patient/patient_home_screen.dart';
 export 'widgets/action_card.dart';
 export 'widgets/greeting_hero.dart';
+export 'widgets/patient_greeting_hero.dart';
 export 'widgets/health_summary_card.dart';
 export 'widgets/upcoming_medication_card.dart';
