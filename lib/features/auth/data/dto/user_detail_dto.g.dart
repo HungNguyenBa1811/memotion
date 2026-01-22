@@ -8,12 +8,12 @@ part of 'user_detail_dto.dart';
 
 _$UserDetailDtoImpl _$$UserDetailDtoImplFromJson(Map<String, dynamic> json) =>
     _$UserDetailDtoImpl(
-      fullName: json['full_name'] as String,
+      fullName: json['fullName'] as String,
       email: json['email'] as String,
-      isActive: json['is_active'] as bool,
-      isFirstLogin: json['is_first_login'] as bool,
+      isActive: json['isActive'] as bool,
+      isFirstLogin: json['isFirstLogin'] as bool,
       role: json['role'] as String,
-      userId: json['user_id'] as String,
+      userId: json['userId'] as String,
       phone: json['phone'] as String,
       patient: json['patient'] == null
           ? null
@@ -22,12 +22,12 @@ _$UserDetailDtoImpl _$$UserDetailDtoImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$UserDetailDtoImplToJson(_$UserDetailDtoImpl instance) =>
     <String, dynamic>{
-      'full_name': instance.fullName,
+      'fullName': instance.fullName,
       'email': instance.email,
-      'is_active': instance.isActive,
-      'is_first_login': instance.isFirstLogin,
+      'isActive': instance.isActive,
+      'isFirstLogin': instance.isFirstLogin,
       'role': instance.role,
-      'user_id': instance.userId,
+      'userId': instance.userId,
       'phone': instance.phone,
       'patient': instance.patient,
     };

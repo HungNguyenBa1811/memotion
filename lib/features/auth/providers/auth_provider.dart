@@ -161,44 +161,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
     debugPrint('│ 🎉 AUTH PROVIDER: Login successful');
     debugPrint('│ Email: $email');
     debugPrint('│ Token: ${data.accessToken.substring(0, 20)}...');
+    debugPrint('│ Is First Login: ${data.isFirstLogin}');
     debugPrint('│ Saving token to secure storage...');
     debugPrint(
       '└─────────────────────────────────────────────────────────────',
     );
 
-    // Lưu token vào secure storage và giữ lại để dùng
+    // Lưu token vào secure storage
     final accessToken = data.accessToken;
     await _tokenStorage.saveAccessToken(accessToken);
     await _tokenStorage.saveTokenType(data.tokenType);
 
-    // Gọi API /api/users/me để lấy thông tin user và is_first_login
-    final userDetailResult = await _authRepository.getUserDetails();
-
-    return switch (userDetailResult) {
-      Success(:final data) => _handleUserDetailSuccess(data, accessToken),
-      Failure(:final exception) => _handleError(exception),
-    };
-  }
-
-  Future<bool> _handleUserDetailSuccess(
-    UserDetailDto userDetail,
-    String accessToken,
-  ) async {
-    debugPrint(
-      '┌─────────────────────────────────────────────────────────────',
-    );
-    debugPrint('│ 🎉 AUTH PROVIDER: User details fetched');
-    debugPrint('│ User ID: ${userDetail.userId}');
-    debugPrint('│ Is First Login: ${userDetail.isFirstLogin}');
-    debugPrint(
-      '└─────────────────────────────────────────────────────────────',
-    );
-
-    // Create user from user detail response
+    // Tạo user tạm với email (có thể fetch thêm info sau nếu cần)
     final user = User(
-      id: userDetail.userId,
-      email: userDetail.email,
-      nickname: userDetail.fullName,
+      id: '',
+      email: email,
+      nickname: email.split('@').first,
       createdAt: DateTime.now(),
     );
 
@@ -206,7 +184,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       status: AuthStatus.authenticated,
       user: user,
       accessToken: accessToken,
-      isFirstLogin: userDetail.isFirstLogin,
+      isFirstLogin: data.isFirstLogin,
     );
     return true;
   }
