@@ -121,8 +121,8 @@ class _NavItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-              width: 56,
-              height: 56,
+              width: 60,
+              height: 60,
               child: Center(
                 child: AnimatedSwitcher(
                   duration: _animationDuration,
