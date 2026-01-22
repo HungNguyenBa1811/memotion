@@ -1,10 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 /// Hero section with greeting, mood card, avatar, and SOS button (Patient/Elderly version)
 /// Based on Figma design node 535:1851 - Homepage Elderly
-class PatientGreetingHero extends StatelessWidget {
+class PatientGreetingHero extends StatefulWidget {
   final String userName;
   final String greeting;
   final String? avatarUrl;
@@ -21,6 +23,29 @@ class PatientGreetingHero extends StatelessWidget {
     this.actionButtonText = 'GỌI KHẨN CẤP (SOS)',
     this.onActionPressed,
   });
+
+  @override
+  State<PatientGreetingHero> createState() => _PatientGreetingHeroState();
+}
+
+class _PatientGreetingHeroState extends State<PatientGreetingHero>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shakeController;
+
+  @override
+  void initState() {
+    super.initState();
+    _shakeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _shakeController.dispose();
+    super.dispose();
+  }
 
   String _getFormattedDate() {
     final now = DateTime.now();
@@ -55,14 +80,14 @@ class PatientGreetingHero extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.tealGreen.withOpacity(0.2),
-                  image: avatarUrl != null
+                  image: widget.avatarUrl != null
                       ? DecorationImage(
-                          image: NetworkImage(avatarUrl!),
+                          image: NetworkImage(widget.avatarUrl!),
                           fit: BoxFit.cover,
                         )
                       : const DecorationImage(
                           image: AssetImage(
-                            'assets/images/elderly_avatar.png',
+                            'assets/images/caregiver_avatar.png',
                           ),
                           fit: BoxFit.cover,
                         ),
@@ -75,7 +100,7 @@ class PatientGreetingHero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$greeting, $userName',
+                      '${widget.greeting}, ${widget.userName}',
                       style: AppTextStyles.headline2.copyWith(
                         fontSize: 18,
                         color: AppColors.primary,
@@ -119,7 +144,7 @@ class PatientGreetingHero extends StatelessWidget {
               // Green mood card
               Container(
                 width: 240,
-                height: 180,
+                height: 160,
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(26),
@@ -127,7 +152,7 @@ class PatientGreetingHero extends StatelessWidget {
                 ),
                 padding: const EdgeInsets.only(left: 24, top: 20, right: 20),
                 child: Text(
-                  moodMessage ?? 'Hôm nay tâm trạng của bác không tốt',
+                  widget.moodMessage ?? 'Hôm nay tâm trạng của bác không tốt',
                   style: AppTextStyles.headline3.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -138,10 +163,10 @@ class PatientGreetingHero extends StatelessWidget {
               ),
               // Elderly illustration positioned at right
               Positioned(
-                right: -70,
+                right: -120,
                 top: -20,
                 child: Image.asset(
-                  'assets/images/elderly_mood.png',
+                  'assets/images/caregiver_elderly.png',
                   width: 200,
                   height: 200,
                   fit: BoxFit.contain,
@@ -153,13 +178,12 @@ class PatientGreetingHero extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 16),
 
           // SOS Button (Patient version - Orange/Red color)
           GestureDetector(
-            onTap: onActionPressed,
+            onTap: widget.onActionPressed,
             child: Container(
-              width: 330,
+              width: double.infinity,
               height: 75,
               decoration: BoxDecoration(
                 color: const Color(0xFFD77658), // Orange/coral color from Figma
@@ -169,20 +193,29 @@ class PatientGreetingHero extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Phone icon
-                  Container(
-                    width: 23,
-                    height: 34,
-                    margin: const EdgeInsets.only(right: 20),
-                    child: const Icon(
-                      Icons.phone,
-                      color: Colors.white,
-                      size: 28,
+                  // Phone icon with shake animation
+                  AnimatedBuilder(
+                    animation: _shakeController,
+                    builder: (context, child) {
+                      return Transform.rotate(
+                        angle: math.sin(_shakeController.value * 2 * math.pi) * 0.3,
+                        child: child,
+                      );
+                    },
+                    child: Container(
+                      width: 34,
+                      height: 34,
+                      margin: const EdgeInsets.only(right: 16),
+                      child: const Icon(
+                        Icons.phone,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                     ),
                   ),
                   // SOS text
                   Text(
-                    actionButtonText,
+                    widget.actionButtonText,
                     style: AppTextStyles.headline2.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
