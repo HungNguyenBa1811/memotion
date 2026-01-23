@@ -398,42 +398,110 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
   /// Phase 2: Calibration progress info
   Widget _buildCalibrationInfo(PoseSessionState state) {
-    return Row(
+    final queueIndex = state.calibrationQueueIndex + 1; // 0-based to 1-based
+    final totalJoints = state.calibrationTotalJoints;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // Current angle being measured
-        Text(
-          '${state.calibrationAngle.toStringAsFixed(0)}°',
-          style: GoogleFonts.lexend(
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: const Color(0xFF1B4332),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          'góc hiện tại',
-          style: GoogleFonts.lexend(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
-        const SizedBox(width: 16),
-
-        // Max angle recorded
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xFFD67052).withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            'Max: ${state.calibrationMaxAngle.toStringAsFixed(0)}°',
-            style: GoogleFonts.lexend(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFFD67052),
+        // Current joint being calibrated with queue progress
+        Row(
+          children: [
+            // Joint name badge
+            if (state.calibrationJoint != null)
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF00695C).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFF00695C),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.accessibility_new,
+                      size: 16,
+                      color: Color(0xFF00695C),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '🎯 ${state.calibrationJoint}',
+                      style: GoogleFonts.lexend(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF00695C),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            
+            // Queue progress badge (1/6, 2/6, ...)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2196F3).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '$queueIndex/$totalJoints',
+                style: GoogleFonts.lexend(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF1565C0),
+                ),
+              ),
             ),
-          ),
+          ],
+        ),
+        
+        const SizedBox(height: 8),
+        
+        // Angle info row
+        Row(
+          children: [
+            // Current angle being measured
+            Text(
+              '${state.calibrationAngle.toStringAsFixed(0)}°',
+              style: GoogleFonts.lexend(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF1B4332),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'góc hiện tại',
+              style: GoogleFonts.lexend(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(width: 16),
+
+            // Max angle recorded
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD67052).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'Max: ${state.calibrationMaxAngle.toStringAsFixed(0)}°',
+                style: GoogleFonts.lexend(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFFD67052),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

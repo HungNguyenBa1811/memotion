@@ -101,10 +101,32 @@ class PoseFrameResult {
   PosePhase get posePhase => PosePhase.fromValue(phase);
 
   factory PoseFrameResult.fromJson(Map<String, dynamic> json) {
+    final phaseNum = json['phase'] as int? ?? 1;
+    
+    // Lấy data từ đúng field dựa trên phase
+    // Backend gửi: detection (phase 1), calibration (phase 2), sync (phase 3), final_report (phase 4)
+    Map<String, dynamic> phaseData = {};
+    switch (phaseNum) {
+      case 1:
+        phaseData = json['detection'] as Map<String, dynamic>? ?? {};
+        break;
+      case 2:
+        phaseData = json['calibration'] as Map<String, dynamic>? ?? {};
+        break;
+      case 3:
+        phaseData = json['sync'] as Map<String, dynamic>? ?? {};
+        break;
+      case 4:
+        phaseData = json['final_report'] as Map<String, dynamic>? ?? {};
+        break;
+      default:
+        phaseData = json['data'] as Map<String, dynamic>? ?? {};
+    }
+    
     return PoseFrameResult(
-      phase: json['phase'] as int? ?? 1,
+      phase: phaseNum,
       phaseName: json['phase_name'] as String? ?? 'detection',
-      data: json['data'] as Map<String, dynamic>? ?? {},
+      data: phaseData,
       message: json['message'] as String?,
       warning: json['warning'] as String?,
       timestamp: (json['timestamp'] as num?)?.toDouble() ?? 0.0,
@@ -123,8 +145,14 @@ class PoseFrameResult {
   String? get currentJoint => data['current_joint'] as String?;
   String? get currentJointName => data['current_joint_name'] as String?;
   double get currentAngle => (data['current_angle'] as num?)?.toDouble() ?? 0.0;
-  double get maxAngle => (data['max_angle'] as num?)?.toDouble() ?? 0.0;
+  double get maxAngle => (data['user_max_angle'] as num?)?.toDouble() ?? 0.0;
   double get calibrationProgress => (data['progress'] as num?)?.toDouble() ?? 0.0;
+  int get queueIndex => data['queue_index'] as int? ?? 0;
+  int get totalJoints => data['total_joints'] as int? ?? 6;
+  double get overallProgress => (data['overall_progress'] as num?)?.toDouble() ?? 0.0;
+  String? get calibrationStatus => data['status'] as String?;
+  double? get countdownRemaining => (data['countdown_remaining'] as num?)?.toDouble();
+  String? get positionInstruction => data['position_instruction'] as String?;
 
   // ==================== Phase 3: Sync Data ====================
   String? get videoFrame => data['video_frame'] as String?;

@@ -37,6 +37,8 @@ class PoseSessionState {
   final double calibrationAngle;
   final double calibrationMaxAngle;
   final double calibrationProgress;
+  final int calibrationQueueIndex;
+  final int calibrationTotalJoints;
   
   final double syncScore;
   final int repCount;
@@ -63,6 +65,8 @@ class PoseSessionState {
     this.calibrationAngle = 0.0,
     this.calibrationMaxAngle = 0.0,
     this.calibrationProgress = 0.0,
+    this.calibrationQueueIndex = 0,
+    this.calibrationTotalJoints = 6,
     // Sync
     this.syncScore = 0.0,
     this.repCount = 0,
@@ -88,6 +92,8 @@ class PoseSessionState {
     double? calibrationAngle,
     double? calibrationMaxAngle,
     double? calibrationProgress,
+    int? calibrationQueueIndex,
+    int? calibrationTotalJoints,
     double? syncScore,
     int? repCount,
     String? fatigueLevel,
@@ -110,6 +116,8 @@ class PoseSessionState {
       calibrationAngle: calibrationAngle ?? this.calibrationAngle,
       calibrationMaxAngle: calibrationMaxAngle ?? this.calibrationMaxAngle,
       calibrationProgress: calibrationProgress ?? this.calibrationProgress,
+      calibrationQueueIndex: calibrationQueueIndex ?? this.calibrationQueueIndex,
+      calibrationTotalJoints: calibrationTotalJoints ?? this.calibrationTotalJoints,
       syncScore: syncScore ?? this.syncScore,
       repCount: repCount ?? this.repCount,
       fatigueLevel: fatigueLevel ?? this.fatigueLevel,
@@ -256,6 +264,8 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
           calibrationAngle: result.currentAngle,
           calibrationMaxAngle: result.maxAngle,
           calibrationProgress: result.calibrationProgress,
+          calibrationQueueIndex: result.queueIndex,
+          calibrationTotalJoints: result.totalJoints,
         );
         break;
         
