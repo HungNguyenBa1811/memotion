@@ -34,6 +34,6 @@ class ApiConstants {
   // WebSocket: ws://{baseUrl}/api/pose/sessions/{session_id}/ws
 
   // Timeout durations
-  static const Duration connectionTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
+  static const Duration connectionTimeout = Duration(seconds: 120);
+  static const Duration receiveTimeout = Duration(seconds: 120);
 }

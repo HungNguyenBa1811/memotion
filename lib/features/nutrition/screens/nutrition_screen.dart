@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/router/app_router.dart';
+import '../../../core/network/api_constants.dart';
 import '../../../core/network/api_exceptions.dart';
 import '../../../core/theme/theme.dart';
 import '../models/nutrition_task.dart';
@@ -338,14 +340,8 @@ class _NutritionTaskCard extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         context.push(
-          '/nutrition/detail',
-          extra: {
-            'taskId': task.id,
-            'title': task.name,
-            'subtitle': task.mealType,
-            'kcal': '${task.calories ?? 0} Kcal',
-            'description': task.description,
-          },
+          AppRoutes.nutritionDetail,
+          extra: {'taskId': task.id},
         );
       },
       child: Container(
@@ -363,7 +359,7 @@ class _NutritionTaskCard extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            // Meal type icon
+            // Meal image from API or fallback icon
             Container(
               width: 60,
               height: 60,
@@ -371,7 +367,29 @@ class _NutritionTaskCard extends ConsumerWidget {
                 color: task.mealColor.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Icon(task.mealIcon, color: task.mealColor, size: 30),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: task.imagePath != null && task.imagePath!.isNotEmpty
+                    ? Image.network(
+                        '${ApiConstants.baseUrl}${task.imagePath}',
+                        fit: BoxFit.cover,
+                        width: 60,
+                        height: 60,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(task.mealIcon, color: task.mealColor, size: 30);
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: task.mealColor,
+                            ),
+                          );
+                        },
+                      )
+                    : Icon(task.mealIcon, color: task.mealColor, size: 30),
+              ),
             ),
             const SizedBox(width: 16),
 

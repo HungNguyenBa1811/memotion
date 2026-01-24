@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:video_player/video_player.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/network/api_constants.dart';
 import '../providers/workout_provider.dart';
 import '../models/workout_model.dart';
 
@@ -18,6 +20,11 @@ class WorkoutDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
+  VideoPlayerController? _videoController;
+  bool _isVideoPlaying = false;
+  bool _isVideoInitialized = false;
+  bool _isVideoLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -25,6 +32,80 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(workoutDetailProvider.notifier).loadWorkout(widget.workoutId);
     });
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initializeAndPlayVideo(String videoPath) async {
+    if (_isVideoLoading) return;
+
+    setState(() => _isVideoLoading = true);
+
+    try {
+      final fullVideoUrl = '${ApiConstants.baseUrl}$videoPath';
+      print('🎬🎬🎬 INITIALIZING VIDEO 🎬🎬🎬');
+      print('📹 URL: $fullVideoUrl');
+
+      // Dispose old controller if exists
+      await _videoController?.dispose();
+
+      _videoController = VideoPlayerController.networkUrl(
+        Uri.parse(fullVideoUrl),
+      );
+
+      await _videoController!.initialize();
+      print('✅ Video initialized! Size: ${_videoController!.value.size}');
+
+      await _videoController!.setLooping(true);
+      await _videoController!.play();
+
+      setState(() {
+        _isVideoInitialized = true;
+        _isVideoPlaying = true;
+        _isVideoLoading = false;
+      });
+
+      print('🎉 VIDEO PLAYING! 🎉');
+    } catch (e) {
+      print('💀 VIDEO ERROR: $e');
+      setState(() => _isVideoLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi tải video: $e', style: GoogleFonts.lexend()),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _toggleVideoPlayPause() {
+    if (_videoController == null) return;
+
+    setState(() {
+      if (_videoController!.value.isPlaying) {
+        _videoController!.pause();
+        _isVideoPlaying = false;
+      } else {
+        _videoController!.play();
+        _isVideoPlaying = true;
+      }
+    });
+  }
+
+  void _stopVideo() {
+    _videoController?.pause();
+    setState(() {
+      _isVideoPlaying = false;
+      _isVideoInitialized = false;
+    });
+    _videoController?.dispose();
+    _videoController = null;
   }
 
   @override
@@ -323,7 +404,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Main image container
+          // Main image/video container
           Positioned(
             top: 0,
             left: 0,
@@ -344,28 +425,49 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(30),
-                child: workout.imageAsset != null
-                    ? Image.asset(
-                        workout.imageAsset!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: imageHeight,
-                        errorBuilder: (context, error, stackTrace) {
-                          return _buildImagePlaceholder(workout);
-                        },
-                      )
-                    : _buildImagePlaceholder(workout),
+                child: _isVideoInitialized && _videoController != null
+                    ? _buildVideoPlayer()
+                    : workout.imageAsset != null
+                        ? Image.asset(
+                            workout.imageAsset!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: imageHeight,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _buildImagePlaceholder(workout);
+                            },
+                          )
+                        : _buildImagePlaceholder(workout),
               ),
             ),
           ),
 
-          // Play button overlay (center of image) - 38x38px
+          // Play/Pause button overlay (center of image) - 38x38px
           Positioned(
             top: (imageHeight - 38) / 2,
             left: 0,
             right: 0,
-            child: Center(child: _buildPlayButton()),
+            child: Center(child: _buildPlayButton(workout)),
           ),
+
+          // Close video button (top right) - only show when video is playing
+          if (_isVideoInitialized)
+            Positioned(
+              top: 10,
+              right: 10,
+              child: GestureDetector(
+                onTap: _stopVideo,
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white, size: 18),
+                ),
+              ),
+            ),
 
           // Glassmorphism info overlay card
           Positioned(
@@ -374,6 +476,32 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             right: 50,
             child: _buildGlassmorphismInfoCard(workout),
           ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the video player widget
+  Widget _buildVideoPlayer() {
+    return GestureDetector(
+      onTap: _toggleVideoPlayPause,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AspectRatio(
+            aspectRatio: _videoController!.value.aspectRatio,
+            child: VideoPlayer(_videoController!),
+          ),
+          // Show pause icon briefly when paused
+          if (!_isVideoPlaying)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(12),
+              child: const Icon(Icons.play_arrow, color: Colors.white, size: 40),
+            ),
         ],
       ),
     );
@@ -403,23 +531,61 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
   }
 
   /// Builds the centered play button - 38x38px per Figma
-  Widget _buildPlayButton() {
+  Widget _buildPlayButton(WorkoutTask workout) {
+    // Don't show play button when video is playing (use tap on video to pause)
+    if (_isVideoInitialized && _isVideoPlaying) {
+      return const SizedBox.shrink();
+    }
+
+    // Show loading indicator when initializing
+    if (_isVideoLoading) {
+      return Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: () {
-        // TODO: Implement video play functionality
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Tính năng xem video sẽ sớm được cập nhật!',
-              style: GoogleFonts.lexend(),
+        if (_isVideoInitialized) {
+          // Toggle play/pause
+          _toggleVideoPlayPause();
+        } else if (workout.videoPath != null && workout.videoPath!.isNotEmpty) {
+          // Initialize and play video inline
+          _initializeAndPlayVideo(workout.videoPath!);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Video chưa có sẵn cho bài tập này',
+                style: GoogleFonts.lexend(),
+              ),
+              backgroundColor: AppColors.primary,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            backgroundColor: AppColors.primary,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
+          );
+        }
       },
       child: Container(
         width: 38,
@@ -435,10 +601,12 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             ),
           ],
         ),
-        child: const Center(
+        child: Center(
           child: Icon(
-            Icons.play_arrow_rounded,
-            color: Color(0xFF1B4332),
+            _isVideoInitialized && !_isVideoPlaying
+                ? Icons.play_arrow_rounded
+                : Icons.play_arrow_rounded,
+            color: const Color(0xFF1B4332),
             size: 22,
           ),
         ),
@@ -564,6 +732,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
     context.push('/pose-detection', extra: {
       'workoutId': workout.id,
       'exerciseType': _getExerciseType(workout.type),
+      'videoPath': workout.videoPath,
     });
   }
 

@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
 import '../../../core/theme/theme.dart';
-import '../providers/medication_provider.dart';
-import '../models/medication.dart';
+import '../providers/scan_medication_notifier.dart';
+import '../models/medication_scan_dto.dart';
 
 class MedicationScanScreen extends ConsumerStatefulWidget {
   const MedicationScanScreen({super.key});
@@ -18,7 +18,7 @@ class MedicationScanScreen extends ConsumerStatefulWidget {
 
 class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
   bool _isScanning = false;
-  Medication? _scannedMedication;
+  MedicationDto? _scannedMedication;
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _isCameraInitialized = false;
@@ -75,17 +75,28 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
     try {
       // Capture image from camera
       final XFile image = await _cameraController!.takePicture();
+      final imageFile = File(image.path);
 
-      // Get scanned medication from provider
-      final medication = await ref
-          .read(medicationNotifierProvider.notifier)
-          .scanMedication(image.path);
+      // Call real scan API via notifier 🚀✨
+      await ref
+          .read(scanMedicationNotifierProvider.notifier)
+          .scanMedication(imageFile);
+
+      // Get state after scan
+      final scanState = ref.read(scanMedicationNotifierProvider);
 
       setState(() {
         _isScanning = false;
-        _scannedMedication = medication;
+        _scannedMedication = scanState.scannedMedication;
         _capturedImagePath = image.path;
       });
+
+      // Show error if scan failed
+      if (scanState.errorMessage != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(scanState.errorMessage!)),
+        );
+      }
     } catch (e) {
       setState(() {
         _isScanning = false;
@@ -129,8 +140,8 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
 
                     const SizedBox(height: 16),
 
-                    // Capture button - only show when no result yet
-                    if (_scannedMedication == null) _buildCaptureButton(),
+                    // Capture button OR Back button after scan
+                    _buildCaptureButton(),
 
                     const SizedBox(height: 16),
 
@@ -342,39 +353,76 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
       return const SizedBox.shrink();
     }
 
-    // Show "Scan Again" button if we have a result
+    // Show Back + Scan Again buttons if we have a result
     if (_scannedMedication != null) {
-      return GestureDetector(
-        onTap: _resetScan,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: AppColors.primary, width: 2),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.refresh, color: AppColors.primary, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Quét lại',
-                style: GoogleFonts.lexend(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.primary,
-                ),
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Back button
+          GestureDetector(
+            onTap: () => context.pop(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
+                ],
               ),
-            ],
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Quay lại',
+                    style: GoogleFonts.lexend(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
+          const SizedBox(width: 12),
+          // Scan Again button
+          GestureDetector(
+            onTap: _resetScan,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: AppColors.primary, width: 2),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.refresh, color: AppColors.primary, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Quét lại',
+                    style: GoogleFonts.lexend(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       );
     }
 
+    // Show capture button when no result yet
     return GestureDetector(
       onTap: _startScanning,
       child: Container(
@@ -413,14 +461,14 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
     return bracket;
   }
 
-  Widget _buildScannedMedicationCard(Medication medication) {
+  Widget _buildScannedMedicationCard(MedicationDto medication) {
     // Get pill image based on index - same as main screen
     final pillImages = [
       'assets/images/medication/pill_1.png',
       'assets/images/medication/pill_2.png',
       'assets/images/medication/pill_3.png',
     ];
-    final imageIndex = medication.id.hashCode % pillImages.length;
+    final imageIndex = medication.medicationId.hashCode % pillImages.length;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -508,34 +556,13 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            medication.time,
-                            style: GoogleFonts.lexend(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF353535),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '|',
-                            style: GoogleFonts.lexend(
-                              fontSize: 12,
-                              color: const Color(0xFF9E9E9E),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            medication.frequency,
-                            style: GoogleFonts.lexend(
-                              fontSize: 12,
-                              color: const Color(0xFF353535),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        '${medication.frequencyPerDay}x daily',
+                        style: GoogleFonts.lexend(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF353535),
+                        ),
                       ),
                     ],
                   ),

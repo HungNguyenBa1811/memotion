@@ -9,12 +9,12 @@ part 'user_detail_dto.g.dart';
 @freezed
 class UserDetailDto with _$UserDetailDto {
   const factory UserDetailDto({
-    required String fullName,
+    @JsonKey(name: 'full_name') required String fullName,
     required String email,
-    required bool isActive,
-    required bool isFirstLogin,
+    @JsonKey(name: 'is_active') required bool isActive,
+    @JsonKey(name: 'is_first_login') required bool isFirstLogin,
     required String role,
-    required String userId,
+    @JsonKey(name: 'user_id') required String userId,
     required String phone,
     PatientDto? patient,
   }) = _UserDetailDto;

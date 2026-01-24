@@ -73,3 +73,10 @@ final nutritionNotifierProvider =
     StateNotifierProvider<NutritionNotifier, AsyncValue<void>>((ref) {
       return NutritionNotifier(ref.watch(nutritionRepositoryProvider), ref);
     });
+
+/// Provider for fetching nutrition task detail by ID
+final nutritionTaskDetailProvider =
+    FutureProvider.family<NutritionTask, String>((ref, taskId) async {
+      final repository = ref.watch(nutritionRepositoryProvider);
+      return repository.getNutritionTaskDetail(taskId);
+    });

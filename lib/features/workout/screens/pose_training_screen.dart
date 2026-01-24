@@ -58,6 +58,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
   
   // Frame sync tracking
   int _userFrameCount = 0;
+  // ignore: unused_field
   int _videoFrameNumber = 0;
   double _syncOffset = 0.0; // ms offset between user and video
 
@@ -123,24 +124,39 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
   Future<void> _initializeVideo() async {
     try {
       final videoUrl = _getVideoUrl();
-      
+
+      print('🎬🎬🎬 VIDEO PLAYER INIT 🎬🎬🎬');
+      print('📹 Video URL: $videoUrl');
+      print('🔗 Is network URL: ${videoUrl.startsWith('http')}');
+
       // Use network URL or asset path
       if (videoUrl.startsWith('http')) {
+        print('🌐 Creating NetworkUrl controller...');
         _videoController = VideoPlayerController.networkUrl(
           Uri.parse(videoUrl),
         );
       } else {
+        print('📁 Creating Asset controller...');
         _videoController = VideoPlayerController.asset(videoUrl);
       }
-      
+
+      print('⏳ Initializing video controller...');
       await _videoController!.initialize();
+      print('✅ Video controller initialized!');
+      print('📐 Video size: ${_videoController!.value.size}');
+      print('⏱️ Duration: ${_videoController!.value.duration}');
+
       await _videoController!.setLooping(true);
       await _videoController!.play();
-      
+
       setState(() => _isVideoInitialized = true);
-      
+
+      print('🎉 VIDEO READY TO PLAY! 🎉');
       PoseLogger.info('Video initialized: $videoUrl');
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('💀💀💀 VIDEO INIT FAILED 💀💀💀');
+      print('❌ Error: $e');
+      print('📜 Stack trace: $stackTrace');
       PoseLogger.error('Failed to initialize video', e);
       // Continue without video - still allow training
       setState(() => _isVideoInitialized = false);

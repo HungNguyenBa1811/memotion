@@ -47,6 +47,7 @@ class TaskDtoMapper {
     switch (status.toLowerCase()) {
       case 'completed':
       case 'taken':
+      case 'done':
         return MedicationStatus.taken;
       case 'missed':
         return MedicationStatus.missed;

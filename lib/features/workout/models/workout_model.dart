@@ -7,6 +7,7 @@ class WorkoutTask {
   final WorkoutType type;
   final bool isCompleted;
   final String? imageAsset;
+  final String? videoPath;
   final String? description;
   final List<String>? steps;
   final int? durationMinutes;
@@ -20,6 +21,7 @@ class WorkoutTask {
     required this.type,
     this.isCompleted = false,
     this.imageAsset,
+    this.videoPath,
     this.description,
     this.steps,
     this.durationMinutes,
@@ -34,6 +36,7 @@ class WorkoutTask {
     WorkoutType? type,
     bool? isCompleted,
     String? imageAsset,
+    String? videoPath,
     String? description,
     List<String>? steps,
     int? durationMinutes,
@@ -47,6 +50,7 @@ class WorkoutTask {
       type: type ?? this.type,
       isCompleted: isCompleted ?? this.isCompleted,
       imageAsset: imageAsset ?? this.imageAsset,
+      videoPath: videoPath ?? this.videoPath,
       description: description ?? this.description,
       steps: steps ?? this.steps,
       durationMinutes: durationMinutes ?? this.durationMinutes,
@@ -64,6 +68,7 @@ class WorkoutTask {
       type: WorkoutType.fromString(json['type'] as String),
       isCompleted: json['is_completed'] as bool? ?? false,
       imageAsset: json['image_asset'] as String?,
+      videoPath: json['video_path'] as String?,
       description: json['description'] as String?,
       steps: (json['steps'] as List<dynamic>?)?.cast<String>(),
       durationMinutes: json['duration_minutes'] as int?,
@@ -81,6 +86,7 @@ class WorkoutTask {
       'type': type.name,
       'is_completed': isCompleted,
       'image_asset': imageAsset,
+      'video_path': videoPath,
       'description': description,
       'steps': steps,
       'duration_minutes': durationMinutes,

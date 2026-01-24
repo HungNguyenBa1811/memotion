@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/router/app_router.dart';
+import '../../../core/network/api_constants.dart';
 import '../../../core/network/api_exceptions.dart';
 import '../../../core/theme/theme.dart';
 import '../providers/medication_provider.dart';
@@ -81,7 +83,7 @@ class _MedicationMainScreenContentState
             right: 20,
             bottom: 100, // Above the bottom navbar
             child: FloatingActionButton(
-              onPressed: () => context.push('/medication/scan'),
+              onPressed: () => context.push(AppRoutes.medicationScan),
               backgroundColor: AppColors.primary,
               elevation: 4,
               child: const Icon(Icons.qr_code_scanner, color: Colors.white),
@@ -148,16 +150,14 @@ class _MedicationMainScreenContentState
 
   Widget _buildDateSelector(DateTime selectedDate) {
     final now = DateTime.now();
-    final dates = List.generate(7, (i) => now.add(Duration(days: i - 2)));
+    // 5 days: 2 days before + today + 2 days after
+    final dates = List.generate(5, (i) => now.add(Duration(days: i - 2)));
 
     return SizedBox(
       height: 84,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        itemCount: dates.length,
-        itemBuilder: (context, index) {
-          final date = dates[index];
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: dates.map((date) {
           final isSelected =
               date.day == selectedDate.day &&
               date.month == selectedDate.month &&
@@ -219,7 +219,7 @@ class _MedicationMainScreenContentState
               ),
             ),
           );
-        },
+        }).toList(),
       ),
     );
   }
@@ -391,13 +391,19 @@ class _MedicationMainScreenContentState
   }
 
   Widget _buildMedicationCard(Medication medication) {
-    // Get pill image based on index
+    // Fallback pill images when API doesn't provide image
     final pillImages = [
       'assets/images/medication/pill_1.png',
       'assets/images/medication/pill_2.png',
       'assets/images/medication/pill_3.png',
     ];
     final imageIndex = medication.id.hashCode % pillImages.length;
+
+    // Check if we have an image URL from API
+    final hasApiImage = medication.imageUrl.isNotEmpty;
+    final fullImageUrl = hasApiImage
+        ? '${ApiConstants.baseUrl}${medication.imageUrl}'
+        : null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -424,7 +430,7 @@ class _MedicationMainScreenContentState
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Medication image
+                // Medication image - use API image if available, else fallback
                 Container(
                   width: 100,
                   height: 85,
@@ -434,17 +440,48 @@ class _MedicationMainScreenContentState
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(27),
-                    child: Image.asset(
-                      pillImages[imageIndex],
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.medication,
-                          size: 40,
-                          color: AppColors.primary,
-                        );
-                      },
-                    ),
+                    child: fullImageUrl != null
+                        ? Image.network(
+                            fullImageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              // Fallback to asset image on network error
+                              return Image.asset(
+                                pillImages[imageIndex],
+                                fit: BoxFit.contain,
+                                errorBuilder: (ctx, err, st) {
+                                  return const Icon(
+                                    Icons.medication,
+                                    size: 40,
+                                    color: AppColors.primary,
+                                  );
+                                },
+                              );
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                          )
+                        : Image.asset(
+                            pillImages[imageIndex],
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.medication,
+                                size: 40,
+                                color: AppColors.primary,
+                              );
+                            },
+                          ),
                   ),
                 ),
 

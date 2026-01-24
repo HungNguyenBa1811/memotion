@@ -302,6 +302,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             workoutId: extra?['workoutId'] ?? '',
             minAngle: extra?['currentAngle'] ?? 20,
             maxAngle: extra?['safeLimit'] ?? 140,
+            videoPath: extra?['videoPath'],
           );
         },
       ),
@@ -309,7 +310,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/workout-training',
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
-          return WorkoutTrainingScreen(workoutId: extra?['workoutId'] ?? '');
+          return WorkoutTrainingScreen(
+            workoutId: extra?['workoutId'] ?? '',
+            videoPath: extra?['videoPath'],
+          );
         },
       ),
       GoRoute(
@@ -332,6 +336,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           return PoseDetectionScreen(
             workoutId: extra?['workoutId'] ?? '',
             exerciseType: extra?['exerciseType'],
+            videoPath: extra?['videoPath'],
           );
         },
       ),
@@ -344,6 +349,22 @@ final routerProvider = Provider<GoRouter>((ref) {
             exerciseType: extra?['exerciseType'],
             videoPath: extra?['videoPath'],
           );
+        },
+      ),
+
+      // Medication Scan - outside shell (no bottom nav)
+      GoRoute(
+        path: AppRoutes.medicationScan,
+        builder: (context, state) => const MedicationScanScreen(),
+      ),
+
+      // Nutrition Detail - outside shell (no bottom nav)
+      GoRoute(
+        path: AppRoutes.nutritionDetail,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final taskId = extra?['taskId'] as String? ?? '';
+          return NutritionDetailScreen(taskId: taskId);
         },
       ),
 
@@ -370,12 +391,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: AppRoutes.medication,
                 builder: (context, state) =>
                     const MedicationMainScreenContent(),
-                routes: [
-                  GoRoute(
-                    path: 'scan',
-                    builder: (context, state) => const MedicationScanScreen(),
-                  ),
-                ],
               ),
             ],
           ),
@@ -385,21 +400,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.nutrition,
                 builder: (context, state) => const NutritionScreenContent(),
-                routes: [
-                  GoRoute(
-                    path: 'detail',
-                    builder: (context, state) {
-                      final extra = state.extra as Map<String, dynamic>?;
-                      return NutritionDetailScreen(
-                        title: extra?['title'] ?? 'Keto Salad',
-                        subtitle:
-                            extra?['subtitle'] ??
-                            'Beans, mandarin and avocado salad',
-                        kcal: extra?['kcal']?.replaceAll(' Kcal', '') ?? '370',
-                      );
-                    },
-                  ),
-                ],
               ),
             ],
           ),

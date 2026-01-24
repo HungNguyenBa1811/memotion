@@ -3,14 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:video_player/video_player.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/network/api_constants.dart';
 
 /// Workout Training Screen (Workout2 from Figma)
 /// Shows live analysis with dual camera view (user + trainer)
 class WorkoutTrainingScreen extends ConsumerStatefulWidget {
   final String workoutId;
+  final String? videoPath;
 
-  const WorkoutTrainingScreen({super.key, required this.workoutId});
+  const WorkoutTrainingScreen({
+    super.key,
+    required this.workoutId,
+    this.videoPath,
+  });
 
   @override
   ConsumerState<WorkoutTrainingScreen> createState() =>
@@ -22,16 +29,48 @@ class _WorkoutTrainingScreenState extends ConsumerState<WorkoutTrainingScreen> {
   int _elapsedSeconds = 0;
   Timer? _timer;
 
+  // Video player for trainer reference
+  VideoPlayerController? _videoController;
+  bool _isVideoInitialized = false;
+
   @override
   void initState() {
     super.initState();
     _startTimer();
+    _initializeVideo();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _videoController?.dispose();
     super.dispose();
+  }
+
+  Future<void> _initializeVideo() async {
+    if (widget.videoPath == null || widget.videoPath!.isEmpty) {
+      print('⚠️ No video path provided');
+      return;
+    }
+
+    try {
+      final fullVideoUrl = '${ApiConstants.baseUrl}${widget.videoPath}';
+      print('🎬 Training video URL: $fullVideoUrl');
+
+      _videoController = VideoPlayerController.networkUrl(
+        Uri.parse(fullVideoUrl),
+      );
+
+      await _videoController!.initialize();
+      await _videoController!.setLooping(true);
+      await _videoController!.setVolume(0); // Mute video
+      await _videoController!.play();
+
+      setState(() => _isVideoInitialized = true);
+      print('✅ Training video ready!');
+    } catch (e) {
+      print('💀 Training video error: $e');
+    }
   }
 
   void _startTimer() {
@@ -199,30 +238,46 @@ class _WorkoutTrainingScreenState extends ConsumerState<WorkoutTrainingScreen> {
   Widget _buildTrainerViewSection() {
     return Stack(
       children: [
-        // Trainer video placeholder
+        // Trainer video - auto-play, loop, no controls
         Container(
           width: double.infinity,
           color: Colors.grey[600],
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.person,
-                  size: 80,
-                  color: Colors.white.withOpacity(0.7),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Trainer View',
-                  style: GoogleFonts.lexend(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.7),
+          child: _isVideoInitialized && _videoController != null
+              ? SizedBox.expand(
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: _videoController!.value.size.width,
+                      height: _videoController!.value.size.height,
+                      child: VideoPlayer(_videoController!),
+                    ),
+                  ),
+                )
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.videoPath != null)
+                        const CircularProgressIndicator(color: Colors.white)
+                      else
+                        Icon(
+                          Icons.person,
+                          size: 80,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                      const SizedBox(height: 8),
+                      Text(
+                        widget.videoPath != null
+                            ? 'Đang tải video...'
+                            : 'Trainer View',
+                        style: GoogleFonts.lexend(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
         ),
 
         // Trainer View badge

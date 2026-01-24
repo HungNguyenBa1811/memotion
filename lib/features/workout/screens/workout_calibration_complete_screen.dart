@@ -10,12 +10,14 @@ class WorkoutCalibrationCompleteScreen extends ConsumerWidget {
   final String workoutId;
   final int minAngle;
   final int maxAngle;
+  final String? videoPath;
 
   const WorkoutCalibrationCompleteScreen({
     super.key,
     required this.workoutId,
     this.minAngle = 20,
     this.maxAngle = 140,
+    this.videoPath,
   });
 
   @override
@@ -358,7 +360,10 @@ class WorkoutCalibrationCompleteScreen extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         // Navigate to training phase
-        context.push('/workout-training', extra: {'workoutId': workoutId});
+        context.push('/workout-training', extra: {
+          'workoutId': workoutId,
+          'videoPath': videoPath,
+        });
       },
       child: Container(
         width: 301,

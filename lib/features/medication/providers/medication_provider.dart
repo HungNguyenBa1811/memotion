@@ -7,10 +7,11 @@ final medicationRepositoryProvider = Provider<MedicationRepository>((ref) {
   return MedicationRepository();
 });
 
-/// Provider for the list of all medications
+/// Provider for the list of all medications (uses selected date)
 final medicationsProvider = FutureProvider<List<Medication>>((ref) async {
   final repository = ref.watch(medicationRepositoryProvider);
-  return repository.getMedications();
+  final selectedDate = ref.watch(selectedDateProvider);
+  return repository.getMedicationsForDate(selectedDate);
 });
 
 /// Provider for medications filtered by status

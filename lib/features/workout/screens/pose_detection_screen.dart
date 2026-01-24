@@ -23,7 +23,7 @@ import '../models/pose_detection_model.dart';
 import '../providers/pose_detection_provider.dart';
 
 /// Screen 1: Pose Detection & Calibration (Phase 1 & 2)
-/// 
+///
 /// Flow:
 /// 1. Initialize camera → show user camera preview
 /// 2. Start WebSocket session
@@ -32,11 +32,13 @@ import '../providers/pose_detection_provider.dart';
 class PoseDetectionScreen extends ConsumerStatefulWidget {
   final String workoutId;
   final String? exerciseType;
+  final String? videoPath;
 
   const PoseDetectionScreen({
     super.key,
     required this.workoutId,
     this.exerciseType,
+    this.videoPath,
   });
 
   @override
@@ -139,7 +141,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
   /// Navigate to Training Screen (Phase 3: Camera + Video)
   void _navigateToTraining() {
     PoseLogger.phaseStart(3, 'Navigating to training screen');
-    
+
     // Stop streaming on this screen (training screen will restart)
     _cameraService.stopStreaming();
 
@@ -148,6 +150,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
       extra: {
         'workoutId': widget.workoutId,
         'exerciseType': widget.exerciseType,
+        'videoPath': widget.videoPath,
       },
     );
   }

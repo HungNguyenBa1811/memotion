@@ -21,7 +21,8 @@ class WorkoutTaskMapper {
       scheduledDate: dto.taskDuedate,
       type: workoutType,
       isCompleted: dto.isCompleted,
-      imageAsset: exerciseDetail.videoPath,
+      imageAsset: null, // TODO: Add image_path to API if needed
+      videoPath: exerciseDetail.videoPath,
       description: exerciseDetail.description,
       steps: null, // API doesn't provide steps yet
       durationMinutes: exerciseDetail.durationMinutes,

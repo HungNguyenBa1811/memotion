@@ -21,11 +21,15 @@ UserDetailDto _$UserDetailDtoFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserDetailDto {
+  @JsonKey(name: 'full_name')
   String get fullName => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_first_login')
   bool get isFirstLogin => throw _privateConstructorUsedError;
   String get role => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
   String get phone => throw _privateConstructorUsedError;
   PatientDto? get patient => throw _privateConstructorUsedError;
@@ -48,12 +52,12 @@ abstract class $UserDetailDtoCopyWith<$Res> {
   ) = _$UserDetailDtoCopyWithImpl<$Res, UserDetailDto>;
   @useResult
   $Res call({
-    String fullName,
+    @JsonKey(name: 'full_name') String fullName,
     String email,
-    bool isActive,
-    bool isFirstLogin,
+    @JsonKey(name: 'is_active') bool isActive,
+    @JsonKey(name: 'is_first_login') bool isFirstLogin,
     String role,
-    String userId,
+    @JsonKey(name: 'user_id') String userId,
     String phone,
     PatientDto? patient,
   });
@@ -133,12 +137,12 @@ abstract class _$$UserDetailDtoImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    String fullName,
+    @JsonKey(name: 'full_name') String fullName,
     String email,
-    bool isActive,
-    bool isFirstLogin,
+    @JsonKey(name: 'is_active') bool isActive,
+    @JsonKey(name: 'is_first_login') bool isFirstLogin,
     String role,
-    String userId,
+    @JsonKey(name: 'user_id') String userId,
     String phone,
     PatientDto? patient,
   });
@@ -210,12 +214,12 @@ class __$$UserDetailDtoImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserDetailDtoImpl implements _UserDetailDto {
   const _$UserDetailDtoImpl({
-    required this.fullName,
+    @JsonKey(name: 'full_name') required this.fullName,
     required this.email,
-    required this.isActive,
-    required this.isFirstLogin,
+    @JsonKey(name: 'is_active') required this.isActive,
+    @JsonKey(name: 'is_first_login') required this.isFirstLogin,
     required this.role,
-    required this.userId,
+    @JsonKey(name: 'user_id') required this.userId,
     required this.phone,
     this.patient,
   });
@@ -224,16 +228,20 @@ class _$UserDetailDtoImpl implements _UserDetailDto {
       _$$UserDetailDtoImplFromJson(json);
 
   @override
+  @JsonKey(name: 'full_name')
   final String fullName;
   @override
   final String email;
   @override
+  @JsonKey(name: 'is_active')
   final bool isActive;
   @override
+  @JsonKey(name: 'is_first_login')
   final bool isFirstLogin;
   @override
   final String role;
   @override
+  @JsonKey(name: 'user_id')
   final String userId;
   @override
   final String phone;
@@ -293,12 +301,12 @@ class _$UserDetailDtoImpl implements _UserDetailDto {
 
 abstract class _UserDetailDto implements UserDetailDto {
   const factory _UserDetailDto({
-    required final String fullName,
+    @JsonKey(name: 'full_name') required final String fullName,
     required final String email,
-    required final bool isActive,
-    required final bool isFirstLogin,
+    @JsonKey(name: 'is_active') required final bool isActive,
+    @JsonKey(name: 'is_first_login') required final bool isFirstLogin,
     required final String role,
-    required final String userId,
+    @JsonKey(name: 'user_id') required final String userId,
     required final String phone,
     final PatientDto? patient,
   }) = _$UserDetailDtoImpl;
@@ -307,16 +315,20 @@ abstract class _UserDetailDto implements UserDetailDto {
       _$UserDetailDtoImpl.fromJson;
 
   @override
+  @JsonKey(name: 'full_name')
   String get fullName;
   @override
   String get email;
   @override
+  @JsonKey(name: 'is_active')
   bool get isActive;
   @override
+  @JsonKey(name: 'is_first_login')
   bool get isFirstLogin;
   @override
   String get role;
   @override
+  @JsonKey(name: 'user_id')
   String get userId;
   @override
   String get phone;
