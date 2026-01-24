@@ -560,8 +560,22 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
   }
 
   void _startWorkoutExercise(WorkoutTask workout) {
-    // Navigate to workout exercise flow (calibration -> training)
-    context.push('/workout-exercise', extra: {'workoutId': workout.id});
+    // Navigate to pose detection flow with real-time AI analysis
+    context.push('/pose-detection', extra: {
+      'workoutId': workout.id,
+      'exerciseType': _getExerciseType(workout.type),
+    });
+  }
+
+  String _getExerciseType(WorkoutType type) {
+    switch (type) {
+      case WorkoutType.yoga:
+        return 'yoga';
+      case WorkoutType.exercise:
+        return 'arm_raise';
+      default:
+        return 'arm_raise';
+    }
   }
 
   // ignore: unused_element

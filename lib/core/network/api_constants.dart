@@ -28,6 +28,11 @@ class ApiConstants {
   // Medication Library Endpoints
   static const String scanMedicationImage = '/api/medication-library/scan-image';
 
+  // Pose Detection Endpoints (Real-time WebSocket)
+  static const String poseHealth = '/api/pose/health';
+  static const String poseSessions = '/api/pose/sessions';
+  // WebSocket: ws://{baseUrl}/api/pose/sessions/{session_id}/ws
+
   // Timeout durations
   static const Duration connectionTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);

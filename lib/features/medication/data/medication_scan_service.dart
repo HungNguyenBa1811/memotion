@@ -31,6 +31,11 @@ class MedicationScanService extends BaseApiService {
       },
     );
 
+    print('🚀✨ OMG WE ARE SCANNING A PILL!!! 💊💊💊');
+    print('📸 File name: $fileName');
+    print('📦 File size: ${(fileSize / 1024).toStringAsFixed(2)} KB uwu~');
+    print('🎯 Endpoint: ${ApiConstants.scanMedicationImage}');
+
     try {
       // Create FormData for multipart upload
       final formData = FormData.fromMap({
@@ -45,6 +50,8 @@ class MedicationScanService extends BaseApiService {
         name: _tag,
       );
 
+      print('📤 Sending request... pls work pls work 🙏🙏🙏');
+
       // Make POST request with multipart/form-data
       final response = await dio.post(
         ApiConstants.scanMedicationImage,
@@ -57,6 +64,11 @@ class MedicationScanService extends BaseApiService {
       );
 
       stopwatch.stop();
+
+      print('🎉🎉🎉 YAAAS WE GOT A RESPONSE!!! 🎉🎉🎉');
+      print('⏱️ Took ${stopwatch.elapsedMilliseconds}ms (slay queen 💅)');
+      print('📊 Status code: ${response.statusCode}');
+      print('📝 Response data: ${response.data}');
 
       developer.log(
         'Scan API response received',
@@ -74,6 +86,13 @@ class MedicationScanService extends BaseApiService {
       );
 
       if (result.data?.medication != null) {
+        print('💊✨ OMG WE FOUND THE PILL!!! ITS GIVING MEDICINE 💅💅💅');
+        print('🏷️ Name: ${result.data!.medication!.name}');
+        print('💉 Dosage: ${result.data!.medication!.dosage}');
+        print('🆔 ID: ${result.data!.medication!.medicationId}');
+        print('📸 Image: ${result.data!.medication!.imagePath}');
+        print('🔥🔥🔥 NO CAP THIS IS BUSSIN FR FR 🔥🔥🔥');
+
         developer.log(
           'Medication identified successfully',
           name: _tag,
@@ -84,6 +103,11 @@ class MedicationScanService extends BaseApiService {
           },
         );
       } else {
+        print('😭😭😭 BRUH... NO MEDICATION FOUND 💀💀💀');
+        print('📝 Message: ${result.data?.message}');
+        print('❌ Agent error: ${result.data?.agentError}');
+        print('😔 its giving... nothing (sad hours)');
+
         developer.log(
           'No medication identified in response',
           name: _tag,
@@ -97,6 +121,14 @@ class MedicationScanService extends BaseApiService {
       return result;
     } on DioException catch (e) {
       stopwatch.stop();
+
+      print('💀💀💀 SHEESH DIO ERROR!!! NOT THE API FAILING 😭😭😭');
+      print('🚨 Error type: ${e.type}');
+      print('📝 Message: ${e.message}');
+      print('🔢 Status: ${e.response?.statusCode}');
+      print('⏱️ Failed after ${stopwatch.elapsedMilliseconds}ms (oof)');
+      print('📦 Response: ${e.response?.data}');
+      print('💔 this is NOT giving what it was supposed to give bestie 💔');
 
       developer.log(
         'Scan API request failed',
@@ -115,6 +147,11 @@ class MedicationScanService extends BaseApiService {
       rethrow;
     } catch (e, stackTrace) {
       stopwatch.stop();
+
+      print('☠️☠️☠️ BRO WHAT EVEN IS THIS ERROR 😵‍💫😵‍💫😵‍💫');
+      print('🤯 Error: $e');
+      print('📜 Stack trace be like: $stackTrace');
+      print('💀 im literally dead rn this is so not slay 💀');
 
       developer.log(
         'Unexpected error during scan',

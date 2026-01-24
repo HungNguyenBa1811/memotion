@@ -16,6 +16,8 @@ import '../../features/workout/screens/workout_exercise_screen.dart';
 import '../../features/workout/screens/workout_calibration_complete_screen.dart';
 import '../../features/workout/screens/workout_training_screen.dart';
 import '../../features/workout/screens/workout_training_complete_screen.dart';
+import '../../features/workout/screens/pose_detection_screen.dart';
+import '../../features/workout/screens/pose_training_screen.dart';
 import '../../features/medication/screens/medication_main_screen.dart';
 import '../../features/medication/screens/medication_scan_screen.dart';
 import '../../shared/widgets/main_shell.dart';
@@ -55,6 +57,8 @@ class AppRoutes {
       '/workout-calibration-complete';
   static const String workoutTraining = '/workout-training';
   static const String workoutTrainingComplete = '/workout-training-complete';
+  static const String poseDetection = '/pose-detection';
+  static const String poseTraining = '/pose-training';
   static const String medication = '/medication';
   static const String medicationScan = '/medication-scan';
 }
@@ -316,6 +320,29 @@ final routerProvider = Provider<GoRouter>((ref) {
             workoutId: extra?['workoutId'] ?? '',
             duration: extra?['duration'] ?? '12:30',
             durationSeconds: extra?['durationSeconds'] ?? 750,
+          );
+        },
+      ),
+      
+      // Pose Detection routes - Real-time AI pose analysis
+      GoRoute(
+        path: '/pose-detection',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return PoseDetectionScreen(
+            workoutId: extra?['workoutId'] ?? '',
+            exerciseType: extra?['exerciseType'],
+          );
+        },
+      ),
+      GoRoute(
+        path: '/pose-training',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return PoseTrainingScreen(
+            workoutId: extra?['workoutId'] ?? '',
+            exerciseType: extra?['exerciseType'],
+            videoPath: extra?['videoPath'],
           );
         },
       ),
