@@ -18,6 +18,7 @@ class RouteConfig {
     '/nutrition',
     '/workout',
     '/profile',
+    '/caretaker-health-report',
   };
 
   /// Check if route is public

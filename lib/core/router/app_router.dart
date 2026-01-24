@@ -20,6 +20,7 @@ import '../../features/workout/screens/pose_detection_screen.dart';
 import '../../features/workout/screens/pose_training_screen.dart';
 import '../../features/medication/screens/medication_main_screen.dart';
 import '../../features/medication/screens/medication_scan_screen.dart';
+import '../../features/profile/screens/caretaker_health_report_screen.dart';
 import '../../shared/widgets/main_shell.dart';
 import 'route_config.dart';
 
@@ -61,6 +62,7 @@ class AppRoutes {
   static const String poseTraining = '/pose-training';
   static const String medication = '/medication';
   static const String medicationScan = '/medication-scan';
+  static const String caretakerHealthReport = '/caretaker-health-report';
 }
 
 /// Listenable để notify router khi auth state thay đổi
@@ -356,6 +358,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.medicationScan,
         builder: (context, state) => const MedicationScanScreen(),
+      ),
+
+      // Caretaker Health Report - outside shell (no bottom nav)
+      GoRoute(
+        path: AppRoutes.caretakerHealthReport,
+        builder: (context, state) => const CaretakerHealthReportScreen(),
       ),
 
       // Nutrition Detail - outside shell (no bottom nav)
