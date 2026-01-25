@@ -264,6 +264,7 @@ class _MedicationMainScreenContentState
                 },
                 child: Container(
                   margin: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.symmetric(vertical: 4),
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.primary : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
@@ -284,7 +285,7 @@ class _MedicationMainScreenContentState
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 4,
-                          vertical: 2,
+                          vertical: 0,
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
@@ -463,9 +464,10 @@ class _MedicationMainScreenContentState
                               return Center(
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  value: loadingProgress.expectedTotalBytes != null
+                                  value:
+                                      loadingProgress.expectedTotalBytes != null
                                       ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
+                                            loadingProgress.expectedTotalBytes!
                                       : null,
                                 ),
                               );

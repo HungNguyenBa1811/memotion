@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/router/app_router.dart';
 import '../providers/onboarding_provider.dart';
-import '../providers/onboarding_notifier.dart';
 import '../models/onboarding_data.dart';
 import '../widgets/widgets.dart';
 
@@ -100,24 +99,8 @@ class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew>
       notifier.nextStep();
       _navigateToStep(state.currentStep + 1);
     } else {
-      // Hoàn thành onboarding - submit data trước khi navigate
-      final onboardingNotifier = ref.read(onboardingNotifierProvider.notifier);
-      final success = await onboardingNotifier.submitFinalProfile(context, ref);
-      if (success) {
-        notifier.completeOnboarding();
-        context.go(AppRoutes.profile);
-      } else {
-        // Show error message if submission failed
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Failed to submit onboarding data. Please try again.',
-              ),
-            ),
-          );
-        }
-      }
+      // Hoàn thành onboarding - navigate to loading screen để submit data
+      context.go(AppRoutes.onboardingLoading);
     }
   }
 

@@ -6,6 +6,7 @@ import '../../features/auth/screens/registration_screen.dart';
 import '../../features/auth/screens/sign_in_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen_new.dart';
+import '../../features/onboarding/screens/onboarding_loading_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/nutrition/screens/nutrition_screen.dart';
@@ -45,6 +46,7 @@ class AppRoutes {
   static const String onboardingStep16 = '/onboarding/16';
   static const String onboardingStep17 = '/onboarding/17';
   static const String onboardingStep18 = '/onboarding/18';
+  static const String onboardingLoading = '/onboarding/loading';
   static const String signIn = '/sign-in';
   static const String registration = '/registration';
   static const String profile = '/profile';
@@ -279,6 +281,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           state,
           const OnboardingScreenNew(initialStep: 18),
         ),
+      ),
+
+      // Onboarding Loading screen - shown while submitting data
+      GoRoute(
+        path: AppRoutes.onboardingLoading,
+        builder: (context, state) => const OnboardingLoadingScreen(),
       ),
 
       // Workout Detail and Exercise routes - OUTSIDE shell (no bottom nav)
