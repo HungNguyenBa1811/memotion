@@ -105,6 +105,7 @@ enum NutritionStatus {
   static NutritionStatus fromString(String status) {
     switch (status.toLowerCase()) {
       case 'completed':
+      case 'done':
         return NutritionStatus.completed;
       case 'missed':
         return NutritionStatus.missed;

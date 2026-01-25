@@ -111,7 +111,9 @@ class PoseFrameResult {
         phaseData = json['detection'] as Map<String, dynamic>? ?? {};
         break;
       case 2:
-        phaseData = json['calibration'] as Map<String, dynamic>? ?? {};
+        // Backend sends calibration data in 'data' field, not 'calibration'
+        phaseData = json['calibration'] as Map<String, dynamic>? ??
+                    json['data'] as Map<String, dynamic>? ?? {};
         break;
       case 3:
         phaseData = json['sync'] as Map<String, dynamic>? ?? {};

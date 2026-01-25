@@ -477,6 +477,8 @@ class _NutritionTaskCard extends ConsumerWidget {
                   await ref
                       .read(nutritionNotifierProvider.notifier)
                       .completeTask(task.id);
+                  // Refresh list after completing
+                  ref.invalidate(nutritionTasksProvider);
                 },
                 child: Container(
                   padding: const EdgeInsets.all(8),

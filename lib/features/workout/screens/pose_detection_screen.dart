@@ -1,11 +1,11 @@
 /// Pose Detection Screen - Phase 1 & 2 Only
-/// 
+///
 /// Screen 1 of workout flow:
 /// - Phase 1: Detection (detect user pose)
 /// - Phase 2: Calibration (collect angle measurements)
-/// 
+///
 /// After Phase 2 completes → Auto navigate to Training Screen (Phase 3)
-/// 
+///
 /// Author: MEMOTION Team
 /// Version: 2.0.0
 
@@ -42,7 +42,8 @@ class PoseDetectionScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<PoseDetectionScreen> createState() => _PoseDetectionScreenState();
+  ConsumerState<PoseDetectionScreen> createState() =>
+      _PoseDetectionScreenState();
 }
 
 class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
@@ -67,9 +68,9 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
       PoseLogger.info('Camera initialized successfully');
 
       // 2. Start pose detection session via WebSocket
-      await ref.read(poseSessionProvider.notifier).startSession(
-        exerciseType: widget.exerciseType ?? 'arm_raise',
-      );
+      await ref
+          .read(poseSessionProvider.notifier)
+          .startSession(exerciseType: widget.exerciseType ?? 'arm_raise');
 
       // 3. Setup phase change listener for auto navigation
       ref.read(poseSessionProvider.notifier).onPhaseChange = _onPhaseChange;
@@ -88,10 +89,9 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
   Future<void> _startStreaming() async {
     await _cameraService.startStreaming(
       onFrame: (frameBytes, timestamp) {
-        ref.read(poseSessionProvider.notifier).sendFrame(
-          frameBytes,
-          timestampMs: timestamp,
-        );
+        ref
+            .read(poseSessionProvider.notifier)
+            .sendFrame(frameBytes, timestampMs: timestamp);
       },
     );
   }
@@ -99,15 +99,20 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
   /// Handle phase transitions - auto navigate when phases complete
   void _onPhaseChange(PosePhase phase) {
     final state = ref.read(poseSessionProvider);
-    
-    PoseLogger.info('_onPhaseChange called: phase=${phase.displayName}, '
-        'sessionActive=${state.isSessionActive}, repCount=${state.repCount}');
+
+    PoseLogger.info(
+      '_onPhaseChange called: phase=${phase.displayName}, '
+      'sessionActive=${state.isSessionActive}, repCount=${state.repCount}',
+    );
 
     switch (phase) {
       case PosePhase.calibration:
         // Phase 1 complete → Now in Phase 2 (Calibration)
         // Stay on same screen, UI updates automatically
-        PoseLogger.phaseStart(2, 'Starting calibration - collecting angle data');
+        PoseLogger.phaseStart(
+          2,
+          'Starting calibration - collecting angle data',
+        );
         break;
 
       case PosePhase.sync:
@@ -126,7 +131,10 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
         // All phases complete → Navigate to results
         // Only navigate if we actually did some work (repCount > 0 or calibration done)
         if (state.isSessionActive && state.repCount > 0) {
-          PoseLogger.phaseComplete(3, 'Session complete - navigating to results');
+          PoseLogger.phaseComplete(
+            3,
+            'Session complete - navigating to results',
+          );
           _navigateToResults();
         } else {
           PoseLogger.warning('Ignoring completed phase - no reps recorded yet');
@@ -161,10 +169,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
     if (results != null && mounted) {
       context.pushReplacement(
         '/workout-training-complete',
-        extra: {
-          'workoutId': widget.workoutId,
-          'results': results,
-        },
+        extra: {'workoutId': widget.workoutId, 'results': results},
       );
     }
   }
@@ -305,7 +310,10 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             // Phase indicator
             Row(
               children: [
-                _buildPhaseIndicator(1, isPhase1 || state.currentPhase == PosePhase.calibration),
+                _buildPhaseIndicator(
+                  1,
+                  isPhase1 || state.currentPhase == PosePhase.calibration,
+                ),
                 const SizedBox(width: 8),
                 Container(
                   width: 40,
@@ -331,7 +339,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
             // Phase-specific info
             Flexible(
-              child: isPhase1 
+              child: isPhase1
                   ? _buildDetectionInfo(state)
                   : _buildCalibrationInfo(state),
             ),
@@ -391,7 +399,9 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             style: GoogleFonts.lexend(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: state.poseDetected ? Colors.green[700] : Colors.orange[700],
+              color: state.poseDetected
+                  ? Colors.green[700]
+                  : Colors.orange[700],
             ),
           ),
         ),
@@ -403,7 +413,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
   Widget _buildCalibrationInfo(PoseSessionState state) {
     final queueIndex = state.calibrationQueueIndex + 1; // 0-based to 1-based
     final totalJoints = state.calibrationTotalJoints;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -415,14 +425,14 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             if (state.calibrationJoint != null)
               Container(
                 margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF00695C).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color(0xFF00695C),
-                    width: 1,
-                  ),
+                  border: Border.all(color: const Color(0xFF00695C), width: 1),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -434,7 +444,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '🎯 ${state.calibrationJoint}',
+                      '${state.calibrationJoint}',
                       style: GoogleFonts.lexend(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -444,7 +454,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
                   ],
                 ),
               ),
-            
+
             // Queue progress badge (1/6, 2/6, ...)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -463,9 +473,9 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         // Angle info row
         Row(
           children: [
@@ -481,10 +491,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             const SizedBox(width: 8),
             Text(
               'góc hiện tại',
-              style: GoogleFonts.lexend(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: GoogleFonts.lexend(fontSize: 12, color: Colors.grey[600]),
             ),
             const SizedBox(width: 16),
 
@@ -523,7 +530,11 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             : Container(
                 color: Colors.grey[400],
                 child: const Center(
-                  child: Icon(Icons.videocam_off, size: 64, color: Colors.white),
+                  child: Icon(
+                    Icons.videocam_off,
+                    size: 64,
+                    color: Colors.white,
+                  ),
                 ),
               ),
       ),
@@ -569,12 +580,14 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
   /// Bottom panel with status message and end button
   Widget _buildBottomPanel(PoseSessionState state) {
+    final isCalibrating = state.currentPhase == PosePhase.calibration;
+
     return Positioned(
       bottom: 0,
       left: 0,
       right: 0,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 100, maxHeight: 120),
+        height: 160,
         decoration: const BoxDecoration(
           color: Color(0xFFF1F8E9),
           borderRadius: BorderRadius.only(
@@ -582,62 +595,148 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             topRight: Radius.circular(35),
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
           children: [
-            // Status message from backend
-            Flexible(
-              child: Text(
-                state.lastResult?.message ?? _getDefaultMessage(state.currentPhase),
-                style: GoogleFonts.lexend(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            // Center content - Title and message
+            Positioned(
+              top: 12,
+              left: 0,
+              right: 0,
+              child: Column(
+                children: [
+                  // Large black title text
+                  Text(
+                    isCalibrating ? 'Calibrating...' : 'Detecting...',
+                    style: GoogleFonts.lexend(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 2),
+                  // Gray instruction text from backend
+                  Text(
+                    state.lastResult?.message ??
+                        _getDefaultMessage(state.currentPhase),
+                    style: GoogleFonts.lexend(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF727070),
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 2),
 
-            // FPS indicator
-            Text(
-              'FPS: ${state.lastResult?.fps.toStringAsFixed(1) ?? '-'}',
-              style: GoogleFonts.lexend(fontSize: 10, color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
+            // Circular timer (left side) - only show during calibration
+            if (isCalibrating)
+              Positioned(left: 6, top: 30, child: _buildCircularTimer(state)),
 
-            // End Session button
-            GestureDetector(
-              onTap: _showEndSessionDialog,
-              child: Container(
-                width: 160,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF00695C),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.close, color: Colors.white, size: 16),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Dừng lại',
-                      style: GoogleFonts.lexend(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
+            // End Session button (center bottom)
+            Positioned(
+              bottom: 16,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: _showEndSessionDialog,
+                  child: Container(
+                    width: 200,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00695C),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Square stop icon
+                        Container(width: 10, height: 10, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Text(
+                          'End Session',
+                          style: GoogleFonts.lexend(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Circular timer widget for calibration hold countdown
+  Widget _buildCircularTimer(PoseSessionState state) {
+    final countdown = state.lastResult?.countdownRemaining ?? 3.0;
+    final progress = countdown / 3.0; // Assuming 3 second hold
+
+    return SizedBox(
+      width: 89,
+      height: 89,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Background circle
+          SizedBox(
+            width: 63,
+            height: 63,
+            child: CircularProgressIndicator(
+              value: 1.0,
+              strokeWidth: 6,
+              backgroundColor: Colors.grey[300],
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Colors.transparent,
+              ),
+            ),
+          ),
+          // Progress arc
+          SizedBox(
+            width: 63,
+            height: 63,
+            child: CircularProgressIndicator(
+              value: progress,
+              strokeWidth: 6,
+              backgroundColor: Colors.transparent,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color(0xFF00695C),
+              ),
+            ),
+          ),
+          // Center text
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'HOLD',
+                style: GoogleFonts.lexend(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF00695C),
+                ),
+              ),
+              Text(
+                '${countdown.toInt()}s',
+                style: GoogleFonts.lexend(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF00695C),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -681,10 +780,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFD67052),
             ),
-            child: Text(
-              'Dừng',
-              style: GoogleFonts.lexend(color: Colors.white),
-            ),
+            child: Text('Dừng', style: GoogleFonts.lexend(color: Colors.white)),
           ),
         ],
       ),

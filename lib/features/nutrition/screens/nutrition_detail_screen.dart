@@ -172,13 +172,13 @@ class _NutritionDetailError extends StatelessWidget {
 }
 
 /// Main content widget with actual data
-class _NutritionDetailContent extends StatelessWidget {
+class _NutritionDetailContent extends ConsumerWidget {
   final NutritionTask task;
 
   const _NutritionDetailContent({required this.task});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       bottom: false,
       child: Stack(
@@ -307,7 +307,7 @@ class _NutritionDetailContent extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 25),
 
                 // Description section (if available)
                 if (task.description != null &&
@@ -381,11 +381,11 @@ class _NutritionDetailContent extends StatelessWidget {
             ),
           ),
 
-          // Status indicator at bottom
+          // Status indicator at bottom (tap to complete)
           Positioned(
             left: 37,
-            bottom: 120,
-            child: _buildStatusIndicator(),
+            bottom: 60,
+            child: _buildStatusIndicator(ref),
           ),
         ],
       ),
@@ -446,74 +446,86 @@ class _NutritionDetailContent extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusIndicator() {
+  Widget _buildStatusIndicator(WidgetRef ref) {
     final isCompleted = task.status == NutritionStatus.completed;
+    debugPrint('┌─────────────────────────────────────────────────────────────');
+    debugPrint('│ 🍽️ UI: Building status indicator');
+    debugPrint('│   - Task ID: ${task.id}');
+    debugPrint('│   - Status: ${task.status}');
+    debugPrint('│   - isCompleted: $isCompleted');
+    debugPrint('└─────────────────────────────────────────────────────────────');
 
-    return SizedBox(
-      height: 48,
-      width: 180,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // Label container (behind)
-          Positioned(
-            left: 17,
-            top: 0,
-            child: Container(
-              padding: const EdgeInsets.only(
-                left: 48,
-                right: 20,
-                top: 14,
-                bottom: 14,
-              ),
-              decoration: BoxDecoration(
-                color: isCompleted ? Colors.green.shade50 : AppColors.background,
-                borderRadius: BorderRadius.circular(70),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: isCompleted
+          ? null
+          : () async {
+              await ref
+                  .read(nutritionNotifierProvider.notifier)
+                  .completeTask(task.id);
+              // Refresh detail data after completing - use refresh to force immediate refetch
+              ref.invalidate(nutritionTaskDetailProvider(task.id));
+            },
+      child: SizedBox(
+        height: 48,
+        width: isCompleted ? 180 : 220,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Label container (behind)
+            Positioned(
+              left: 17,
+              top: 0,
+              child: Container(
+                padding: const EdgeInsets.only(
+                  left: 48,
+                  right: 20,
+                  top: 14,
+                  bottom: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: isCompleted
+                      ? AppColors.primary
+                      : AppColors.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(70),
+                ),
+                child: Text(
+                  isCompleted ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành',
+                  style: GoogleFonts.lexend(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: isCompleted ? AppColors.textOnPrimary : AppColors.primary,
+                    height: 1.12,
                   ),
-                ],
-              ),
-              child: Text(
-                isCompleted ? 'Đã hoàn thành' : 'Chưa hoàn thành',
-                style: GoogleFonts.lexend(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: isCompleted ? Colors.green : Colors.black,
-                  height: 1.12,
                 ),
               ),
             ),
-          ),
-          // Icon (in front, overlapping)
-          Positioned(
-            left: 0,
-            top: 0,
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: isCompleted ? Colors.green : AppColors.primary,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    blurRadius: 50,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Icon(
-                isCompleted ? Icons.check : Icons.schedule,
-                color: Colors.white,
-                size: 24,
+            // Icon (in front, overlapping)
+            Positioned(
+              left: 0,
+              top: 0,
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 50,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  isCompleted ? Icons.check : Icons.check_circle_outline,
+                  color: AppColors.textOnPrimary,
+                  size: 24,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

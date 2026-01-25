@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/nutrition_repository.dart';
 import '../models/nutrition_task.dart';
@@ -9,6 +10,9 @@ final nutritionRepositoryProvider = Provider<NutritionRepository>((ref) {
 
 /// Provider for the list of all nutrition tasks
 final nutritionTasksProvider = FutureProvider<List<NutritionTask>>((ref) async {
+  debugPrint('┌─────────────────────────────────────────────────────────────');
+  debugPrint('│ 🍽️ NUTRITION PROVIDER: Fetching all tasks');
+  debugPrint('└─────────────────────────────────────────────────────────────');
   final repository = ref.watch(nutritionRepositoryProvider);
   return repository.getNutritionTasks();
 });
@@ -57,12 +61,21 @@ class NutritionNotifier extends StateNotifier<AsyncValue<void>> {
   NutritionNotifier(this._repository, this._ref) : super(const AsyncData(null));
 
   Future<void> completeTask(String taskId) async {
+    debugPrint('┌─────────────────────────────────────────────────────────────');
+    debugPrint('│ 🍽️ NUTRITION NOTIFIER: Completing task: $taskId');
+    debugPrint('└─────────────────────────────────────────────────────────────');
     state = const AsyncLoading();
     try {
       await _repository.completeNutritionTask(taskId);
       _ref.invalidate(nutritionTasksProvider);
+      debugPrint('┌─────────────────────────────────────────────────────────────');
+      debugPrint('│ ✅ NUTRITION NOTIFIER: Task completed, invalidated tasks provider');
+      debugPrint('└─────────────────────────────────────────────────────────────');
       state = const AsyncData(null);
     } catch (e, st) {
+      debugPrint('┌─────────────────────────────────────────────────────────────');
+      debugPrint('│ ❌ NUTRITION NOTIFIER ERROR: $e');
+      debugPrint('└─────────────────────────────────────────────────────────────');
       state = AsyncError(e, st);
     }
   }
@@ -77,6 +90,9 @@ final nutritionNotifierProvider =
 /// Provider for fetching nutrition task detail by ID
 final nutritionTaskDetailProvider =
     FutureProvider.family<NutritionTask, String>((ref, taskId) async {
+      debugPrint('┌─────────────────────────────────────────────────────────────');
+      debugPrint('│ 🍽️ NUTRITION PROVIDER: Fetching detail for taskId: $taskId');
+      debugPrint('└─────────────────────────────────────────────────────────────');
       final repository = ref.watch(nutritionRepositoryProvider);
       return repository.getNutritionTaskDetail(taskId);
     });
