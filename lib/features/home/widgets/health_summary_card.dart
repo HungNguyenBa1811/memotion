@@ -3,7 +3,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 /// Floating health summary card with vitals (Figma design)
-/// Shows: "Chỉ số hôm nay" label, status text, blood pressure, heart rate
+/// Shows: "Today's Vitals" label, status text, blood pressure, heart rate
 class HealthSummaryCard extends StatelessWidget {
   final String heartRate;
   final String bloodPressure;
@@ -16,7 +16,7 @@ class HealthSummaryCard extends StatelessWidget {
     this.heartRate = '72',
     this.bloodPressure = '120/80',
     this.steps = '5,420',
-    this.statusLabel = 'Rất tốt',
+    this.statusLabel = 'Very Good',
     this.backgroundImageUrl,
   });
 
@@ -65,7 +65,7 @@ class HealthSummaryCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Chỉ số hôm nay',
+                          "Today's Vitals",
                           style: AppTextStyles.bodySmall.copyWith(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -93,7 +93,7 @@ class HealthSummaryCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'HUYẾT ÁP',
+                          'BLOOD PRESSURE',
                           style: AppTextStyles.caption.copyWith(
                             fontSize: 7,
                             fontWeight: FontWeight.w700,
@@ -128,7 +128,7 @@ class HealthSummaryCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'NHỊP TIM',
+                          'HEART RATE',
                           style: AppTextStyles.caption.copyWith(
                             fontSize: 7,
                             fontWeight: FontWeight.w700,

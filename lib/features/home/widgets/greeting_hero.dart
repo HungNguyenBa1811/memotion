@@ -14,26 +14,41 @@ class GreetingHero extends StatelessWidget {
   const GreetingHero({
     super.key,
     required this.userName,
-    this.greeting = 'Chào buổi sáng',
+    this.greeting = 'Good morning',
     this.avatarUrl,
     this.moodMessage,
-    this.actionButtonText = 'XỬ LÝ TÌNH HUỐNG',
+    this.actionButtonText = 'SITUATION HANDLING',
     this.onActionPressed,
   });
 
   String _getFormattedDate() {
     final now = DateTime.now();
     final weekdays = [
-      'Chủ Nhật',
-      'Thứ Hai',
-      'Thứ Ba',
-      'Thứ Tư',
-      'Thứ Năm',
-      'Thứ Sáu',
-      'Thứ Bảy',
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
+    final months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     final weekday = weekdays[now.weekday % 7];
-    return '$weekday, ngày ${now.day} tháng ${now.month}';
+    final month = months[now.month - 1];
+    return '$weekday, $month ${now.day}';
   }
 
   @override
@@ -133,7 +148,7 @@ class GreetingHero extends StatelessWidget {
                 ),
                 padding: const EdgeInsets.only(left: 20, top: 20, right: 160),
                 child: Text(
-                  moodMessage ?? 'Hôm nay cần để ý đến tâm trạng của bác nhé',
+                  moodMessage ?? "Please pay attention to the patient's mood today",
                   style: AppTextStyles.headline3.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,

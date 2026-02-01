@@ -40,7 +40,7 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
                 heartRate: '72',
                 bloodPressure: '120/80',
                 steps: '8400',
-                statusLabel: 'Rất tốt',
+                statusLabel: 'Excellent',
               ),
 
               // Bottom padding for navigation bar
@@ -133,7 +133,7 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Tiến trình',
+                        'Progress',
                         style: GoogleFonts.lexend(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -155,7 +155,7 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   // Date
                   Text(
-                    '19 Tháng 11 năm 2025',
+                    '19 November 2025',
                     style: GoogleFonts.lexend(
                       fontSize: 16,
                       fontWeight: FontWeight.w300,

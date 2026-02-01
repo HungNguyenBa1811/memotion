@@ -43,11 +43,11 @@ class PatientHomeScreen extends ConsumerWidget {
               children: [
                 // Greeting Hero with SOS button (Patient/Elderly version)
                 PatientGreetingHero(
-                  userName: 'Ông/Bà',
+                  userName: 'Grandpa/Grandma',
                   greeting: _getGreeting(),
                   avatarUrl: dashboardData?.avatarUrl,
-                  moodMessage: 'Hôm nay tâm trạng của bác không tốt',
-                  actionButtonText: 'GỌI KHẨN CẤP (SOS)',
+                  moodMessage: "You don't seem to be in a good mood today",
+                  actionButtonText: 'EMERGENCY CALL (SOS)',
                   onActionPressed: () {
                     homeNotifier.triggerSOS();
                     _showSOSDialog(context);
@@ -56,11 +56,11 @@ class PatientHomeScreen extends ConsumerWidget {
 
                 const SizedBox(height: 24),
 
-                // Section title: "Dành cho Ông/Bà"
+                // Section title: "For Grandpa/Grandma"
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   child: Text(
-                    'Dành cho Ông/Bà',
+                    'For Grandpa/Grandma',
                     style: AppTextStyles.headline1.copyWith(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
@@ -73,16 +73,16 @@ class PatientHomeScreen extends ConsumerWidget {
 
                 // Upcoming Medication Card (Patient perspective)
                 UpcomingMedicationCard(
-                  title: 'Lịch uống thuốc sắp tới',
+                  title: 'Upcoming Medication Schedule',
                   time: dashboardData?.upcomingMedication?.time ?? '10:00 AM',
                   dosage:
                       dashboardData?.upcomingMedication?.dosage ??
-                      'Uống 1 viên Vitamin C sau ăn',
+                      'Take 1 Vitamin C tablet after meal',
                   imageUrl: dashboardData?.upcomingMedication?.imageUrl,
                   onTakenPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Đã đánh dấu uống thuốc!'),
+                        content: Text('Marked as taken!'),
                         backgroundColor: AppColors.tealGreen,
                       ),
                     );
@@ -104,7 +104,7 @@ class PatientHomeScreen extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: ActionCard(
-                              title: 'Kiểm tra\nsức khoẻ',
+                              title: 'Health\nCheck',
                               iconAsset: 'assets/images/icon_heart_beat.png',
                               icon: Icons.health_and_safety,
                               iconColor: AppColors.primary,
@@ -116,7 +116,7 @@ class PatientHomeScreen extends ConsumerWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: ActionCard(
-                              title: 'Nhắc uống\nthuốc',
+                              title: 'Medication\nReminder',
                               iconAsset: 'assets/images/icon_medicine_file.png',
                               icon: Icons.medication,
                               iconColor: AppColors.primary,
@@ -133,7 +133,7 @@ class PatientHomeScreen extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: ActionCard(
-                              title: 'Trò chuyện\ngia đình',
+                              title: 'Family\nChat',
                               iconAsset: 'assets/images/icon_calls.png',
                               icon: Icons.chat_bubble,
                               iconColor: AppColors.primary,
@@ -145,7 +145,7 @@ class PatientHomeScreen extends ConsumerWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: ActionCard(
-                              title: 'Sổ sức\nkhoẻ',
+                              title: 'Health\nRecord',
                               iconAsset: 'assets/images/icon_health_check.png',
                               icon: Icons.book,
                               iconColor: AppColors.primary,
@@ -168,7 +168,7 @@ class PatientHomeScreen extends ConsumerWidget {
                   bloodPressure:
                       dashboardData?.healthVitals?.bloodPressure ?? '120/80',
                   steps: dashboardData?.healthVitals?.steps ?? '0',
-                  statusLabel: 'Rất tốt',
+                  statusLabel: 'Very Good',
                 ),
 
                 // Bottom padding for navigation bar
@@ -184,11 +184,11 @@ class PatientHomeScreen extends ConsumerWidget {
   String _getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {
-      return 'Chào buổi sáng';
+      return 'Good morning';
     } else if (hour < 18) {
-      return 'Chào buổi chiều';
+      return 'Good afternoon';
     } else {
-      return 'Chào buổi tối';
+      return 'Good evening';
     }
   }
 
@@ -211,7 +211,7 @@ class PatientHomeScreen extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             const Text(
-              'GỌI KHẨN CẤP',
+              'EMERGENCY CALL',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -221,14 +221,14 @@ class PatientHomeScreen extends ConsumerWidget {
           ],
         ),
         content: const Text(
-          'Bạn có muốn gọi khẩn cấp cho người thân hoặc dịch vụ cấp cứu?',
+          'Do you want to make an emergency call to family or emergency services?',
           style: TextStyle(fontSize: 16),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text(
-              'Huỷ',
+              'Cancel',
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
@@ -238,7 +238,7 @@ class PatientHomeScreen extends ConsumerWidget {
               // TODO: Implement emergency call to family
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Đang gọi cho người thân...'),
+                  content: Text('Calling family...'),
                   backgroundColor: AppColors.tealGreen,
                 ),
               );
@@ -249,7 +249,7 @@ class PatientHomeScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text('Gọi người thân'),
+            child: const Text('Call Family'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -257,7 +257,7 @@ class PatientHomeScreen extends ConsumerWidget {
               // TODO: Implement 115 emergency call
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Đang gọi 115...'),
+                  content: Text('Calling 115...'),
                   backgroundColor: Color(0xFFD77658),
                 ),
               );
@@ -268,7 +268,7 @@ class PatientHomeScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text('Gọi 115'),
+            child: const Text('Call 115'),
           ),
         ],
       ),

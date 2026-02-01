@@ -44,11 +44,11 @@ class CaretakerHomeScreen extends ConsumerWidget {
               children: [
                 // Greeting Hero with situation handling button (Caretaker version)
                 GreetingHero(
-                  userName: 'Anh/Chị',
+                  userName: 'Sir/Madam',
                   greeting: _getGreeting(),
                   avatarUrl: dashboardData?.avatarUrl,
-                  moodMessage: 'Hôm nay cần để ý đến tâm trạng của bác nhé',
-                  actionButtonText: 'XỬ LÝ TÌNH HUỐNG',
+                  moodMessage: "Please pay attention to the patient's mood today",
+                  actionButtonText: 'SITUATION HANDLING',
                   onActionPressed: () {
                     homeNotifier.triggerSOS();
                     _showSituationHandlingDialog(context);
@@ -59,16 +59,16 @@ class CaretakerHomeScreen extends ConsumerWidget {
 
                 // Upcoming Medication Card (Caregiver perspective)
                 UpcomingMedicationCard(
-                  title: 'Nhắc ông/bà uống thuốc',
+                  title: 'Remind to take medicine',
                   time: dashboardData?.upcomingMedication?.time ?? '10:00 AM',
                   dosage:
                       dashboardData?.upcomingMedication?.dosage ??
-                      'Uống 1 viên Vitamin C sau ăn',
+                      'Take 1 Vitamin C tablet after meal',
                   imageUrl: dashboardData?.upcomingMedication?.imageUrl,
                   onTakenPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Đã đánh dấu uống thuốc!'),
+                        content: Text('Marked as taken!'),
                         backgroundColor: AppColors.tealGreen,
                       ),
                     );
@@ -80,11 +80,11 @@ class CaretakerHomeScreen extends ConsumerWidget {
 
                 const SizedBox(height: 24),
 
-                // Section title: "Dành cho Caregiver"
+                // Section title: "For Caregiver"
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   child: Text(
-                    'Dành cho Caregiver',
+                    'For Caregiver',
                     style: AppTextStyles.headline1.copyWith(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
@@ -105,7 +105,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: ActionCard(
-                              title: 'Kiểm tra\nsức khoẻ',
+                              title: 'Health\nCheck',
                               iconAsset: 'assets/images/icon_heart_beat.png',
                               icon: Icons.health_and_safety,
                               iconColor: AppColors.primary,
@@ -117,7 +117,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: ActionCard(
-                              title: 'Nhắc uống\nthuốc',
+                              title: 'Medication\nReminder',
                               iconAsset: 'assets/images/icon_medicine_file.png',
                               icon: Icons.medication,
                               iconColor: AppColors.primary,
@@ -134,7 +134,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: ActionCard(
-                              title: 'Trò chuyện\ngia đình',
+                              title: 'Family\nChat',
                               iconAsset: 'assets/images/icon_calls.png',
                               icon: Icons.chat_bubble,
                               iconColor: AppColors.primary,
@@ -146,7 +146,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: ActionCard(
-                              title: 'Sổ sức\nkhoẻ',
+                              title: 'Health\nRecord',
                               iconAsset: 'assets/images/icon_health_check.png',
                               icon: Icons.book,
                               iconColor: AppColors.primary,
@@ -169,7 +169,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
                   bloodPressure:
                       dashboardData?.healthVitals?.bloodPressure ?? '120/80',
                   steps: dashboardData?.healthVitals?.steps ?? '0',
-                  statusLabel: 'Rất tốt',
+                  statusLabel: 'Very Good',
                 ),
 
                 // Bottom padding for navigation bar
@@ -185,11 +185,11 @@ class CaretakerHomeScreen extends ConsumerWidget {
   String _getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {
-      return 'Chào buổi sáng';
+      return 'Good morning';
     } else if (hour < 18) {
-      return 'Chào buổi chiều';
+      return 'Good afternoon';
     } else {
-      return 'Chào buổi tối';
+      return 'Good evening';
     }
   }
 
@@ -197,12 +197,12 @@ class CaretakerHomeScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xử lý tình huống'),
-        content: const Text('Bạn có muốn gọi khẩn cấp hoặc liên hệ gia đình?'),
+        title: const Text('Situation Handling'),
+        content: const Text('Do you want to make an emergency call or contact family?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Huỷ'),
+            child: const Text('Cancel'), // TODO: REVIEW_LAYOUT_RISK
           ),
           ElevatedButton(
             onPressed: () {
@@ -210,7 +210,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
               // TODO: Implement emergency call
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Gọi khẩn cấp'),
+            child: const Text('Emergency Call'),
           ),
         ],
       ),

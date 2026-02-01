@@ -17,10 +17,10 @@ class PatientGreetingHero extends StatefulWidget {
   const PatientGreetingHero({
     super.key,
     required this.userName,
-    this.greeting = 'Chào buổi sáng',
+    this.greeting = 'Good morning',
     this.avatarUrl,
     this.moodMessage,
-    this.actionButtonText = 'GỌI KHẨN CẤP (SOS)',
+    this.actionButtonText = 'EMERGENCY CALL (SOS)',
     this.onActionPressed,
   });
 
@@ -50,16 +50,31 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
   String _getFormattedDate() {
     final now = DateTime.now();
     final weekdays = [
-      'Chủ Nhật',
-      'Thứ Hai',
-      'Thứ Ba',
-      'Thứ Tư',
-      'Thứ Năm',
-      'Thứ Sáu',
-      'Thứ Bảy',
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
+    final months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     final weekday = weekdays[now.weekday % 7];
-    return '$weekday, ngày ${now.day} tháng ${now.month}';
+    final month = months[now.month - 1];
+    return '$weekday, $month ${now.day}';
   }
 
   @override
@@ -152,7 +167,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
                 ),
                 padding: const EdgeInsets.only(left: 24, top: 20, right: 20),
                 child: Text(
-                  widget.moodMessage ?? 'Hôm nay tâm trạng của bác không tốt',
+                  widget.moodMessage ?? "You don't seem to be in a good mood today",
                   style: AppTextStyles.headline3.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,

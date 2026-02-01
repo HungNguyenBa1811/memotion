@@ -113,7 +113,7 @@ class UpcomingMedicationCard extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      // "Đã uống" button
+                      // "Taken" button
                       GestureDetector(
                         onTap: onTakenPressed ?? onDetailsPressed,
                         child: Container(
@@ -135,7 +135,7 @@ class UpcomingMedicationCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Đã uống',
+                                'Taken',
                                 style: AppTextStyles.headline3.copyWith(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
