@@ -170,14 +170,14 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       final uiData = ref.read(onboardingProvider);
 
       // Build payload from UI data
-      // usernameOrPhone is used for phone; fullName is the patient's name
+      // usernameOrPhone is used for email; fullName is the patient's name
       final body = {
         'full_name': uiData.fullName ?? 'none',
-        'email': '${uiData.usernameOrPhone ?? 'user'}@memotion.app',
+        'email': uiData.usernameOrPhone ?? 'user',
         'phone': uiData.usernameOrPhone ?? 'none',
         'role': 'PATIENT',
         'patient_full_name': uiData.fullName ?? 'none',
-        'patient_email': '${uiData.usernameOrPhone ?? 'user'}@memotion.app',
+        'patient_email': uiData.usernameOrPhone ?? 'user',
         'patient_phone': uiData.usernameOrPhone ?? 'none',
       };
       debugPrint('[NOTIFIER] createPatient() payload: $body');

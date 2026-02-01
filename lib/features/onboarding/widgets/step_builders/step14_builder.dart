@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/onboarding_data.dart';
-import '../../providers/onboarding_notifier.dart';
+import '../../providers/onboarding_provider.dart';
 import '../onboarding_option_cell.dart';
 
 /// Builder cho Step 14: ADL (Activities of Daily Living) assessment
@@ -23,7 +23,7 @@ class Step14Builder extends ConsumerWidget {
 
     // Watch current ADL score to highlight selected option
     final currentAdlScore = ref.watch(
-      onboardingNotifierProvider.select((s) => s.adlScore),
+      onboardingProvider.select((s) => s.adlScore),
     );
 
     // Determine selected index from score (reverse lookup)
@@ -67,7 +67,7 @@ class Step14Builder extends ConsumerWidget {
                 onTap: () {
                   // Set ADL score using option index -> score mapping [2,1,0]
                   ref
-                      .read(onboardingNotifierProvider.notifier)
+                      .read(onboardingProvider.notifier)
                       .setAdlScoreByOptionIndex(i);
                 },
               ),

@@ -272,7 +272,7 @@ class _NutritionDetailContent extends ConsumerWidget {
                     children: [
                       // Main image from API or fallback
                       Positioned(
-                        right: -100,
+                        right: -140,
                         top: -10,
                         child: _buildMainImage(),
                       ),
@@ -395,7 +395,7 @@ class _NutritionDetailContent extends ConsumerWidget {
   Widget _buildMainImage() {
     if (task.imagePath != null && task.imagePath!.isNotEmpty) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(200),
         child: Image.network(
           '${ApiConstants.baseUrl}${task.imagePath}',
           width: 300,

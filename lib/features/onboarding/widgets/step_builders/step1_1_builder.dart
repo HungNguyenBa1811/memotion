@@ -47,7 +47,7 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
             padding: const EdgeInsets.symmetric(horizontal: 0),
             child: Center(
               child: Text(
-                'Bác hãy nhập thông tin\nđăng nhập vào đây nhé',
+                'Bác hãy nhập email để\nđăng nhập vào đây nhé',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lexend(
                   fontSize: 22,
@@ -63,7 +63,7 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
 
           // Label - Lexend medium 16px
           Text(
-            'Username/Phone Number',
+            'Email',
             style: GoogleFonts.lexend(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -75,39 +75,31 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
           const SizedBox(height: 12),
 
           // Text field - 54px height, white bg, gray border, radius 16
-          Container(
+          SizedBox(
             height: 54,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFBEBAB3), width: 1),
-            ),
             child: TextField(
               controller: _usernameController,
               onChanged: _onUsernameChanged,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF3C3A36),
-                height: 1.5,
-              ),
               decoration: InputDecoration(
                 hintText: 'Username',
-                hintStyle: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF3C3A36).withOpacity(0.5),
-                  height: 1.5,
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 16,
                 ),
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
               ),
             ),
           ),

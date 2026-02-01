@@ -50,6 +50,7 @@ dependencies:
   flutter_secure_storage: ^10.0.0
   web_socket_channel: ^3.0.1
   video_player: ^2.9.2
+  video_thumbnail: ^0.5.3
 
 dev_dependencies:
   flutter_test:

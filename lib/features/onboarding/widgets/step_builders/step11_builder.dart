@@ -5,7 +5,7 @@ import '../../models/onboarding_data.dart';
 import '../../providers/onboarding_provider.dart';
 import '../onboarding_text_input.dart';
 
-/// Builder cho Step 11: Free text / notes
+/// Builder cho Step 11: Blood pressure / MAP score input
 class Step11Builder extends ConsumerStatefulWidget {
   const Step11Builder({super.key});
 
@@ -20,7 +20,9 @@ class _Step11BuilderState extends ConsumerState<Step11Builder> {
   void initState() {
     super.initState();
     final state = ref.read(onboardingProvider);
-    _controller = TextEditingController(text: state.doctorAdvice ?? '');
+    _controller = TextEditingController(
+      text: state.mapScore != null ? state.mapScore!.toInt().toString() : '',
+    );
   }
 
   @override
@@ -55,10 +57,14 @@ class _Step11BuilderState extends ConsumerState<Step11Builder> {
               height: 54,
               child: OnboardingTextInput(
                 controller: _controller,
-                hintText: 'map_score',
+                hintText: 'Nhập huyết áp',
                 maxLines: 1,
-                onChanged: (v) =>
-                    ref.read(onboardingProvider.notifier).setDoctorAdvice(v),
+                onChanged: (v) {
+                  final parsed = double.tryParse(v);
+                  if (parsed != null) {
+                    ref.read(onboardingProvider.notifier).setMapScore(parsed);
+                  }
+                },
               ),
             ),
             const SizedBox(height: 32),

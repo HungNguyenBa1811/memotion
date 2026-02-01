@@ -65,52 +65,38 @@ class _Step5BuilderState extends ConsumerState<Step5Builder> {
   }
 
   Widget _buildPainLevelInput(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 54,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFBEBAB3)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Center(
-          child: TextField(
-            controller: _painLevelController,
-            keyboardType: TextInputType.number,
-            textAlign: TextAlign.left,
-            style: GoogleFonts.lexend(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF3C3A36),
-              height: 26 / 16,
-              letterSpacing: -0.5,
-            ),
-            decoration: InputDecoration(
-              hintText: 'Nhập số từ 0 đến 10',
-              hintStyle: GoogleFonts.lexend(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF3C3A36).withAlpha(128),
-                height: 26 / 16,
-                letterSpacing: -0.5,
-              ),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              disabledBorder: InputBorder.none,
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-            ),
-            onChanged: (value) {
-              final intValue = int.tryParse(value);
-              if (intValue != null && intValue >= 0 && intValue <= 10) {
-                ref.read(onboardingProvider.notifier).setPainLevel(intValue);
-              }
-            },
+      child: TextField(
+        controller: _painLevelController,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          hintText: 'Nhập số từ 0 đến 10',
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
           ),
         ),
+        onChanged: (value) {
+          final intValue = int.tryParse(value);
+          if (intValue != null && intValue >= 0 && intValue <= 10) {
+            ref.read(onboardingProvider.notifier).setPainLevel(intValue);
+          }
+        },
       ),
     );
   }

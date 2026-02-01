@@ -150,6 +150,50 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
     state = state.copyWith(standAbility: ability);
   }
 
+  /// ========== Step 10: Living Arrangement ==========
+
+  /// Set living arrangement (step 10)
+  void setLivingArrangement(String arrangement) {
+    state = state.copyWith(livingArrangement: arrangement);
+  }
+
+  /// ========== Step 11: Blood Pressure / MAP Score ==========
+
+  /// Set MAP score / blood pressure (step 11)
+  void setMapScore(double score) {
+    state = state.copyWith(mapScore: score);
+  }
+
+  /// ========== Step 14: ADL Score ==========
+
+  /// Set ADL score directly (step 14)
+  void setAdlScore(int score) {
+    state = state.copyWith(adlScore: score);
+  }
+
+  /// Set ADL score by option index (step 14)
+  /// Options map to scores [2, 1, 0] in order
+  void setAdlScoreByOptionIndex(int index) {
+    const scores = [2, 1, 0];
+    final score = (index >= 0 && index < scores.length) ? scores[index] : 0;
+    state = state.copyWith(adlScore: score);
+  }
+
+  /// ========== Step 15: IADL Score ==========
+
+  /// Set IADL score directly (step 15)
+  void setIadlScore(int score) {
+    state = state.copyWith(iadlScore: score);
+  }
+
+  /// Set IADL score by option index (step 15)
+  /// Options map to scores [2, 1, 0] in order
+  void setIadlScoreByOptionIndex(int index) {
+    const scores = [2, 1, 0];
+    final score = (index >= 0 && index < scores.length) ? scores[index] : 0;
+    state = state.copyWith(iadlScore: score);
+  }
+
   /// ========== Validation & Completion ==========
 
   /// Hoàn thành onboarding
@@ -289,11 +333,190 @@ final currentStepConfigProvider = Provider<OnboardingStepConfig>((ref) {
 });
 
 /// Provider kiểm tra có thể tiến hành không
+/// All data is now stored in onboardingProvider (OnboardingData)
 final canProceedProvider = Provider<bool>((ref) {
-  return ref.watch(onboardingProvider.notifier).canProceed();
+  final state = ref.watch(onboardingProvider);
+
+  switch (state.currentStep) {
+    case 1:
+      return true; // Step 1 chỉ là giới thiệu
+
+    case 2:
+      // Step 2 (1.1): Username/Phone - bắt buộc nhập
+      return state.usernameOrPhone != null && state.usernameOrPhone!.isNotEmpty;
+
+    case 3:
+      // Step 3: Personal info - yêu cầu tên, năm sinh, giới tính, chiều cao, cân nặng
+      return state.fullName != null &&
+          state.fullName!.isNotEmpty &&
+          state.birthYear != null &&
+          state.gender != null &&
+          state.height != null &&
+          state.height! > 0 &&
+          state.weight != null &&
+          state.weight! > 0;
+
+    case 4:
+      // Step 4: Health objectives - yêu cầu chọn ít nhất 1 mục tiêu
+      return state.selectedObjectives.isNotEmpty;
+
+    case 5:
+      // Step 5: Pain locations - yêu cầu chọn ít nhất 1 vị trí đau
+      return state.selectedPainLocations.isNotEmpty;
+
+    case 6:
+      // Step 6: Pain level - yêu cầu chọn mức đau
+      return state.painLevel != null;
+
+    case 7:
+      // Step 7: Yếu/cứng - không bắt buộc
+      return true;
+
+    case 8:
+      // Step 8: Weakness type - không bắt buộc
+      return true;
+
+    case 9:
+      // Step 9: Vững chân/chóng mặt - không bắt buộc
+      return true;
+
+    case 10:
+      // Step 10: (uses OnboardingStep9Config) - not required here
+      return true;
+
+    case 11:
+      // Step 11: Living arrangement (OnboardingStep10Config) - optional
+      return true;
+
+    case 12:
+      // Step 12: Blood pressure/MAP score - yêu cầu nhập
+      return state.mapScore != null && state.mapScore! > 0;
+
+    case 13:
+      // Step 13: Heart rate - yêu cầu nhập
+      return state.heartRate != null && state.heartRate! > 0;
+
+    case 14:
+      // Step 14: Blood glucose - yêu cầu nhập
+      return state.bloodSugar != null && state.bloodSugar! > 0;
+
+    case 15:
+      // Step 15: ADL score - yêu cầu chọn
+      return state.adlScore != null;
+
+    case 16:
+      // Step 16: IADL score - yêu cầu chọn
+      return state.iadlScore != null;
+
+    case 17:
+      // Step 17: Document upload - optional
+      return true;
+
+    case 18:
+      // Step 18: Final step - no input required
+      return true;
+
+    default:
+      return true;
+  }
 });
 
 /// Provider lấy thông báo lỗi validation
+/// All data is now stored in onboardingProvider (OnboardingData)
 final validationErrorProvider = Provider<String?>((ref) {
-  return ref.watch(onboardingProvider.notifier).getValidationError();
+  final state = ref.watch(onboardingProvider);
+
+  switch (state.currentStep) {
+    case 2:
+      // Step 2 (1.1): Username/Phone - bắt buộc nhập
+      if (state.usernameOrPhone == null || state.usernameOrPhone!.isEmpty) {
+        return 'Vui lòng nhập số điện thoại hoặc tên đăng nhập';
+      }
+      return null;
+
+    case 3:
+      if (state.fullName == null || state.fullName!.isEmpty) {
+        return 'Vui lòng nhập tên';
+      }
+      if (state.birthYear == null) {
+        return 'Vui lòng chọn năm sinh';
+      }
+      if (state.gender == null) {
+        return 'Vui lòng chọn giới tính';
+      }
+      if (state.height == null || state.height! <= 0) {
+        return 'Vui lòng nhập chiều cao hợp lệ';
+      }
+      if (state.weight == null || state.weight! <= 0) {
+        return 'Vui lòng nhập cân nặng hợp lệ';
+      }
+      return null;
+
+    case 4:
+      if (state.selectedObjectives.isEmpty) {
+        return 'Vui lòng chọn mục tiêu phục hồi';
+      }
+      return null;
+
+    case 5:
+      if (state.selectedPainLocations.isEmpty) {
+        return 'Vui lòng chọn vị trí đau';
+      }
+      return null;
+
+    case 6:
+      if (state.painLevel == null) {
+        return 'Vui lòng cho biết mức đau (0-10)';
+      }
+      return null;
+
+    case 7:
+      // Step 7: Yếu/cứng - không bắt buộc
+      return null;
+
+    case 8:
+      // Step 8: Weakness type - không bắt buộc
+      return null;
+
+    case 9:
+      // Step 9: Vững chân/chóng mặt - không bắt buộc
+      return null;
+
+    case 10:
+      // Step 10: Living arrangement - không bắt buộc
+      return null;
+
+    case 11:
+      if (state.mapScore == null || state.mapScore! <= 0) {
+        return 'Vui lòng nhập huyết áp';
+      }
+      return null;
+
+    case 12:
+      if (state.heartRate == null || state.heartRate! <= 0) {
+        return 'Vui lòng nhập nhịp tim';
+      }
+      return null;
+
+    case 13:
+      if (state.bloodSugar == null || state.bloodSugar! <= 0) {
+        return 'Vui lòng nhập chỉ số đường huyết';
+      }
+      return null;
+
+    case 14:
+      if (state.adlScore == null) {
+        return 'Vui lòng chọn một đáp án';
+      }
+      return null;
+
+    case 15:
+      if (state.iadlScore == null) {
+        return 'Vui lòng chọn một đáp án';
+      }
+      return null;
+
+    default:
+      return null;
+  }
 });

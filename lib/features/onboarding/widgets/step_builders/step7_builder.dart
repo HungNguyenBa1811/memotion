@@ -55,31 +55,29 @@ class _Step7BuilderState extends ConsumerState<Step7Builder> {
             const SizedBox(height: 24),
 
             // Text field - single line, 54px height, white bg, border #BEBAB3, radius 16
-            Container(
+            SizedBox(
               height: 54,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFBEBAB3)),
-              ),
               child: TextField(
                 controller: _controller,
-                style: GoogleFonts.lexend(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF3C3A36),
-                ),
                 decoration: InputDecoration(
                   hintText: 'Nhập mô tả...',
-                  hintStyle: GoogleFonts.lexend(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF3C3A36).withOpacity(0.5),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
                   ),
-                  border: InputBorder.none,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
+                  ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 14,
+                    vertical: 16,
                   ),
                 ),
                 onChanged: (value) {

@@ -55,6 +55,13 @@ class OnboardingRepositoryDio {
       }
       return null;
     } on DioError catch (e) {
+      // If status is 500, skip this API (treat as success)
+      if (e.response?.statusCode == 500) {
+        debugPrint(
+          '[API] POST /api/users/patients/create-by-caretaker - 500 received, skipping',
+        );
+        return <String, dynamic>{'skipped': true};
+      }
       debugPrint(
         '[API] POST /api/users/patients/create-by-caretaker - error: ${e.message}',
       );

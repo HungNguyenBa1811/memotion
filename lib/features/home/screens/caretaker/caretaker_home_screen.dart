@@ -106,7 +106,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
                           Expanded(
                             child: ActionCard(
                               title: 'Kiểm tra\nsức khoẻ',
-                              svgAsset: 'assets/images/icon_heart_beat.svg',
+                              iconAsset: 'assets/images/icon_heart_beat.png',
                               icon: Icons.health_and_safety,
                               iconColor: AppColors.primary,
                               onTap: () {
@@ -118,7 +118,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
                           Expanded(
                             child: ActionCard(
                               title: 'Nhắc uống\nthuốc',
-                              svgAsset: 'assets/images/icon_medicine_file.svg',
+                              iconAsset: 'assets/images/icon_medicine_file.png',
                               icon: Icons.medication,
                               iconColor: AppColors.primary,
                               onTap: () {
@@ -135,7 +135,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
                           Expanded(
                             child: ActionCard(
                               title: 'Trò chuyện\ngia đình',
-                              svgAsset: 'assets/images/icon_calls.svg',
+                              iconAsset: 'assets/images/icon_calls.png',
                               icon: Icons.chat_bubble,
                               iconColor: AppColors.primary,
                               onTap: () {
@@ -147,7 +147,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
                           Expanded(
                             child: ActionCard(
                               title: 'Sổ sức\nkhoẻ',
-                              svgAsset: 'assets/images/icon_health_check.svg',
+                              iconAsset: 'assets/images/icon_health_check.png',
                               icon: Icons.book,
                               iconColor: AppColors.primary,
                               onTap: () {

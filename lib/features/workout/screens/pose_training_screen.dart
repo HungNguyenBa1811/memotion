@@ -19,6 +19,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/network/api_constants.dart';
 import '../data/camera_service.dart';
 import '../data/pose_detection_service.dart';
 import '../models/pose_detection_model.dart';
@@ -112,12 +113,12 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
 
   /// Get video URL based on exercise type
   String _getVideoUrl() {
-    if (widget.videoPath != null) {
-      return widget.videoPath!;
+    if (widget.videoPath != null && widget.videoPath!.isNotEmpty) {
+      // Use API base URL for video path from backend
+      return '${ApiConstants.baseUrl}${widget.videoPath}';
     }
     // Default video based on exercise type
     final exerciseType = widget.exerciseType ?? 'arm_raise';
-    // TODO: Replace with actual video URLs from backend
     return 'assets/videos/${exerciseType}_demo.mp4';
   }
 
@@ -343,19 +344,13 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
             // Back button
             Positioned(top: 8, left: 16, child: _buildBackButton()),
 
-            // Live analysis badge on user camera
-            Positioned(left: 8, top: 200, child: _buildLiveAnalysisBadge(state)),
-
-            // Bottom control panel
+            // Bottom control panel (includes Live Analysis and Synced badges)
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
               child: _buildBottomPanel(state),
             ),
-
-            // Sync indicator
-            Positioned(right: 16, top: 200, child: _buildSyncIndicator()),
           ],
         ),
       ),
@@ -428,12 +423,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                 Icon(
                   state.isConnected ? Icons.wifi : Icons.wifi_off,
                   size: 12,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  state.isConnected ? 'Live' : 'Offline',
-                  style: GoogleFonts.lexend(fontSize: 10, color: Colors.white),
+                  color: AppColors.primary,
                 ),
               ],
             ),
@@ -476,6 +466,20 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                 ),
               ],
             ),
+          ),
+        ),
+
+        // Live Analysis and Synced badges at bottom of camera
+        Positioned(
+          left: 12,
+          right: 12,
+          bottom: 8,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildLiveAnalysisBadge(state),
+              _buildSyncIndicator(),
+            ],
           ),
         ),
       ],
@@ -542,10 +546,10 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
 
   Widget _buildLiveAnalysisBadge(PoseSessionState state) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFFFFC5C5).withOpacity(0.4),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.red, width: 1),
       ),
       child: Row(
@@ -553,18 +557,18 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
         children: [
           // Blinking indicator
           Container(
-            width: 12,
-            height: 12,
+            width: 8,
+            height: 8,
             decoration: BoxDecoration(
               color: state.isConnected ? Colors.red : Colors.grey,
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Text(
             'LIVE ANALYSIS',
             style: GoogleFonts.lexend(
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: FontWeight.w800,
               color: Colors.white,
             ),
@@ -579,21 +583,21 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
     final syncColor = _syncOffset.abs() < 100 ? Colors.green : Colors.orange;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: syncColor.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: syncColor),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.sync, size: 14, color: syncColor),
+          Icon(Icons.sync, size: 12, color: syncColor),
           const SizedBox(width: 4),
           Text(
             syncStatus,
             style: GoogleFonts.lexend(
-              fontSize: 10,
+              fontSize: 9,
               fontWeight: FontWeight.w700,
               color: syncColor,
             ),
@@ -605,15 +609,15 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
 
   Widget _buildBottomPanel(PoseSessionState state) {
     return Container(
-      height: 140,
+      height: 110,
       decoration: const BoxDecoration(
         color: Color(0xFFF1F8E9),
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Column(
         children: [
           // Stats row
@@ -625,16 +629,16 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                 'Thời gian',
                 const Color(0xFFD67052),
               ),
-              const SizedBox(width: 12),
-              
+              const SizedBox(width: 8),
+
               // Reps
               _buildStatBox(
                 '${state.repCount}',
                 'Lần lặp',
                 const Color(0xFF00695C),
               ),
-              const SizedBox(width: 12),
-              
+              const SizedBox(width: 8),
+
               // Fatigue
               Expanded(
                 child: Column(
@@ -643,7 +647,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                     Text(
                       state.lastResult?.message ?? 'Đang phân tích...',
                       style: GoogleFonts.lexend(
-                        fontSize: 16,
+                        fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
                       maxLines: 1,
@@ -652,7 +656,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                     Text(
                       'Mức mệt mỏi: ${state.fatigueLevel}',
                       style: GoogleFonts.lexend(
-                        fontSize: 12,
+                        fontSize: 10,
                         color: _getFatigueColor(state.fatigueLevel),
                       ),
                     ),
@@ -661,28 +665,28 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
               ),
             ],
           ),
-          
+
           const Spacer(),
 
           // End button
           GestureDetector(
             onTap: _endSession,
             child: Container(
-              width: 180,
-              height: 44,
+              width: 160,
+              height: 36,
               decoration: BoxDecoration(
                 color: const Color(0xFF00695C),
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(18),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.stop, color: Colors.white, size: 18),
-                  const SizedBox(width: 8),
+                  const Icon(Icons.stop, color: Colors.white, size: 16),
+                  const SizedBox(width: 6),
                   Text(
                     'Kết thúc',
                     style: GoogleFonts.lexend(
-                      fontSize: 14,
+                      fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
@@ -698,17 +702,17 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
 
   Widget _buildStatBox(String value, String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         children: [
           Text(
             value,
             style: GoogleFonts.lexend(
-              fontSize: 16,
+              fontSize: 13,
               fontWeight: FontWeight.w800,
               color: color,
             ),
@@ -716,7 +720,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
           Text(
             label,
             style: GoogleFonts.lexend(
-              fontSize: 10,
+              fontSize: 9,
               color: Colors.grey[600],
             ),
           ),

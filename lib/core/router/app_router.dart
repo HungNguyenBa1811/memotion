@@ -107,8 +107,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthenticated = status == AuthStatus.authenticated;
 
       // Case 1: Đã authenticated nhưng đang ở public route (sign-in, registration, landing)
-      // -> Redirect đến authenticated area dựa trên is_first_login
+      // -> Redirect đến authenticated area dựa trên role và is_first_login
       if (isAuthenticated && isPublicRoute) {
+        // Nếu role = PATIENT -> skip onboarding, đi thẳng home
+        if (authState.isPatient) {
+          return RouteConfig.homeRoute; // /home
+        }
+
         final isFirstLogin = authState.isFirstLogin ?? true;
 
         // Nếu is_first_login = true -> đi onboarding

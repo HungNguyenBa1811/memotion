@@ -1,9 +1,11 @@
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/network/api_constants.dart';
 import '../providers/workout_provider.dart';
@@ -24,6 +26,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
   bool _isVideoPlaying = false;
   bool _isVideoInitialized = false;
   bool _isVideoLoading = false;
+  Uint8List? _thumbnailData;
 
   @override
   void initState() {
@@ -40,6 +43,24 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
     super.dispose();
   }
 
+  Future<void> _generateThumbnail(String videoPath) async {
+    try {
+      final fullVideoUrl = '${ApiConstants.baseUrl}$videoPath';
+      final data = await VideoThumbnail.thumbnailData(
+        video: fullVideoUrl,
+        imageFormat: ImageFormat.JPEG,
+        maxWidth: 512,
+        quality: 75,
+        timeMs: 0,
+      );
+      if (mounted && data != null) {
+        setState(() => _thumbnailData = data);
+      }
+    } catch (e) {
+      debugPrint('Thumbnail generation failed: $e');
+    }
+  }
+
   Future<void> _initializeAndPlayVideo(String videoPath) async {
     if (_isVideoLoading) return;
 
@@ -47,8 +68,8 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
 
     try {
       final fullVideoUrl = '${ApiConstants.baseUrl}$videoPath';
-      print('🎬🎬🎬 INITIALIZING VIDEO 🎬🎬🎬');
-      print('📹 URL: $fullVideoUrl');
+      debugPrint('🎬🎬🎬 INITIALIZING VIDEO 🎬🎬🎬');
+      debugPrint('📹 URL: $fullVideoUrl');
 
       // Dispose old controller if exists
       await _videoController?.dispose();
@@ -58,7 +79,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
       );
 
       await _videoController!.initialize();
-      print('✅ Video initialized! Size: ${_videoController!.value.size}');
+      debugPrint('✅ Video initialized! Size: ${_videoController!.value.size}');
 
       await _videoController!.setLooping(true);
       await _videoController!.play();
@@ -69,9 +90,9 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
         _isVideoLoading = false;
       });
 
-      print('🎉 VIDEO PLAYING! 🎉');
+      debugPrint('🎉 VIDEO PLAYING! 🎉');
     } catch (e) {
-      print('💀 VIDEO ERROR: $e');
+      debugPrint('💀 VIDEO ERROR: $e');
       setState(() => _isVideoLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -111,6 +132,15 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final detailState = ref.watch(workoutDetailProvider);
+
+    // Generate thumbnail when workout data is available
+    final workout = detailState.workout;
+    if (workout != null &&
+        _thumbnailData == null &&
+        workout.videoPath != null &&
+        workout.videoPath!.isNotEmpty) {
+      _generateThumbnail(workout.videoPath!);
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -394,7 +424,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
   /// Builds the hero image section with glassmorphism overlay card
   /// Design pattern: Stack with positioned overlay for depth effect
   Widget _buildHeroImageSection(WorkoutTask workout) {
-    const double imageHeight = 227.0;
+    const double imageHeight = 207.0;
     const double overlayCardHeight = 60.0;
     const double overlapOffset = 30.0; // How much the card overlaps the image
 
@@ -427,17 +457,24 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                 borderRadius: BorderRadius.circular(30),
                 child: _isVideoInitialized && _videoController != null
                     ? _buildVideoPlayer()
+                    : _thumbnailData != null
+                    ? Image.memory(
+                        _thumbnailData!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: imageHeight,
+                      )
                     : workout.imageAsset != null
-                        ? Image.asset(
-                            workout.imageAsset!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: imageHeight,
-                            errorBuilder: (context, error, stackTrace) {
-                              return _buildImagePlaceholder(workout);
-                            },
-                          )
-                        : _buildImagePlaceholder(workout),
+                    ? Image.asset(
+                        workout.imageAsset!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: imageHeight,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildImagePlaceholder(workout);
+                        },
+                      )
+                    : _buildImagePlaceholder(workout),
               ),
             ),
           ),
@@ -450,13 +487,13 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             child: Center(child: _buildPlayButton(workout)),
           ),
 
-          // Close video button (top right) - only show when video is playing
+          // Fullscreen button (bottom right of image)
           if (_isVideoInitialized)
             Positioned(
-              top: 10,
+              top: imageHeight - 42,
               right: 10,
               child: GestureDetector(
-                onTap: _stopVideo,
+                onTap: _openFullscreenVideo,
                 child: Container(
                   width: 32,
                   height: 32,
@@ -464,7 +501,11 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                     color: Colors.black.withOpacity(0.6),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.close, color: Colors.white, size: 18),
+                  child: const Icon(
+                    Icons.fullscreen,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
             ),
@@ -477,6 +518,15 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             child: _buildGlassmorphismInfoCard(workout),
           ),
         ],
+      ),
+    );
+  }
+
+  void _openFullscreenVideo() {
+    if (_videoController == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _FullscreenVideoPage(controller: _videoController!),
       ),
     );
   }
@@ -500,7 +550,11 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                 shape: BoxShape.circle,
               ),
               padding: const EdgeInsets.all(12),
-              child: const Icon(Icons.play_arrow, color: Colors.white, size: 40),
+              child: const Icon(
+                Icons.play_arrow,
+                color: Colors.white,
+                size: 40,
+              ),
             ),
         ],
       ),
@@ -729,11 +783,14 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
 
   void _startWorkoutExercise(WorkoutTask workout) {
     // Navigate to pose detection flow with real-time AI analysis
-    context.push('/pose-detection', extra: {
-      'workoutId': workout.id,
-      'exerciseType': _getExerciseType(workout.type),
-      'videoPath': workout.videoPath,
-    });
+    context.push(
+      '/pose-detection',
+      extra: {
+        'workoutId': workout.id,
+        'exerciseType': _getExerciseType(workout.type),
+        'videoPath': workout.videoPath,
+      },
+    );
   }
 
   String _getExerciseType(WorkoutType type) {
@@ -798,5 +855,58 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
       case WorkoutType.other:
         return AppColors.primary;
     }
+  }
+}
+
+class _FullscreenVideoPage extends StatelessWidget {
+  final VideoPlayerController controller;
+
+  const _FullscreenVideoPage({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: () {
+          if (controller.value.isPlaying) {
+            controller.pause();
+          } else {
+            controller.play();
+          }
+        },
+        child: Stack(
+          children: [
+            Center(
+              child: AspectRatio(
+                aspectRatio: controller.value.aspectRatio,
+                child: VideoPlayer(controller),
+              ),
+            ),
+            // Close button
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 10,
+              right: 16,
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.fullscreen_exit,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

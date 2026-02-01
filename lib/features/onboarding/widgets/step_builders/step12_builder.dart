@@ -61,7 +61,7 @@ class _Step12BuilderState extends ConsumerState<Step12Builder> {
               child: OnboardingTextInput(
                 controller: _controller,
                 maxLines: 1,
-                hintText: 'rhr_score',
+                hintText: 'RHR Score',
                 onChanged: (v) {
                   final parsed = int.tryParse(v);
                   ref.read(onboardingProvider.notifier).setHeartRate(parsed);

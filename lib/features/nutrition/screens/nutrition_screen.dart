@@ -73,7 +73,7 @@ class NutritionScreenContent extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Container(
+                      SizedBox(
                         width: 24,
                         height: 24,
                         child: Stack(
@@ -408,6 +408,8 @@ class _NutritionTaskCard extends ConsumerWidget {
                           ? TextDecoration.lineThrough
                           : null,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Row(

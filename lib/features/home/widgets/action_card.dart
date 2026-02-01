@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -9,7 +8,6 @@ class ActionCard extends StatelessWidget {
   final String title;
   final IconData? icon;
   final String? iconAsset;
-  final String? svgAsset;
   final Color? backgroundColor;
   final Color? iconColor;
   final VoidCallback? onTap;
@@ -21,7 +19,6 @@ class ActionCard extends StatelessWidget {
     required this.title,
     this.icon,
     this.iconAsset,
-    this.svgAsset,
     this.backgroundColor,
     this.iconColor,
     this.onTap,
@@ -61,7 +58,7 @@ class ActionCard extends StatelessWidget {
                       width: 15,
                       height: 15,
                       decoration: const BoxDecoration(
-                        color: AppColors.tealGreen,
+                        color: AppColors.primary,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -98,15 +95,9 @@ class ActionCard extends StatelessWidget {
   }
 
   Widget _buildIcon() {
-    // SVG asset
-    if (svgAsset != null) {
-      return SvgPicture.asset(svgAsset!, fit: BoxFit.contain);
-    }
-    // PNG/image asset
     if (iconAsset != null) {
       return Image.asset(iconAsset!, fit: BoxFit.contain);
     }
-    // No fallback
     return const SizedBox.shrink();
   }
 }

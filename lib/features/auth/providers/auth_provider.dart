@@ -16,6 +16,7 @@ class AuthState {
   final String? accessToken;
   final String? error;
   final bool? isFirstLogin;
+  final String? role;
 
   const AuthState({
     this.status = AuthStatus.initial,
@@ -23,7 +24,11 @@ class AuthState {
     this.accessToken,
     this.error,
     this.isFirstLogin,
+    this.role,
   });
+
+  /// Check if user is a patient (skip onboarding)
+  bool get isPatient => role?.toUpperCase() == 'PATIENT';
 
   AuthState copyWith({
     AuthStatus? status,
@@ -31,6 +36,7 @@ class AuthState {
     String? accessToken,
     String? error,
     bool? isFirstLogin,
+    String? role,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -38,6 +44,7 @@ class AuthState {
       accessToken: accessToken ?? this.accessToken,
       error: error,
       isFirstLogin: isFirstLogin ?? this.isFirstLogin,
+      role: role ?? this.role,
     );
   }
 }
@@ -85,6 +92,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         case Success(:final data):
           debugPrint('🔐 AuthNotifier: Session restored successfully');
           debugPrint('🔐 AuthNotifier: is_first_login = ${data.isFirstLogin}');
+          debugPrint('🔐 AuthNotifier: role = ${data.role}');
 
           final user = User(
             id: data.userId,
@@ -98,6 +106,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
             user: user,
             accessToken: token,
             isFirstLogin: data.isFirstLogin,
+            role: data.role,
           );
 
         case Failure(:final exception):
@@ -172,19 +181,42 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _tokenStorage.saveAccessToken(accessToken);
     await _tokenStorage.saveTokenType(data.tokenType);
 
-    // Tạo user tạm với email (có thể fetch thêm info sau nếu cần)
-    final user = User(
-      id: '',
-      email: email,
-      nickname: email.split('@').first,
-      createdAt: DateTime.now(),
-    );
+    // Gọi API /api/users/me để lấy role
+    debugPrint('🔐 AuthNotifier: Fetching user details to get role...');
+    final userDetailResult = await _authRepository.getUserDetails();
+
+    String? role;
+    User user;
+    bool isFirstLogin = data.isFirstLogin;
+
+    switch (userDetailResult) {
+      case Success(:final data):
+        debugPrint('🔐 AuthNotifier: Got user details - role: ${data.role}');
+        role = data.role;
+        isFirstLogin = data.isFirstLogin;
+        user = User(
+          id: data.userId,
+          email: data.email,
+          nickname: data.fullName,
+          createdAt: DateTime.now(),
+        );
+      case Failure(:final exception):
+        debugPrint('🔐 AuthNotifier: Failed to get user details: ${exception.message}');
+        // Fallback to basic user info
+        user = User(
+          id: '',
+          email: email,
+          nickname: email.split('@').first,
+          createdAt: DateTime.now(),
+        );
+    }
 
     state = state.copyWith(
       status: AuthStatus.authenticated,
       user: user,
       accessToken: accessToken,
-      isFirstLogin: data.isFirstLogin,
+      isFirstLogin: isFirstLogin,
+      role: role,
     );
     return true;
   }

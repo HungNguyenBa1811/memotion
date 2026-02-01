@@ -447,7 +447,7 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
         ),
         child: Center(
           child: Text(
-            'Back to Homepage',
+            'To Homepage',
             style: GoogleFonts.lexend(
               fontSize: 24,
               fontWeight: FontWeight.w700,
