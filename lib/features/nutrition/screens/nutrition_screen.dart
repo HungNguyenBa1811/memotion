@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/router/app_router.dart';
-import '../../../core/network/api_constants.dart';
 import '../../../core/network/api_exceptions.dart';
 import '../../../core/theme/theme.dart';
 import '../models/nutrition_task.dart';
 import '../providers/nutrition_provider.dart';
+import '../widgets/nutrition_task_card.dart';
 
 /// Original screen - kept for backwards compatibility
 class NutritionScreen extends ConsumerWidget {
@@ -268,7 +267,7 @@ class NutritionScreenContent extends ConsumerWidget {
         final task = tasks[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: _NutritionTaskCard(task: task),
+          child: NutritionTaskCard(task: task),
         );
       },
     );
@@ -318,181 +317,6 @@ class NutritionScreenContent extends ConsumerWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Card widget for displaying a nutrition task
-class _NutritionTaskCard extends ConsumerWidget {
-  final NutritionTask task;
-
-  const _NutritionTaskCard({required this.task});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isCompleted = task.status == NutritionStatus.completed;
-
-    return GestureDetector(
-      onTap: () {
-        context.push(
-          AppRoutes.nutritionDetail,
-          extra: {'taskId': task.id},
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Meal image from API or fallback icon
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: task.mealColor.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: task.imagePath != null && task.imagePath!.isNotEmpty
-                    ? Image.network(
-                        '${ApiConstants.baseUrl}${task.imagePath}',
-                        fit: BoxFit.cover,
-                        width: 60,
-                        height: 60,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(task.mealIcon, color: task.mealColor, size: 30);
-                        },
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: task.mealColor,
-                            ),
-                          );
-                        },
-                      )
-                    : Icon(task.mealIcon, color: task.mealColor, size: 30),
-              ),
-            ),
-            const SizedBox(width: 16),
-
-            // Task info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.name,
-                    style: GoogleFonts.lexend(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                      decoration: isCompleted
-                          ? TextDecoration.lineThrough
-                          : null,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.access_time,
-                        size: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        task.time,
-                        style: GoogleFonts.lexend(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: task.mealColor.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          task.mealType,
-                          style: GoogleFonts.lexend(
-                            fontSize: 12,
-                            color: task.mealColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (task.calories != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      '${task.calories} Kcal',
-                      style: GoogleFonts.lexend(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
-            // Status / Complete button
-            if (isCompleted)
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.check, color: Colors.green, size: 24),
-              )
-            else
-              GestureDetector(
-                onTap: () async {
-                  await ref
-                      .read(nutritionNotifierProvider.notifier)
-                      .completeTask(task.id);
-                  // Refresh list after completing
-                  ref.invalidate(nutritionTasksProvider);
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.check_circle_outline,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
                 ),
               ),
           ],

@@ -1,0 +1,167 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../core/network/api_constants.dart';
+import '../../../core/theme/theme.dart';
+import '../models/medication.dart';
+
+class MedicationTaskCard extends StatelessWidget {
+  final Medication medication;
+
+  const MedicationTaskCard({super.key, required this.medication});
+
+  @override
+  Widget build(BuildContext context) {
+    final pillImages = [
+      'assets/images/medication/pill_1.png',
+      'assets/images/medication/pill_2.png',
+      'assets/images/medication/pill_3.png',
+    ];
+    final imageIndex = medication.id.hashCode % pillImages.length;
+
+    final hasApiImage = medication.imageUrl.isNotEmpty;
+    final fullImageUrl = hasApiImage
+        ? '${ApiConstants.baseUrl}${medication.imageUrl}'
+        : null;
+
+    return Container(
+      width: double.infinity,
+      height: 110,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(27),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Teal dot indicator - top right
+          Positioned(
+            top: 10,
+            right: 15,
+            child: Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: AppColors.secondary,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          // Image on left side
+          Positioned(
+            left: 20,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: SizedBox(
+                width: 86,
+                height: 86,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: fullImageUrl != null
+                      ? Image.network(
+                          fullImageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              pillImages[imageIndex],
+                              fit: BoxFit.contain,
+                              errorBuilder: (ctx, err, st) {
+                                return _buildIconPlaceholder();
+                              },
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2),
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          pillImages[imageIndex],
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return _buildIconPlaceholder();
+                          },
+                        ),
+                ),
+              ),
+            ),
+          ),
+
+          // Title and Description
+          Positioned(
+            left: 120,
+            top: 15,
+            right: 80,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  medication.name,
+                  style: GoogleFonts.lexend(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                    letterSpacing: -0.3,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  medication.dosage,
+                  style: GoogleFonts.lexend(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w300,
+                    color: Colors.black,
+                    letterSpacing: -0.3,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+
+          // Time at bottom right
+          Positioned(
+            bottom: 15,
+            right: 20,
+            child: Text(
+              medication.time,
+              style: GoogleFonts.lexend(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIconPlaceholder() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Icon(
+        Icons.medication,
+        size: 40,
+        color: AppColors.primary,
+      ),
+    );
+  }
+}

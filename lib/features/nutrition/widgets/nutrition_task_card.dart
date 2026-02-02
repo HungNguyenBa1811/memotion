@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/router/app_router.dart';
+import '../../../core/network/api_constants.dart';
 import '../../../core/theme/theme.dart';
-import '../models/workout_model.dart';
+import '../models/nutrition_task.dart';
 
-class WorkoutTaskCard extends StatelessWidget {
-  final WorkoutTask workout;
-  final VoidCallback onTap;
+class NutritionTaskCard extends StatelessWidget {
+  final NutritionTask task;
 
-  const WorkoutTaskCard({
-    super.key,
-    required this.workout,
-    required this.onTap,
-  });
+  const NutritionTaskCard({super.key, required this.task});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        context.push(
+          AppRoutes.nutritionDetail,
+          extra: {'taskId': task.id},
+        );
+      },
       child: Container(
         width: double.infinity,
         height: 110,
@@ -58,12 +61,22 @@ class WorkoutTaskCard extends StatelessWidget {
                   height: 86,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: workout.imageAsset != null
-                        ? Image.asset(
-                            workout.imageAsset!,
-                            fit: BoxFit.contain,
+                    child: task.imagePath != null && task.imagePath!.isNotEmpty
+                        ? Image.network(
+                            '${ApiConstants.baseUrl}${task.imagePath}',
+                            fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return _buildIconPlaceholder();
+                            },
+                            loadingBuilder:
+                                (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: task.mealColor,
+                                ),
+                              );
                             },
                           )
                         : _buildIconPlaceholder(),
@@ -81,7 +94,7 @@ class WorkoutTaskCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    workout.title,
+                    task.name,
                     style: GoogleFonts.lexend(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -91,11 +104,11 @@ class WorkoutTaskCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (workout.description != null &&
-                      workout.description!.isNotEmpty) ...[
+                  if (task.description != null &&
+                      task.description!.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
-                      workout.description!,
+                      task.description!,
                       style: GoogleFonts.lexend(
                         fontSize: 11,
                         fontWeight: FontWeight.w300,
@@ -115,7 +128,7 @@ class WorkoutTaskCard extends StatelessWidget {
               bottom: 15,
               right: 20,
               child: Text(
-                workout.time,
+                task.time,
                 style: GoogleFonts.lexend(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -133,48 +146,14 @@ class WorkoutTaskCard extends StatelessWidget {
   Widget _buildIconPlaceholder() {
     return Container(
       decoration: BoxDecoration(
-        color: _getColorForType(workout.type).withOpacity(0.1),
+        color: task.mealColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(
-        _getIconForType(workout.type),
+        task.mealIcon,
         size: 40,
-        color: _getColorForType(workout.type),
+        color: task.mealColor,
       ),
     );
-  }
-
-  IconData _getIconForType(WorkoutType type) {
-    switch (type) {
-      case WorkoutType.yoga:
-        return Icons.self_improvement;
-      case WorkoutType.meal:
-        return Icons.restaurant;
-      case WorkoutType.medicine:
-        return Icons.medication;
-      case WorkoutType.exercise:
-        return Icons.fitness_center;
-      case WorkoutType.rest:
-        return Icons.hotel;
-      case WorkoutType.other:
-        return Icons.event;
-    }
-  }
-
-  Color _getColorForType(WorkoutType type) {
-    switch (type) {
-      case WorkoutType.yoga:
-        return const Color(0xFF7E57C2); // Purple
-      case WorkoutType.meal:
-        return const Color(0xFFFF7043); // Orange
-      case WorkoutType.medicine:
-        return const Color(0xFF42A5F5); // Blue
-      case WorkoutType.exercise:
-        return const Color(0xFF66BB6A); // Green
-      case WorkoutType.rest:
-        return const Color(0xFFAB47BC); // Violet
-      case WorkoutType.other:
-        return AppColors.primary;
-    }
   }
 }
