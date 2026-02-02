@@ -47,7 +47,7 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
             padding: const EdgeInsets.symmetric(horizontal: 0),
             child: Center(
               child: Text(
-                'Bác hãy nhập email để\nđăng nhập vào đây nhé',
+                'Please enter your email to\nlogin here',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lexend(
                   fontSize: 22,

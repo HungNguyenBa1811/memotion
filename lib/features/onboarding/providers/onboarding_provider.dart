@@ -265,55 +265,55 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
 
       case 3:
         if (state.fullName == null || state.fullName!.isEmpty) {
-          return 'Vui lòng nhập tên';
+          return 'Please enter name';
         }
         if (state.birthYear == null) {
-          return 'Vui lòng chọn năm sinh';
+          return 'Please select birth year';
         }
         if (state.gender == null) {
-          return 'Vui lòng chọn giới tính';
+          return 'Please select gender';
         }
         if (state.height == null || state.height! <= 0) {
-          return 'Vui lòng nhập chiều cao hợp lệ';
+          return 'Please enter a valid height';
         }
         if (state.weight == null || state.weight! <= 0) {
-          return 'Vui lòng nhập cân nặng hợp lệ';
+          return 'Please enter a valid weight';
         }
         return null;
 
       case 4:
         if (state.selectedObjectives.isEmpty) {
-          return 'Vui lòng chọn mục tiêu phục hồi';
+          return 'Please select recovery goal';
         }
         return null;
 
       case 5:
         if (state.selectedPainLocations.isEmpty) {
-          return 'Vui lòng chọn vị trí đau';
+          return 'Please select pain location';
         }
         return null;
 
       case 6:
         if (state.painLevel == null) {
-          return 'Vui lòng cho biết mức đau (0-10)';
+          return 'Please provide pain level (0-10)';
         }
         return null;
 
       case 7:
         if (state.painType == null) {
-          return 'Vui lòng chọn đặc tính cơn đau';
+          return 'Please select pain type';
         }
         return null;
 
       case 8:
         if (state.weaknessType == null) {
-          return 'Vui lòng chọn tình trạng yếu/cứng';
+          return 'Please select weakness/stiffness';
         }
         return null;
 
       case 9:
         if (state.standAbility == null) {
-          return 'Vui lòng chọn một đáp án';
+          return 'Please select an answer';
         }
         return null;
 
@@ -430,43 +430,43 @@ final validationErrorProvider = Provider<String?>((ref) {
     case 2:
       // Step 2 (1.1): Username/Phone - bắt buộc nhập
       if (state.usernameOrPhone == null || state.usernameOrPhone!.isEmpty) {
-        return 'Vui lòng nhập số điện thoại hoặc tên đăng nhập';
+        return 'Please enter phone number or username';
       }
       return null;
 
     case 3:
       if (state.fullName == null || state.fullName!.isEmpty) {
-        return 'Vui lòng nhập tên';
+        return 'Please enter name';
       }
       if (state.birthYear == null) {
-        return 'Vui lòng chọn năm sinh';
+        return 'Please select birth year';
       }
       if (state.gender == null) {
-        return 'Vui lòng chọn giới tính';
+        return 'Please select gender';
       }
       if (state.height == null || state.height! <= 0) {
-        return 'Vui lòng nhập chiều cao hợp lệ';
+        return 'Please enter a valid height';
       }
       if (state.weight == null || state.weight! <= 0) {
-        return 'Vui lòng nhập cân nặng hợp lệ';
+        return 'Please enter a valid weight';
       }
       return null;
 
     case 4:
       if (state.selectedObjectives.isEmpty) {
-        return 'Vui lòng chọn mục tiêu phục hồi';
+        return 'Please select recovery goal';
       }
       return null;
 
     case 5:
       if (state.selectedPainLocations.isEmpty) {
-        return 'Vui lòng chọn vị trí đau';
+        return 'Please select pain location';
       }
       return null;
 
     case 6:
       if (state.painLevel == null) {
-        return 'Vui lòng cho biết mức đau (0-10)';
+        return 'Please provide pain level (0-10)';
       }
       return null;
 
@@ -488,31 +488,31 @@ final validationErrorProvider = Provider<String?>((ref) {
 
     case 11:
       if (state.mapScore == null || state.mapScore! <= 0) {
-        return 'Vui lòng nhập huyết áp';
+        return 'Please enter blood pressure';
       }
       return null;
 
     case 12:
       if (state.heartRate == null || state.heartRate! <= 0) {
-        return 'Vui lòng nhập nhịp tim';
+        return 'Please enter heart rate';
       }
       return null;
 
     case 13:
       if (state.bloodSugar == null || state.bloodSugar! <= 0) {
-        return 'Vui lòng nhập chỉ số đường huyết';
+        return 'Please enter blood sugar level';
       }
       return null;
 
     case 14:
       if (state.adlScore == null) {
-        return 'Vui lòng chọn một đáp án';
+        return 'Please select an answer';
       }
       return null;
 
     case 15:
       if (state.iadlScore == null) {
-        return 'Vui lòng chọn một đáp án';
+        return 'Please select an answer';
       }
       return null;
 

@@ -39,7 +39,7 @@ class Step17Builder extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 26),
                 child: Text(
-                  'Hoàn tất hồ sơ phục hồi',
+                  'Recovery profile completed',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.lexend(
                     fontSize: 22,

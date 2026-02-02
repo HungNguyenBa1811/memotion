@@ -266,15 +266,15 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
         }
       }
 
-      // Map UI livingArrangement (Vietnamese options) to API enum strings
+      // Map UI livingArrangement (English options now) to API enum strings
       String mapLivingArrangement(String? v) {
         if (v == null) return 'ALONE';
         switch (v.trim()) {
-          case 'Sống một mình':
+          case 'Living alone':
             return 'ALONE';
-          case 'Sống cùng vợ/chồng':
+          case 'Living with spouse':
             return 'WITH_SPOUSE';
-          case 'Sống cùng con cháu':
+          case 'Living with children/grandchildren':
             return 'WITH_CHILDREN';
           default:
             return v.toUpperCase().replaceAll(' ', '_');

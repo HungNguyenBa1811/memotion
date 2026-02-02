@@ -71,7 +71,7 @@ class _Step5BuilderState extends ConsumerState<Step5Builder> {
         controller: _painLevelController,
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
-          hintText: 'Nhập số từ 0 đến 10',
+          hintText: 'Enter a number from 0 to 10',
           filled: true,
           fillColor: Colors.white,
           border: OutlineInputBorder(

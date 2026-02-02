@@ -60,7 +60,7 @@ class _Step7BuilderState extends ConsumerState<Step7Builder> {
               child: TextField(
                 controller: _controller,
                 decoration: InputDecoration(
-                  hintText: 'Nhập mô tả...',
+                  hintText: 'Enter description...',
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -82,16 +82,16 @@ class _Step7BuilderState extends ConsumerState<Step7Builder> {
                 ),
                 onChanged: (value) {
                   // Map text to WeaknessType or store as custom
-                  if (value.toLowerCase().contains('yếu')) {
+                  if (value.toLowerCase().contains('yếu') || value.toLowerCase().contains('weak')) {
                     ref
                         .read(onboardingProvider.notifier)
                         .setWeaknessType(WeaknessType.weakness);
-                  } else if (value.toLowerCase().contains('cứng')) {
+                  } else if (value.toLowerCase().contains('cứng') || value.toLowerCase().contains('stiff')) {
                     ref
                         .read(onboardingProvider.notifier)
                         .setWeaknessType(WeaknessType.stiffness);
                   } else if (value.isEmpty ||
-                      value.toLowerCase().contains('không')) {
+                      value.toLowerCase().contains('không') || value.toLowerCase().contains('none')) {
                     ref
                         .read(onboardingProvider.notifier)
                         .setWeaknessType(WeaknessType.none);

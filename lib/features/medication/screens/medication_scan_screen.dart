@@ -55,12 +55,12 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
         }
       } else {
         setState(() {
-          _cameraError = 'Không tìm thấy camera';
+          _cameraError = 'No camera found';
         });
       }
     } catch (e) {
       setState(() {
-        _cameraError = 'Lỗi khởi tạo camera: $e';
+        _cameraError = 'Camera initialization error: $e';
       });
     }
   }
@@ -104,7 +104,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi quét: $e')));
+        ).showSnackBar(SnackBar(content: Text('Scan error: $e')));
       }
     }
   }
@@ -275,7 +275,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
                       const CircularProgressIndicator(color: Colors.white),
                       const SizedBox(height: 16),
                       Text(
-                        'Đang quét...',
+                        'Scanning...',
                         style: GoogleFonts.lexend(
                           fontSize: 16,
                           color: Colors.white,
@@ -333,7 +333,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
               const CircularProgressIndicator(color: AppColors.primary),
               const SizedBox(height: 16),
               Text(
-                'Đang khởi tạo camera...',
+                'Initializing camera...',
                 style: GoogleFonts.lexend(
                   fontSize: 14,
                   color: Colors.grey[600],
@@ -376,7 +376,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
                   const Icon(Icons.arrow_back, color: Colors.white, size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    'Quay lại',
+                    'Back',
                     style: GoogleFonts.lexend(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -407,7 +407,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
                   const Icon(Icons.refresh, color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    'Quét lại',
+                    'Scan again',
                     style: GoogleFonts.lexend(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -571,7 +571,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
             ),
           ),
 
-          // "Mới quét" badge (top right)
+          // "Newly scanned" badge (top right)
           Positioned(
             top: 0,
             right: 0,
@@ -590,7 +590,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
                 ),
               ),
               child: Text(
-                'Mới quét',
+                'Newly scanned',
                 style: GoogleFonts.lexend(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -609,7 +609,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
                 // Add medication to list
                 ScaffoldMessenger.of(
                   context,
-                ).showSnackBar(const SnackBar(content: Text('Đã thêm thuốc!')));
+                ).showSnackBar(const SnackBar(content: Text('Medication added!')));
                 context.pop();
               },
               child: Container(
@@ -621,7 +621,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
                 ),
                 child: Center(
                   child: Text(
-                    'Thêm',
+                    'Add',
                     style: GoogleFonts.lexend(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,

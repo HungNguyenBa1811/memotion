@@ -106,7 +106,7 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Tên người được chăm sóc',
+          'Care recipient name',
           style: GoogleFonts.lexend(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -120,7 +120,7 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
             controller: _nameController,
             focusNode: _nameFocus,
             decoration: InputDecoration(
-              hintText: 'Họ và tên',
+              hintText: 'Full name',
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
@@ -150,7 +150,7 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Năm sinh',
+          'Birth Year',
           style: GoogleFonts.lexend(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -181,7 +181,7 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  state.birthYear != null ? state.birthYear.toString() : 'Chọn',
+                  state.birthYear != null ? state.birthYear.toString() : 'Select',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Icon(Icons.calendar_today, size: 18, color: Colors.grey[600]),
@@ -198,7 +198,7 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Giới tính',
+          'Gender',
           style: GoogleFonts.lexend(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -247,7 +247,7 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Chiều cao (cm)',
+          'Height (cm)',
           style: GoogleFonts.lexend(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -295,7 +295,7 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Cân nặng (kg)',
+          'Weight (kg)',
           style: GoogleFonts.lexend(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -410,7 +410,7 @@ class _BirthYearPickerState extends State<_BirthYearPicker> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'Chọn năm sinh',
+                'Select Birth Year',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
@@ -436,11 +436,11 @@ class _BirthYearPickerState extends State<_BirthYearPicker> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Hủy'),
+                    child: const Text('Cancel'),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context, selectedYear),
-                    child: const Text('Chọn'),
+                    child: const Text('Select'),
                   ),
                 ],
               ),

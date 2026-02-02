@@ -74,7 +74,7 @@ class Step3Builder extends ConsumerWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: OnboardingOptionCell(
-            text: objective.displayNameVi,
+            text: objective.displayNameEn,
             isSelected: isSelected,
             onTap: () {
               ref

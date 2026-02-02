@@ -25,10 +25,10 @@ class _OnboardingLoadingScreenState
 
   int _currentStep = 0;
   final List<String> _loadingMessages = [
-    'Đang tạo hồ sơ sức khỏe...',
-    'Đang phân tích thông tin vật lý trị liệu...',
-    'Đang tạo kế hoạch chăm sóc AI...',
-    'Hoàn tất!',
+    'Creating health profile...',
+    'Analyzing physical therapy information...',
+    'Generating AI care plan...',
+    'Completed!',
   ];
 
   @override
@@ -151,7 +151,7 @@ class _OnboardingLoadingScreenState
 
                 // Title
                 Text(
-                  'Đang thiết lập hồ sơ',
+                  'Setting up your profile',
                   style: GoogleFonts.lexend(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
@@ -163,7 +163,7 @@ class _OnboardingLoadingScreenState
 
                 // Subtitle
                 Text(
-                  'Vui lòng chờ trong giây lát...',
+                  'Please wait a moment...',
                   style: GoogleFonts.lexend(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,

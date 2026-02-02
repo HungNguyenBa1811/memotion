@@ -134,7 +134,7 @@ class _NutritionDetailError extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Không thể tải thông tin',
+                      'Unable to load information',
                       style: GoogleFonts.lexend(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -154,7 +154,7 @@ class _NutritionDetailError extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: onRetry,
                       icon: const Icon(Icons.refresh),
-                      label: const Text('Thử lại'),
+                      label: const Text('Try again'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
@@ -285,7 +285,7 @@ class _NutritionDetailContent extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Dinh dưỡng',
+                              'Nutrition',
                               style: GoogleFonts.lexend(
                                 fontSize: 26,
                                 fontWeight: FontWeight.w700,
@@ -315,7 +315,7 @@ class _NutritionDetailContent extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 22),
                     child: Text(
-                      'Mô tả',
+                      'Description',
                       style: GoogleFonts.lexend(
                         fontSize: 30,
                         fontWeight: FontWeight.w700,
@@ -344,7 +344,7 @@ class _NutritionDetailContent extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 22),
                   child: Text(
-                    'Thời gian',
+                    'Time',
                     style: GoogleFonts.lexend(
                       fontSize: 30,
                       fontWeight: FontWeight.w700,
@@ -467,7 +467,7 @@ class _NutritionDetailContent extends ConsumerWidget {
             },
       child: SizedBox(
         height: 48,
-        width: isCompleted ? 180 : 220,
+        width: isCompleted ? 140 : 180,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -489,7 +489,7 @@ class _NutritionDetailContent extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(70),
                 ),
                 child: Text(
-                  isCompleted ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành',
+                  isCompleted ? 'Completed' : 'Mark as completed',
                   style: GoogleFonts.lexend(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -533,13 +533,13 @@ class _NutritionDetailContent extends ConsumerWidget {
   String _getMealTypeLabel(String mealType) {
     switch (mealType.toLowerCase()) {
       case 'breakfast':
-        return 'Bữa sáng';
+        return 'Breakfast';
       case 'lunch':
-        return 'Bữa trưa';
+        return 'Lunch';
       case 'dinner':
-        return 'Bữa tối';
+        return 'Dinner';
       case 'snack':
-        return 'Bữa phụ';
+        return 'Snack';
       default:
         return mealType;
     }

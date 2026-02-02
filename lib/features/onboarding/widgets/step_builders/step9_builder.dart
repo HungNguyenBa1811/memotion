@@ -64,7 +64,7 @@ class _Step9BuilderState extends ConsumerState<Step9Builder> {
       child: TextField(
         controller: _controller,
         decoration: InputDecoration(
-          hintText: 'Nhập câu trả lời',
+          hintText: 'Enter your answer',
           filled: true,
           fillColor: Colors.white,
           border: OutlineInputBorder(

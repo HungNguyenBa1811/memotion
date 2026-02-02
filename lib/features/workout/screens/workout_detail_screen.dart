@@ -97,7 +97,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi tải video: $e', style: GoogleFonts.lexend()),
+            content: Text('Video loading error: $e', style: GoogleFonts.lexend()),
             backgroundColor: Colors.red,
           ),
         );
@@ -153,7 +153,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             ? _buildErrorView(detailState.error!)
             : detailState.workout != null
             ? _buildDetailContent(detailState.workout!)
-            : _buildErrorView('Không tìm thấy nhiệm vụ'),
+            : _buildErrorView('Task not found'),
       ),
     );
   }
@@ -186,7 +186,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                 ),
               ),
               child: Text(
-                'Quay lại',
+                'Back',
                 style: GoogleFonts.lexend(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -310,7 +310,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Các bước thực hiện',
+                    'Execution Steps',
                     style: GoogleFonts.lexend(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -629,7 +629,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Video chưa có sẵn cho bài tập này',
+                'Video not available for this exercise',
                 style: GoogleFonts.lexend(),
               ),
               backgroundColor: AppColors.primary,
@@ -811,8 +811,8 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
       SnackBar(
         content: Text(
           workout.isCompleted
-              ? 'Đã đánh dấu chưa hoàn thành'
-              : 'Đã hoàn thành nhiệm vụ!',
+              ? 'Marked as incomplete'
+              : 'Task completed!',
           style: GoogleFonts.lexend(),
         ),
         backgroundColor: AppColors.primary,

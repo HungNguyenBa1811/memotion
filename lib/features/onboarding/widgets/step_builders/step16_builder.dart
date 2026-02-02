@@ -68,7 +68,7 @@ class Step16Builder extends ConsumerWidget {
                   ),
                 ),
                 child: Text(
-                  'Chụp ảnh',
+                  'Take photo',
                   style: GoogleFonts.lexend(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -94,7 +94,7 @@ class Step16Builder extends ConsumerWidget {
                   ),
                 ),
                 child: Text(
-                  'Chọn ảnh từ thư viện',
+                  'Choose from gallery',
                   style: GoogleFonts.lexend(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,

@@ -286,14 +286,14 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
               const CircularProgressIndicator(color: Color(0xFF4CAF50)),
               const SizedBox(height: 16),
               Text(
-                'Đang khởi tạo Phase 3...',
+                'Initializing Phase 3...',
                 style: GoogleFonts.lexend(fontSize: 16),
               ),
               if (_isCameraReady)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    '✓ Camera sẵn sàng',
+                    '✓ Camera ready',
                     style: GoogleFonts.lexend(fontSize: 14, color: Colors.green),
                   ),
                 ),
@@ -313,11 +313,11 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Lỗi: $_error', style: GoogleFonts.lexend(fontSize: 16)),
+              Text('Error: $_error', style: GoogleFonts.lexend(fontSize: 16)),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => context.pop(),
-                child: const Text('Quay lại'),
+                child: const Text('Back'),
               ),
             ],
           ),
@@ -399,7 +399,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                       const Icon(Icons.videocam_off, size: 64, color: Colors.white54),
                       const SizedBox(height: 8),
                       Text(
-                        'Camera đang khởi tạo...',
+                        'Camera initializing...',
                         style: GoogleFonts.lexend(color: Colors.white54),
                       ),
                     ],
@@ -505,7 +505,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                       Icon(Icons.person, size: 64, color: Colors.white.withOpacity(0.5)),
                       const SizedBox(height: 8),
                       Text(
-                        'Video mẫu',
+                        'Reference Video',
                         style: GoogleFonts.lexend(color: Colors.white70),
                       ),
                     ],
@@ -626,7 +626,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
               // Duration
               _buildStatBox(
                 _formatTime(_elapsedSeconds),
-                'Thời gian',
+                'Duration',
                 const Color(0xFFD67052),
               ),
               const SizedBox(width: 8),
@@ -634,7 +634,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
               // Reps
               _buildStatBox(
                 '${state.repCount}',
-                'Lần lặp',
+                'Reps',
                 const Color(0xFF00695C),
               ),
               const SizedBox(width: 8),
@@ -645,7 +645,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      state.lastResult?.message ?? 'Đang phân tích...',
+                      state.lastResult?.message ?? 'Analyzing...',
                       style: GoogleFonts.lexend(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -654,7 +654,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'Mức mệt mỏi: ${state.fatigueLevel}',
+                      'Fatigue Level: ${state.fatigueLevel}',
                       style: GoogleFonts.lexend(
                         fontSize: 10,
                         color: _getFatigueColor(state.fatigueLevel),
@@ -684,7 +684,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                   const Icon(Icons.stop, color: Colors.white, size: 16),
                   const SizedBox(width: 6),
                   Text(
-                    'Kết thúc',
+                    'End',
                     style: GoogleFonts.lexend(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -749,12 +749,12 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Kết thúc?', style: GoogleFonts.lexend(fontWeight: FontWeight.bold)),
-        content: Text('Bạn có chắc muốn kết thúc bài tập?', style: GoogleFonts.lexend()),
+        title: Text('End Session?', style: GoogleFonts.lexend(fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to end the workout?', style: GoogleFonts.lexend()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Tiếp tục', style: GoogleFonts.lexend(color: AppColors.primary)),
+            child: Text('Continue', style: GoogleFonts.lexend(color: AppColors.primary)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -762,7 +762,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
               _endSession();
             },
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD67052)),
-            child: Text('Kết thúc', style: GoogleFonts.lexend(color: Colors.white)),
+            child: Text('End', style: GoogleFonts.lexend(color: Colors.white)),
           ),
         ],
       ),

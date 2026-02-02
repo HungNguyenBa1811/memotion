@@ -32,13 +32,13 @@ class _OnboardingStepScreenState extends State<OnboardingStepScreen> {
   String get title {
     switch (widget.step) {
       case 1:
-        return 'Ứng dụng giám sát, xây dựng lộ trình phục hồi chức năng toàn diện';
+        return 'Comprehensive monitoring and rehabilitation journey app';
       case 2:
-        return 'Bác muốn phục hồi chức năng về?';
+        return 'What type of rehabilitation do you need?';
       case 3:
-        return 'Hiện tại, cơ thể bác đang cảm thấy đau hay khó chịu ở đâu nhất?';
+        return 'Where does your body feel the most pain or discomfort right now?';
       case 4:
-        return 'Lời khuyên từ bác sĩ?';
+        return "Doctor's advice?";
       default:
         return 'Onboarding';
     }
@@ -47,9 +47,9 @@ class _OnboardingStepScreenState extends State<OnboardingStepScreen> {
   List<String> get options {
     switch (widget.step) {
       case 2:
-        return ['Vật lý trị liệu', 'Thần kinh'];
+        return ['Physical Therapy', 'Neurology'];
       case 3:
-        return ['Khớp gối', 'Khớp vai'];
+        return ['Knee Joint', 'Shoulder Joint'];
       default:
         return [];
     }
@@ -357,7 +357,7 @@ class _OnboardingStepScreenState extends State<OnboardingStepScreen> {
             controller: _adviceController,
             maxLines: 3,
             decoration: const InputDecoration(
-              hintText: 'Nhập lời khuyên...',
+              hintText: 'Enter advice...',
               hintStyle: TextStyle(
                 fontFamily: 'Lexend',
                 fontSize: 16,
@@ -444,13 +444,13 @@ class _OnboardingStepScreenState extends State<OnboardingStepScreen> {
 
   IconData _getIconForOption(String option) {
     switch (option) {
-      case 'Vật lý trị liệu':
+      case 'Physical Therapy':
         return Icons.accessibility;
-      case 'Thần kinh':
+      case 'Neurology':
         return Icons.psychology;
-      case 'Khớp gối':
+      case 'Knee Joint':
         return Icons.directions_walk;
-      case 'Khớp vai':
+      case 'Shoulder Joint':
         return Icons.sports_martial_arts;
       default:
         return Icons.medical_services;

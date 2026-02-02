@@ -9,16 +9,11 @@ import '../widgets/calendar_day_picker.dart';
 import '../widgets/workout_task_card.dart';
 
 /// Original screen - kept for backwards compatibility
-class WorkoutScreen extends ConsumerStatefulWidget {
+class WorkoutScreen extends ConsumerWidget {
   const WorkoutScreen({super.key});
 
   @override
-  ConsumerState<WorkoutScreen> createState() => _WorkoutScreenState();
-}
-
-class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return const WorkoutScreenContent();
   }
 }
@@ -116,7 +111,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Nhiệm vụ ngày',
+                      'Daily Tasks',
                       style: GoogleFonts.lexend(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
@@ -126,7 +121,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Ông Hải Nam BE',
+                      'Patient Name',
                       style: GoogleFonts.lexend(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -179,8 +174,8 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                         const SizedBox(height: 16),
                         Text(
                           workoutState.isPatientProfileNotFound
-                              ? 'Chưa có hồ sơ bệnh nhân'
-                              : 'Không thể tải dữ liệu',
+                              ? 'No patient profile yet'
+                              : 'Unable to load data',
                           style: GoogleFonts.lexend(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -191,7 +186,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                         const SizedBox(height: 8),
                         Text(
                           workoutState.isPatientProfileNotFound
-                              ? 'Vui lòng liên hệ bác sĩ để được tạo hồ sơ bệnh nhân và nhận kế hoạch tập luyện.'
+                              ? 'Please contact your doctor to create a patient profile and receive a workout plan.'
                               : workoutState.error!,
                           style: GoogleFonts.lexend(
                             fontSize: 14,
@@ -206,7 +201,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                                 .read(workoutListProvider.notifier)
                                 .loadWorkoutsForDate(workoutState.selectedDate),
                             icon: const Icon(Icons.refresh, size: 18),
-                            label: const Text('Thử lại'),
+                            label: const Text('Try again'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: Colors.white,
@@ -230,7 +225,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Không có nhiệm vụ nào',
+                          'No tasks available',
                           style: GoogleFonts.lexend(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -239,7 +234,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Hãy thêm nhiệm vụ mới',
+                          'Stay active',
                           style: GoogleFonts.lexend(
                             fontSize: 14,
                             color: AppColors.textSecondary,

@@ -43,7 +43,7 @@ class OnboardingStep1Config extends OnboardingStepConfig {
     : super(
         step: 1,
         title:
-            'Ứng dụng giám sát, xây dựng lộ trình phục hồi chức năng toàn diện',
+            'Monitoring and building a comprehensive rehabilitation journey app',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly_couple.png',
         extraImagePath: 'assets/images/onboarding/onboarding_logo.png',
@@ -57,7 +57,7 @@ class OnboardingStep1_1Config extends OnboardingStepConfig {
   const OnboardingStep1_1Config()
     : super(
         step: 2,
-        title: 'Bác hãy nhập thông tin đăng nhập vào đây nhé',
+        title: 'Please enter your login information here',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly4.png',
         titleAlignment: TitleAlignment.center,
@@ -68,7 +68,7 @@ class OnboardingStep2Config extends OnboardingStepConfig {
   const OnboardingStep2Config()
     : super(
         step: 3,
-        title: 'Thông tin cơ bản của người được chăm sóc',
+        title: 'Basic information of the care recipient',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly4.png',
         titleAlignment: TitleAlignment.center,
@@ -79,8 +79,8 @@ class OnboardingStep3Config extends OnboardingStepConfig {
   const OnboardingStep3Config()
     : super(
         step: 3,
-        title: 'Mục tiêu phục hồi chính hiện nay là gì?',
-        subtitle: 'Chọn mục tiêu phù hợp nhất với tình trạng hiện tại.',
+        title: 'What is the main recovery goal currently?',
+        subtitle: 'Choose the most appropriate goal for the current condition.',
         imagePath: 'assets/images/onboarding/elderly1.png',
       );
 }
@@ -89,7 +89,7 @@ class OnboardingStep4Config extends OnboardingStepConfig {
   const OnboardingStep4Config()
     : super(
         step: 4,
-        title: 'Hiện tại, bác thấy đau hoặc khó chịu nhiều nhất ở đâu?',
+        title: 'Currently, where do you feel the most pain or discomfort?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -100,7 +100,7 @@ class OnboardingStep5Config extends OnboardingStepConfig {
     : super(
         step: 5,
         title:
-            'Nếu coi 0 là không đau và 10 là đau không chịu nổi, thì mức đau của ông/bà đang là mấy ạ?',
+            'If 0 is no pain and 10 is unbearable pain, what is your current pain level?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -111,7 +111,7 @@ class OnboardingStep6Config extends OnboardingStepConfig {
     : super(
         step: 6,
         title:
-            'Cái đau này nó như thế nào ông/bà nhỉ? Đau nhói một lúc rồi hết, hay cứ đau âm ỉ cả ngày?',
+            'How would you describe this pain? Sharp for a while then gone, or a dull ache all day?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -122,7 +122,7 @@ class OnboardingStep7Config extends OnboardingStepConfig {
     : super(
         step: 7,
         title:
-            'Ông/bà có thấy tay chân mình bị yếu đi hay có chỗ nào bị cứng, khó cử động không',
+            'Do you feel any weakness in your limbs or any stiffness or difficulty moving?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -133,7 +133,7 @@ class OnboardingStep8Config extends OnboardingStepConfig {
     : super(
         step: 8,
         title:
-            'Từ ghế ngồi, ông/bà có thể tự đứng lên mà không cần vịn tay hay ai đỡ không ạ?',
+            'Can you stand up from a chair without using your hands or needing support?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -144,7 +144,7 @@ class OnboardingStep9Config extends OnboardingStepConfig {
     : super(
         step: 9,
         title:
-            'Khi đi lại, ông/bà có thấy vững chân không? Có bao giờ cảm thấy hơi chóng mặt hay lo sợ mình bị ngã không?',
+            'Do you feel steady when walking? Do you ever feel slightly dizzy or fear falling?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -154,13 +154,13 @@ class OnboardingStep10Config extends OnboardingStepConfig {
   const OnboardingStep10Config()
     : super(
         step: 10,
-        title: 'Hiện tại ông/bà đang sống cùng với ai cho vui vầy ạ?',
+        title: 'Who are you currently living with?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly_couple2.png',
         options: const [
-          'Sống một mình',
-          'Sống cùng vợ/chồng',
-          'Sống cùng con cháu',
+          'Living alone',
+          'Living with spouse',
+          'Living with children/grandchildren',
         ],
       );
 }
@@ -170,7 +170,7 @@ class OnboardingStep11Config extends OnboardingStepConfig {
     : super(
         step: 11,
         title:
-            'Huyết áp của ông/bà thường ở mức nào ạ? Nếu có máy đo ở đó, ông/bà cho con xin con số nhé.',
+            'What is your typical blood pressure level? If you have a monitor, please provide the numbers.',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly5.png',
       );
@@ -181,7 +181,7 @@ class OnboardingStep12Config extends OnboardingStepConfig {
     : super(
         step: 12,
         title:
-            'Lúc ngồi nghỉ ngơi thong thả, ông/bà thấy tim mình đập có đều không? Nhịp tim thường là bao nhiêu ạ?',
+            'When resting, do you feel your heart beat regularly? What is your typical heart rate?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly5.png',
       );
@@ -192,7 +192,7 @@ class OnboardingStep13Config extends OnboardingStepConfig {
     : super(
         step: 13,
         title:
-            'Chỉ số đường huyết gần nhất mà bác sĩ báo cho ông/bà là bao nhiêu ạ',
+            'What was the most recent blood glucose level reported by your doctor?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly5.png',
       );
@@ -203,13 +203,13 @@ class OnboardingStep14Config extends OnboardingStepConfig {
     : super(
         step: 14,
         title:
-            'Trong các việc hằng ngày như vệ sinh cá nhân, mặc quần áo hay ăn uống, ông/bà có cần ai giúp đỡ không?',
+            'Do you need any help with daily activities like personal hygiene, dressing, or eating?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly_couple3.png',
         options: const [
-          'Hoàn toàn tự làm được',
-          'Cần hỗ trợ một chút.',
-          'Cần người làm giúp hoàn toàn.',
+          'Completely independent',
+          'Need a little support.',
+          'Need full assistance.',
         ],
       );
 }
@@ -219,13 +219,13 @@ class OnboardingStep15Config extends OnboardingStepConfig {
     : super(
         step: 15,
         title:
-            'Ông/bà có thể tự đi chợ, nấu cơm hay dùng điện thoại gọi cho con cháu một mình được không ạ',
+            'Can you go shopping, cook, or use the phone to call your children/grandchildren by yourself?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly_couple3.png',
         options: const [
-          'Hoàn toàn tự làm được',
-          'Cần hỗ trợ một chút.',
-          'Cần người làm giúp hoàn toàn.',
+          'Completely independent',
+          'Need a little support.',
+          'Need full assistance.',
         ],
       );
 }
@@ -234,7 +234,7 @@ class OnboardingStep16Config extends OnboardingStepConfig {
   const OnboardingStep16Config()
     : super(
         step: 16,
-        title: 'Chụp giấy ra viện / đơn thuốc',
+        title: 'Take a photo of discharge summary / prescription',
         subtitle: null,
         imagePath: null,
         titleAlignment: TitleAlignment.center,
@@ -245,7 +245,7 @@ class OnboardingStep17Config extends OnboardingStepConfig {
   const OnboardingStep17Config()
     : super(
         step: 17,
-        title: 'Hoàn tất',
+        title: 'Completed',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly2.png',
       );
@@ -463,11 +463,11 @@ extension GenderDisplay on Gender {
   String get displayName {
     switch (this) {
       case Gender.male:
-        return 'Nam';
+        return 'Male';
       case Gender.female:
-        return 'Nữ';
+        return 'Female';
       case Gender.other:
-        return 'Khác';
+        return 'Other';
     }
   }
 }
@@ -500,15 +500,15 @@ extension PainLocationDisplay on PainLocation {
   String get displayName {
     switch (this) {
       case PainLocation.shoulder:
-        return 'Khớp vai';
+        return 'Shoulder Joint';
       case PainLocation.back:
-        return 'Thắt lưng';
+        return 'Lower Back';
       case PainLocation.knee:
-        return 'Khớp gối';
+        return 'Knee Joint';
       case PainLocation.hip:
-        return 'Hông';
+        return 'Hip';
       case PainLocation.neck:
-        return 'Cổ';
+        return 'Neck';
     }
   }
 }
@@ -517,13 +517,13 @@ extension PainTypeDisplay on PainType {
   String get displayName {
     switch (this) {
       case PainType.sharp:
-        return 'Đau nhói';
+        return 'Sharp pain';
       case PainType.aching:
-        return 'Đau âm ỉ';
+        return 'Dull ache';
       case PainType.burning:
-        return 'Rát, nóng';
+        return 'Burning sensation';
       case PainType.other:
-        return 'Khác';
+        return 'Other';
     }
   }
 }
@@ -532,11 +532,11 @@ extension WeaknessTypeDisplay on WeaknessType {
   String get displayName {
     switch (this) {
       case WeaknessType.none:
-        return 'Không';
+        return 'None';
       case WeaknessType.weakness:
-        return 'Yếu';
+        return 'Weakness';
       case WeaknessType.stiffness:
-        return 'Cứng';
+        return 'Stiffness';
     }
   }
 }
@@ -545,11 +545,11 @@ extension StandAbilityDisplay on StandAbility {
   String get displayName {
     switch (this) {
       case StandAbility.veryEasy:
-        return 'Rất dễ dàng';
+        return 'Very easy';
       case StandAbility.normal:
-        return 'Bình thường';
+        return 'Normal';
       case StandAbility.difficult:
-        return 'Hơi khó khăn';
+        return 'Somewhat difficult';
     }
   }
 }

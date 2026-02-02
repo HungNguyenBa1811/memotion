@@ -43,7 +43,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     if (!_agreedToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng đồng ý với điều khoản sử dụng'),
+          content: Text('Please agree to the Terms of Service'),
           backgroundColor: AppColors.error,
         ),
       );

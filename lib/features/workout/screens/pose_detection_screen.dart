@@ -237,7 +237,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             const CircularProgressIndicator(color: Color(0xFF00695C)),
             const SizedBox(height: 24),
             Text(
-              'Đang khởi tạo camera...',
+              'Initializing camera...',
               style: GoogleFonts.lexend(
                 fontSize: 16,
                 color: const Color(0xFF1B4332),
@@ -261,7 +261,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
               Text(
-                'Có lỗi xảy ra',
+                'An error occurred',
                 style: GoogleFonts.lexend(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -276,7 +276,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => context.pop(),
-                child: const Text('Quay lại'),
+                child: const Text('Back'),
               ),
             ],
           ),
@@ -328,7 +328,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
             // Phase title
             Text(
-              isPhase1 ? 'NHẬN DIỆN NGƯỜI DÙNG' : 'THU THẬP GÓC ĐO',
+              isPhase1 ? 'USER DETECTION' : 'COLLECTING MEASUREMENTS',
               style: GoogleFonts.lexend(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
@@ -395,7 +395,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            state.poseDetected ? '✓ Đã phát hiện' : '⏳ Đang tìm...',
+            state.poseDetected ? '✓ Detected' : '⏳ Searching...',
             style: GoogleFonts.lexend(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -490,7 +490,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             ),
             const SizedBox(width: 8),
             Text(
-              'góc hiện tại',
+              'current angle',
               style: GoogleFonts.lexend(fontSize: 12, color: Colors.grey[600]),
             ),
             const SizedBox(width: 16),
@@ -744,11 +744,11 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
   String _getDefaultMessage(PosePhase phase) {
     switch (phase) {
       case PosePhase.detection:
-        return 'Hãy đứng trong khung hình để bắt đầu';
+        return 'Please stand in the frame to start';
       case PosePhase.calibration:
-        return 'Đang thu thập dữ liệu góc đo...';
+        return 'Collecting angle measurements...';
       default:
-        return 'Đang xử lý...';
+        return 'Processing...';
     }
   }
 
@@ -757,18 +757,18 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Dừng bài tập?',
+          'Stop workout?',
           style: GoogleFonts.lexend(fontWeight: FontWeight.w700),
         ),
         content: Text(
-          'Bạn có chắc muốn dừng không? Tiến độ hiện tại sẽ không được lưu.',
+          'Are you sure you want to stop? Current progress will not be saved.',
           style: GoogleFonts.lexend(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Tiếp tục',
+              'Continue',
               style: GoogleFonts.lexend(color: AppColors.primary),
             ),
           ),
@@ -780,7 +780,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFD67052),
             ),
-            child: Text('Dừng', style: GoogleFonts.lexend(color: Colors.white)),
+            child: Text('Stop', style: GoogleFonts.lexend(color: Colors.white)),
           ),
         ],
       ),

@@ -294,7 +294,7 @@ class NutritionScreenContent extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               isPatientNotFound
-                  ? 'Chưa có hồ sơ bệnh nhân'
+                  ? 'No patient profile yet'
                   : 'Failed to load nutrition tasks',
               style: GoogleFonts.lexend(
                 fontSize: 18,
@@ -304,7 +304,7 @@ class NutritionScreenContent extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               isPatientNotFound
-                  ? 'Vui lòng liên hệ bác sĩ để được tạo hồ sơ bệnh nhân và nhận kế hoạch dinh dưỡng.'
+                  ? 'Please contact your doctor to create a patient profile and receive a nutrition plan.'
                   : error.toString(),
               textAlign: TextAlign.center,
               style: GoogleFonts.lexend(fontSize: 14, color: Colors.grey),

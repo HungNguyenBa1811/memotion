@@ -57,7 +57,7 @@ class _Step11BuilderState extends ConsumerState<Step11Builder> {
               height: 54,
               child: OnboardingTextInput(
                 controller: _controller,
-                hintText: 'Nhập huyết áp',
+                hintText: 'Enter blood pressure',
                 maxLines: 1,
                 onChanged: (v) {
                   final parsed = double.tryParse(v);

@@ -333,8 +333,8 @@ class _MedicationMainScreenContentState
             const SizedBox(height: 16),
             Text(
               isPatientNotFound
-                  ? 'Chưa có hồ sơ bệnh nhân'
-                  : 'Không thể tải dữ liệu thuốc',
+                  ? 'No patient profile yet'
+                  : 'Unable to load medication data',
               style: GoogleFonts.lexend(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -343,7 +343,7 @@ class _MedicationMainScreenContentState
             const SizedBox(height: 8),
             Text(
               isPatientNotFound
-                  ? 'Vui lòng liên hệ bác sĩ để được tạo hồ sơ bệnh nhân và nhận lịch uống thuốc.'
+                  ? 'Please contact your doctor to create a patient profile and receive a medication schedule.'
                   : error.toString(),
               textAlign: TextAlign.center,
               style: GoogleFonts.lexend(fontSize: 14, color: Colors.grey),
@@ -353,7 +353,7 @@ class _MedicationMainScreenContentState
               ElevatedButton.icon(
                 onPressed: () => ref.invalidate(medicationsProvider),
                 icon: const Icon(Icons.refresh),
-                label: const Text('Thử lại'),
+                label: const Text('Try again'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
