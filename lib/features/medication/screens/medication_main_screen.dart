@@ -80,8 +80,8 @@ class _MedicationMainScreenContentState
           ),
           // Floating QR button - positioned bottom right, above navbar
           Positioned(
-            right: 20,
-            bottom: 100, // Above the bottom navbar
+            right: 30,
+            bottom: 120, // Above the bottom navbar
             child: FloatingActionButton(
               onPressed: () => context.push(AppRoutes.medicationScan),
               backgroundColor: AppColors.primary,

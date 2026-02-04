@@ -1,15 +1,71 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../../core/router/app_router.dart';
 import '../../models/onboarding_data.dart';
+import '../../providers/onboarding_notifier.dart';
+import '../../providers/onboarding_provider.dart';
 
-/// Builder cho Step 16: Capture prescription / discharge paper
-class Step16Builder extends ConsumerWidget {
+class Step16Builder extends ConsumerStatefulWidget {
   const Step16Builder({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<Step16Builder> createState() => _Step16BuilderState();
+}
+
+class _Step16BuilderState extends ConsumerState<Step16Builder> {
+  final ImagePicker _picker = ImagePicker();
+  final List<File> _capturedImages = [];
+  bool _isScanning = false;
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+      );
+      if (picked == null) return;
+      setState(() => _capturedImages.add(File(picked.path)));
+      await _submitScan();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _submitScan() async {
+    if (_capturedImages.isEmpty) return;
+    setState(() => _isScanning = true);
+
+    final success = await ref
+        .read(onboardingNotifierProvider.notifier)
+        .scanMedicalRecord(_capturedImages);
+
+    if (!mounted) return;
+    setState(() => _isScanning = false);
+
+    if (success) {
+      ref.read(onboardingProvider.notifier).nextStep();
+      context.go(AppRoutes.onboardingStep18);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to scan medical record. Please try again.'),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final config = const OnboardingStep16Config();
+    final hasImages = _capturedImages.isNotEmpty;
 
     return SingleChildScrollView(
       child: Padding(
@@ -29,83 +85,130 @@ class Step16Builder extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Large image placeholder (327x356 per design)
-            Container(
-              width: double.infinity,
-              height: 356,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE7EBEF),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: config.imagePath != null && config.imagePath!.isNotEmpty
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        config.imagePath!,
-                        width: double.infinity,
-                        height: 356,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : const Center(
-                      child: Icon(Icons.image, size: 48, color: Colors.grey),
-                    ),
-            ),
-
+            _buildImageArea(hasImages),
             const SizedBox(height: 20),
-
-            // Primary action
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00695C),
-                  padding: const EdgeInsets.symmetric(vertical: 13),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                child: Text(
-                  'Take photo',
-                  style: GoogleFonts.lexend(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-
+            _buildPrimaryButton(hasImages),
             const SizedBox(height: 12),
-
-            // Secondary action
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  side: const BorderSide(color: Color(0xFF1B4332), width: 1),
-                  padding: const EdgeInsets.symmetric(vertical: 13),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                child: Text(
-                  'Choose from gallery',
-                  style: GoogleFonts.lexend(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1B4332),
-                  ),
-                ),
-              ),
-            ),
-
+            _buildSecondaryButton(hasImages),
             const SizedBox(height: 24),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageArea(bool hasImages) {
+    return Container(
+      width: double.infinity,
+      height: 356,
+      decoration: BoxDecoration(
+        color: const Color(0xFFE7EBEF),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Stack(
+        children: [
+          if (hasImages)
+            PageView.builder(
+              itemCount: _capturedImages.length,
+              itemBuilder: (context, index) => ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.file(
+                  _capturedImages[index],
+                  width: double.infinity,
+                  height: 356,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            )
+          else
+            const Center(
+              child: Icon(Icons.image, size: 48, color: Colors.grey),
+            ),
+          if (_isScanning)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black45,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: Colors.white),
+                    SizedBox(height: 12),
+                    Text(
+                      'Scanning...',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (hasImages && !_isScanning)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${_capturedImages.length} photo${_capturedImages.length > 1 ? 's' : ''}',
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrimaryButton(bool hasImages) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _isScanning ? null : () => _pickImage(ImageSource.camera),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF00695C),
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+        child: Text(
+          hasImages ? 'Take another photo' : 'Take photo',
+          style: GoogleFonts.lexend(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSecondaryButton(bool hasImages) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: _isScanning ? null : () => _pickImage(ImageSource.gallery),
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
+          side: const BorderSide(color: Color(0xFF1B4332), width: 1),
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+        child: Text(
+          hasImages ? 'Choose more from gallery' : 'Choose from gallery',
+          style: GoogleFonts.lexend(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF1B4332),
+          ),
         ),
       ),
     );

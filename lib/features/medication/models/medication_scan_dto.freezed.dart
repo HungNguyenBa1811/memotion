@@ -245,8 +245,9 @@ MedicationScanData _$MedicationScanDataFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$MedicationScanData {
-  String get message => throw _privateConstructorUsedError;
+  String? get message => throw _privateConstructorUsedError;
   MedicationDto? get medication => throw _privateConstructorUsedError;
+  @JsonKey(name: 'agent_error')
   String? get agentError => throw _privateConstructorUsedError;
 
   /// Serializes this MedicationScanData to a JSON map.
@@ -266,7 +267,11 @@ abstract class $MedicationScanDataCopyWith<$Res> {
     $Res Function(MedicationScanData) then,
   ) = _$MedicationScanDataCopyWithImpl<$Res, MedicationScanData>;
   @useResult
-  $Res call({String message, MedicationDto? medication, String? agentError});
+  $Res call({
+    String? message,
+    MedicationDto? medication,
+    @JsonKey(name: 'agent_error') String? agentError,
+  });
 
   $MedicationDtoCopyWith<$Res>? get medication;
 }
@@ -286,16 +291,16 @@ class _$MedicationScanDataCopyWithImpl<$Res, $Val extends MedicationScanData>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? message = null,
+    Object? message = freezed,
     Object? medication = freezed,
     Object? agentError = freezed,
   }) {
     return _then(
       _value.copyWith(
-            message: null == message
+            message: freezed == message
                 ? _value.message
                 : message // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             medication: freezed == medication
                 ? _value.medication
                 : medication // ignore: cast_nullable_to_non_nullable
@@ -333,7 +338,11 @@ abstract class _$$MedicationScanDataImplCopyWith<$Res>
   ) = __$$MedicationScanDataImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String message, MedicationDto? medication, String? agentError});
+  $Res call({
+    String? message,
+    MedicationDto? medication,
+    @JsonKey(name: 'agent_error') String? agentError,
+  });
 
   @override
   $MedicationDtoCopyWith<$Res>? get medication;
@@ -353,16 +362,16 @@ class __$$MedicationScanDataImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? message = null,
+    Object? message = freezed,
     Object? medication = freezed,
     Object? agentError = freezed,
   }) {
     return _then(
       _$MedicationScanDataImpl(
-        message: null == message
+        message: freezed == message
             ? _value.message
             : message // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         medication: freezed == medication
             ? _value.medication
             : medication // ignore: cast_nullable_to_non_nullable
@@ -380,19 +389,20 @@ class __$$MedicationScanDataImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$MedicationScanDataImpl implements _MedicationScanData {
   const _$MedicationScanDataImpl({
-    required this.message,
+    this.message,
     this.medication,
-    this.agentError,
+    @JsonKey(name: 'agent_error') this.agentError,
   });
 
   factory _$MedicationScanDataImpl.fromJson(Map<String, dynamic> json) =>
       _$$MedicationScanDataImplFromJson(json);
 
   @override
-  final String message;
+  final String? message;
   @override
   final MedicationDto? medication;
   @override
+  @JsonKey(name: 'agent_error')
   final String? agentError;
 
   @override
@@ -435,19 +445,20 @@ class _$MedicationScanDataImpl implements _MedicationScanData {
 
 abstract class _MedicationScanData implements MedicationScanData {
   const factory _MedicationScanData({
-    required final String message,
+    final String? message,
     final MedicationDto? medication,
-    final String? agentError,
+    @JsonKey(name: 'agent_error') final String? agentError,
   }) = _$MedicationScanDataImpl;
 
   factory _MedicationScanData.fromJson(Map<String, dynamic> json) =
       _$MedicationScanDataImpl.fromJson;
 
   @override
-  String get message;
+  String? get message;
   @override
   MedicationDto? get medication;
   @override
+  @JsonKey(name: 'agent_error')
   String? get agentError;
 
   /// Create a copy of MedicationScanData
@@ -467,9 +478,12 @@ mixin _$MedicationDto {
   String get name => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
   String get dosage => throw _privateConstructorUsedError;
-  int get frequencyPerDay => throw _privateConstructorUsedError;
+  @JsonKey(name: 'frequency_per_day')
+  int? get frequencyPerDay => throw _privateConstructorUsedError;
   String get notes => throw _privateConstructorUsedError;
+  @JsonKey(name: 'image_path')
   String get imagePath => throw _privateConstructorUsedError;
+  @JsonKey(name: 'medication_id')
   String get medicationId => throw _privateConstructorUsedError;
 
   /// Serializes this MedicationDto to a JSON map.
@@ -493,10 +507,10 @@ abstract class $MedicationDtoCopyWith<$Res> {
     String name,
     String description,
     String dosage,
-    int frequencyPerDay,
+    @JsonKey(name: 'frequency_per_day') int? frequencyPerDay,
     String notes,
-    String imagePath,
-    String medicationId,
+    @JsonKey(name: 'image_path') String imagePath,
+    @JsonKey(name: 'medication_id') String medicationId,
   });
 }
 
@@ -518,7 +532,7 @@ class _$MedicationDtoCopyWithImpl<$Res, $Val extends MedicationDto>
     Object? name = null,
     Object? description = null,
     Object? dosage = null,
-    Object? frequencyPerDay = null,
+    Object? frequencyPerDay = freezed,
     Object? notes = null,
     Object? imagePath = null,
     Object? medicationId = null,
@@ -537,10 +551,10 @@ class _$MedicationDtoCopyWithImpl<$Res, $Val extends MedicationDto>
                 ? _value.dosage
                 : dosage // ignore: cast_nullable_to_non_nullable
                       as String,
-            frequencyPerDay: null == frequencyPerDay
+            frequencyPerDay: freezed == frequencyPerDay
                 ? _value.frequencyPerDay
                 : frequencyPerDay // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as int?,
             notes: null == notes
                 ? _value.notes
                 : notes // ignore: cast_nullable_to_non_nullable
@@ -572,10 +586,10 @@ abstract class _$$MedicationDtoImplCopyWith<$Res>
     String name,
     String description,
     String dosage,
-    int frequencyPerDay,
+    @JsonKey(name: 'frequency_per_day') int? frequencyPerDay,
     String notes,
-    String imagePath,
-    String medicationId,
+    @JsonKey(name: 'image_path') String imagePath,
+    @JsonKey(name: 'medication_id') String medicationId,
   });
 }
 
@@ -596,7 +610,7 @@ class __$$MedicationDtoImplCopyWithImpl<$Res>
     Object? name = null,
     Object? description = null,
     Object? dosage = null,
-    Object? frequencyPerDay = null,
+    Object? frequencyPerDay = freezed,
     Object? notes = null,
     Object? imagePath = null,
     Object? medicationId = null,
@@ -615,10 +629,10 @@ class __$$MedicationDtoImplCopyWithImpl<$Res>
             ? _value.dosage
             : dosage // ignore: cast_nullable_to_non_nullable
                   as String,
-        frequencyPerDay: null == frequencyPerDay
+        frequencyPerDay: freezed == frequencyPerDay
             ? _value.frequencyPerDay
             : frequencyPerDay // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as int?,
         notes: null == notes
             ? _value.notes
             : notes // ignore: cast_nullable_to_non_nullable
@@ -643,10 +657,10 @@ class _$MedicationDtoImpl implements _MedicationDto {
     required this.name,
     required this.description,
     required this.dosage,
-    required this.frequencyPerDay,
+    @JsonKey(name: 'frequency_per_day') this.frequencyPerDay,
     required this.notes,
-    required this.imagePath,
-    required this.medicationId,
+    @JsonKey(name: 'image_path') required this.imagePath,
+    @JsonKey(name: 'medication_id') required this.medicationId,
   });
 
   factory _$MedicationDtoImpl.fromJson(Map<String, dynamic> json) =>
@@ -659,12 +673,15 @@ class _$MedicationDtoImpl implements _MedicationDto {
   @override
   final String dosage;
   @override
-  final int frequencyPerDay;
+  @JsonKey(name: 'frequency_per_day')
+  final int? frequencyPerDay;
   @override
   final String notes;
   @override
+  @JsonKey(name: 'image_path')
   final String imagePath;
   @override
+  @JsonKey(name: 'medication_id')
   final String medicationId;
 
   @override
@@ -722,10 +739,10 @@ abstract class _MedicationDto implements MedicationDto {
     required final String name,
     required final String description,
     required final String dosage,
-    required final int frequencyPerDay,
+    @JsonKey(name: 'frequency_per_day') final int? frequencyPerDay,
     required final String notes,
-    required final String imagePath,
-    required final String medicationId,
+    @JsonKey(name: 'image_path') required final String imagePath,
+    @JsonKey(name: 'medication_id') required final String medicationId,
   }) = _$MedicationDtoImpl;
 
   factory _MedicationDto.fromJson(Map<String, dynamic> json) =
@@ -738,12 +755,15 @@ abstract class _MedicationDto implements MedicationDto {
   @override
   String get dosage;
   @override
-  int get frequencyPerDay;
+  @JsonKey(name: 'frequency_per_day')
+  int? get frequencyPerDay;
   @override
   String get notes;
   @override
+  @JsonKey(name: 'image_path')
   String get imagePath;
   @override
+  @JsonKey(name: 'medication_id')
   String get medicationId;
 
   /// Create a copy of MedicationDto

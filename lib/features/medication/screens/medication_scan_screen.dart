@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
+import '../../../core/network/api_constants.dart';
 import '../../../core/theme/theme.dart';
 import '../providers/scan_medication_notifier.dart';
 import '../models/medication_scan_dto.dart';
@@ -16,30 +17,52 @@ class MedicationScanScreen extends ConsumerStatefulWidget {
       _MedicationScanScreenState();
 }
 
-class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
+class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen>
+    with WidgetsBindingObserver {
   bool _isScanning = false;
   MedicationDto? _scannedMedication;
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _isCameraInitialized = false;
   String? _cameraError;
-  String? _capturedImagePath;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    Future.microtask(() {
+      ref.read(scanMedicationNotifierProvider.notifier).reset();
+    });
     _initializeCamera();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _cameraController?.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final controller = _cameraController;
+    if (controller == null || !controller.value.isInitialized) return;
+
+    if (state == AppLifecycleState.inactive) {
+      controller.dispose();
+      _cameraController = null;
+      if (mounted) {
+        setState(() => _isCameraInitialized = false);
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      _initializeCamera();
+    }
   }
 
   Future<void> _initializeCamera() async {
     try {
       _cameras = await availableCameras();
+      if (!mounted) return;
       if (_cameras != null && _cameras!.isNotEmpty) {
         _cameraController = CameraController(
           _cameras!.first,
@@ -48,24 +71,24 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
         );
 
         await _cameraController!.initialize();
-        if (mounted) {
-          setState(() {
-            _isCameraInitialized = true;
-          });
-        }
+        if (!mounted) return;
+        setState(() {
+          _isCameraInitialized = true;
+        });
       } else {
         setState(() {
           _cameraError = 'No camera found';
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _cameraError = 'Camera initialization error: $e';
       });
     }
   }
 
-  void _startScanning() async {
+  Future<void> _startScanning() async {
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       return;
     }
@@ -73,46 +96,41 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
     setState(() => _isScanning = true);
 
     try {
-      // Capture image from camera
       final XFile image = await _cameraController!.takePicture();
+      if (!mounted) return;
       final imageFile = File(image.path);
 
-      // Call real scan API via notifier 🚀✨
       await ref
           .read(scanMedicationNotifierProvider.notifier)
           .scanMedication(imageFile);
+      if (!mounted) return;
 
-      // Get state after scan
       final scanState = ref.read(scanMedicationNotifierProvider);
 
       setState(() {
         _isScanning = false;
         _scannedMedication = scanState.scannedMedication;
-        _capturedImagePath = image.path;
       });
 
-      // Show error if scan failed
-      if (scanState.errorMessage != null && mounted) {
+      if (scanState.errorMessage != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(scanState.errorMessage!)),
         );
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isScanning = false;
       });
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Scan error: $e')));
-      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Scan error: $e')));
     }
   }
 
   void _resetScan() {
     setState(() {
       _scannedMedication = null;
-      _capturedImagePath = null;
     });
   }
 
@@ -170,7 +188,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.primary,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
@@ -179,7 +197,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
                   ),
                 ],
               ),
-              child: const Icon(Icons.arrow_back_ios_new, size: 18),
+              child: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.white),
             ),
           ),
           Text(
@@ -292,11 +310,6 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
   }
 
   Widget _buildCameraPreview() {
-    // Show captured image if available
-    if (_capturedImagePath != null) {
-      return Image.file(File(_capturedImagePath!), fit: BoxFit.cover);
-    }
-
     if (_cameraError != null) {
       return Container(
         color: Colors.grey[300],
@@ -353,72 +366,23 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
       return const SizedBox.shrink();
     }
 
-    // Show Back + Scan Again buttons if we have a result
+    // Show "Retake" button if we already have a result
     if (_scannedMedication != null) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Back button
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.arrow_back, color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Back',
-                    style: GoogleFonts.lexend(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      return GestureDetector(
+        onTap: _resetScan,
+        child: Container(
+          width: 70,
+          height: 70,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+            border: Border.all(color: AppColors.primary, width: 4),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10),
+            ],
           ),
-          const SizedBox(width: 12),
-          // Scan Again button
-          GestureDetector(
-            onTap: _resetScan,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: AppColors.primary, width: 2),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.refresh, color: AppColors.primary, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Scan again',
-                    style: GoogleFonts.lexend(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          child: const Icon(Icons.refresh, color: AppColors.primary, size: 32),
+        ),
       );
     }
 
@@ -462,25 +426,22 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
   }
 
   Widget _buildScannedMedicationCard(MedicationDto medication) {
-    // Get pill image based on index - same as main screen
     final pillImages = [
       'assets/images/medication/pill_1.png',
       'assets/images/medication/pill_2.png',
       'assets/images/medication/pill_3.png',
     ];
     final imageIndex = medication.medicationId.hashCode % pillImages.length;
+    final hasApiImage = medication.imagePath.isNotEmpty;
+    final fullImageUrl =
+        hasApiImage ? '${ApiConstants.baseUrl}${medication.imagePath}' : null;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      width: double.infinity,
       height: 110,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(70),
-          bottomLeft: Radius.circular(70),
-          topRight: Radius.circular(27),
-          bottomRight: Radius.circular(27),
-        ),
+        borderRadius: BorderRadius.circular(27),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.25),
@@ -490,149 +451,100 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen> {
         ],
       ),
       child: Stack(
-        clipBehavior: Clip.none,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(
-              left: 36,
-              top: 12,
-              bottom: 12,
-              right: 12,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Medication image
-                Container(
-                  width: 100,
-                  height: 75,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF7F7F7),
-                    borderRadius: BorderRadius.circular(27),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(27),
-                    child: Image.asset(
-                      pillImages[imageIndex],
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.medication,
-                          size: 40,
-                          color: AppColors.primary,
-                        );
-                      },
-                    ),
-                  ),
+          // Image on left side
+          Positioned(
+            left: 20,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: SizedBox(
+                width: 86,
+                height: 86,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: fullImageUrl != null
+                      ? Image.network(
+                          fullImageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              pillImages[imageIndex],
+                              fit: BoxFit.contain,
+                              errorBuilder: (ctx, err, st) {
+                                return _buildIconPlaceholder();
+                              },
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2),
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          pillImages[imageIndex],
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return _buildIconPlaceholder();
+                          },
+                        ),
                 ),
+              ),
+            ),
+          ),
 
-                const SizedBox(width: 22),
-
-                // Medication info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        medication.name,
-                        style: GoogleFonts.lexend(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          letterSpacing: -0.3,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        medication.dosage,
-                        style: GoogleFonts.lexend(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w300,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${medication.frequencyPerDay}x daily',
-                        style: GoogleFonts.lexend(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF353535),
-                        ),
-                      ),
-                    ],
+          // Title and Description
+          Positioned(
+            left: 120,
+            top: 15,
+            right: 80,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  medication.name,
+                  style: GoogleFonts.lexend(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                    letterSpacing: -0.3,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  medication.description,
+                  style: GoogleFonts.lexend(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w300,
+                    color: Colors.black,
+                    letterSpacing: -0.3,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-
-          // "Newly scanned" badge (top right)
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.only(
-                left: 14,
-                right: 16,
-                top: 4,
-                bottom: 4,
-              ),
-              decoration: const BoxDecoration(
-                color: Color(0xFF4CAF50),
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(21),
-                  bottomLeft: Radius.circular(16),
-                ),
-              ),
-              child: Text(
-                'Newly scanned',
-                style: GoogleFonts.lexend(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-
-          // Action button (bottom right)
-          Positioned(
-            bottom: 6,
-            right: 8,
-            child: GestureDetector(
-              onTap: () {
-                // Add medication to list
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Medication added!')));
-                context.pop();
-              },
-              child: Container(
-                width: 80,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(27),
-                ),
-                child: Center(
-                  child: Text(
-                    'Add',
-                    style: GoogleFonts.lexend(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildIconPlaceholder() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Icon(
+        Icons.medication,
+        size: 40,
+        color: AppColors.primary,
       ),
     );
   }

@@ -27,11 +27,11 @@ Map<String, dynamic> _$$MedicationScanResponseImplToJson(
 _$MedicationScanDataImpl _$$MedicationScanDataImplFromJson(
   Map<String, dynamic> json,
 ) => _$MedicationScanDataImpl(
-  message: json['message'] as String,
+  message: json['message'] as String?,
   medication: json['medication'] == null
       ? null
       : MedicationDto.fromJson(json['medication'] as Map<String, dynamic>),
-  agentError: json['agentError'] as String?,
+  agentError: json['agent_error'] as String?,
 );
 
 Map<String, dynamic> _$$MedicationScanDataImplToJson(
@@ -39,7 +39,7 @@ Map<String, dynamic> _$$MedicationScanDataImplToJson(
 ) => <String, dynamic>{
   'message': instance.message,
   'medication': instance.medication,
-  'agentError': instance.agentError,
+  'agent_error': instance.agentError,
 };
 
 _$MedicationDtoImpl _$$MedicationDtoImplFromJson(Map<String, dynamic> json) =>
@@ -47,10 +47,10 @@ _$MedicationDtoImpl _$$MedicationDtoImplFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       description: json['description'] as String,
       dosage: json['dosage'] as String,
-      frequencyPerDay: (json['frequencyPerDay'] as num).toInt(),
+      frequencyPerDay: (json['frequency_per_day'] as num?)?.toInt(),
       notes: json['notes'] as String,
-      imagePath: json['imagePath'] as String,
-      medicationId: json['medicationId'] as String,
+      imagePath: json['image_path'] as String,
+      medicationId: json['medication_id'] as String,
     );
 
 Map<String, dynamic> _$$MedicationDtoImplToJson(_$MedicationDtoImpl instance) =>
@@ -58,8 +58,8 @@ Map<String, dynamic> _$$MedicationDtoImplToJson(_$MedicationDtoImpl instance) =>
       'name': instance.name,
       'description': instance.description,
       'dosage': instance.dosage,
-      'frequencyPerDay': instance.frequencyPerDay,
+      'frequency_per_day': instance.frequencyPerDay,
       'notes': instance.notes,
-      'imagePath': instance.imagePath,
-      'medicationId': instance.medicationId,
+      'image_path': instance.imagePath,
+      'medication_id': instance.medicationId,
     };

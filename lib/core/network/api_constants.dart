@@ -28,6 +28,10 @@ class ApiConstants {
   // Medication Library Endpoints
   static const String scanMedicationImage = '/api/medication-library/scan-image';
 
+  // Medical Record Scan Endpoints
+  static const String scanMedicalRecord =
+      '/api/patient-profiles/physical-therapy/scan-medical-record';
+
   // Pose Detection Endpoints (Real-time WebSocket)
   static const String poseHealth = '/api/pose/health';
   static const String poseSessions = '/api/pose/sessions';

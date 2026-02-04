@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'medication_scan_dto.freezed.dart';
 part 'medication_scan_dto.g.dart';
 
-/// Response DTO for medication scan API
 @freezed
 class MedicationScanResponse with _$MedicationScanResponse {
   const factory MedicationScanResponse({
@@ -16,30 +15,28 @@ class MedicationScanResponse with _$MedicationScanResponse {
       _$MedicationScanResponseFromJson(json);
 }
 
-/// Medication scan data containing the scanned medication info
 @freezed
 class MedicationScanData with _$MedicationScanData {
   const factory MedicationScanData({
-    required String message,
+    String? message,
     MedicationDto? medication,
-    String? agentError,
+    @JsonKey(name: 'agent_error') String? agentError,
   }) = _MedicationScanData;
 
   factory MedicationScanData.fromJson(Map<String, dynamic> json) =>
       _$MedicationScanDataFromJson(json);
 }
 
-/// Medication DTO from scan result
 @freezed
 class MedicationDto with _$MedicationDto {
   const factory MedicationDto({
     required String name,
     required String description,
     required String dosage,
-    required int frequencyPerDay,
+    @JsonKey(name: 'frequency_per_day') int? frequencyPerDay,
     required String notes,
-    required String imagePath,
-    required String medicationId,
+    @JsonKey(name: 'image_path') required String imagePath,
+    @JsonKey(name: 'medication_id') required String medicationId,
   }) = _MedicationDto;
 
   factory MedicationDto.fromJson(Map<String, dynamic> json) =>

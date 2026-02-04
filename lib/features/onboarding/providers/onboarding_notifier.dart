@@ -1,5 +1,5 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-// 'foundation' import removed (not needed)
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
@@ -143,6 +143,33 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
   }
 
   // --- API Calls ---
+  Future<bool> scanMedicalRecord(List<File> files) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      debugPrint('[NOTIFIER] scanMedicalRecord() sending ${files.length} files');
+      final data = await _repo.scanMedicalRecord(files: files);
+      debugPrint('[NOTIFIER] scanMedicalRecord() response: $data');
+      if (data != null) {
+        final recommended = data['doctor_recommended']?.toString() ?? '';
+        final plan = data['doctor_treatment_plan']?.toString() ?? '';
+        state = state.copyWith(
+          doctorRecommended: recommended,
+          doctorTreatmentPlan: plan,
+        );
+        debugPrint(
+          '[NOTIFIER] scanMedicalRecord() extracted: recommended=$recommended, plan=$plan',
+        );
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('[NOTIFIER] scanMedicalRecord() error: $e');
+      return false;
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
   Future<void> fetchUserProfile() async {
     state = state.copyWith(isLoading: true);
     try {

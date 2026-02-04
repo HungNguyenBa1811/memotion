@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../../../core/network/api_constants.dart';
@@ -126,6 +127,47 @@ class OnboardingRepositoryDio {
       }
       debugPrint(
         '[API] POST ${ApiConstants.patientProfilePhysicalTherapy} - error: ${e.message}',
+      );
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> scanMedicalRecord({
+    required List<File> files,
+  }) async {
+    try {
+      final formData = FormData();
+      for (final file in files) {
+        final fileName = file.path.split(Platform.pathSeparator).last;
+        formData.files.add(MapEntry(
+          'files',
+          await MultipartFile.fromFile(file.path, filename: fileName),
+        ));
+      }
+      debugPrint(
+        '[API] POST ${ApiConstants.scanMedicalRecord} - files: ${files.length}',
+      );
+      final resp = await _dio.post(
+        ApiConstants.scanMedicalRecord,
+        data: formData,
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+      );
+      debugPrint(
+        '[API] POST ${ApiConstants.scanMedicalRecord} - status: ${resp.statusCode}',
+      );
+      debugPrint(
+        '[API] POST ${ApiConstants.scanMedicalRecord} - response: ${resp.data}',
+      );
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
+        final data = resp.data is Map && resp.data['data'] != null
+            ? resp.data['data'] as Map<String, dynamic>
+            : (resp.data is Map ? resp.data as Map<String, dynamic> : null);
+        return data;
+      }
+      return null;
+    } on DioError catch (e) {
+      debugPrint(
+        '[API] POST ${ApiConstants.scanMedicalRecord} - error: ${e.message}',
       );
       rethrow;
     }

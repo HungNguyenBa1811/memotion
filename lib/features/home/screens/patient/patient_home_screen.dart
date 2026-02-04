@@ -47,7 +47,7 @@ class PatientHomeScreen extends ConsumerWidget {
                   greeting: _getGreeting(),
                   avatarUrl: dashboardData?.avatarUrl,
                   moodMessage: "You don't seem to be in a good mood today",
-                  actionButtonText: 'EMERGENCY CALL (SOS)',
+                  actionButtonText: 'EMERGENCY CALL',
                   onActionPressed: () {
                     homeNotifier.triggerSOS();
                     _showSOSDialog(context);
@@ -73,7 +73,7 @@ class PatientHomeScreen extends ConsumerWidget {
 
                 // Upcoming Medication Card (Patient perspective)
                 UpcomingMedicationCard(
-                  title: 'Upcoming Medication Schedule',
+                  title: 'Upcoming Schedule',
                   time: dashboardData?.upcomingMedication?.time ?? '10:00 AM',
                   dosage:
                       dashboardData?.upcomingMedication?.dosage ??
