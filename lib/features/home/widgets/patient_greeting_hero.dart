@@ -20,7 +20,7 @@ class PatientGreetingHero extends StatefulWidget {
     this.greeting = 'Good morning',
     this.avatarUrl,
     this.moodMessage,
-    this.actionButtonText = 'EMERGENCY CALL (SOS)',
+    this.actionButtonText = 'EMERGENCY CALL',
     this.onActionPressed,
   });
 
@@ -162,12 +162,16 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
                 height: 160,
                 decoration: BoxDecoration(
                   color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(26),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(26),
+                    topRight: Radius.circular(26),
+                  ),
                   border: Border.all(color: AppColors.primary),
                 ),
                 padding: const EdgeInsets.only(left: 24, top: 20, right: 20),
                 child: Text(
-                  widget.moodMessage ?? "You don't seem to be in a good mood today",
+                  widget.moodMessage ??
+                      "You don't seem to be in a good mood today",
                   style: AppTextStyles.headline3.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -178,7 +182,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
               ),
               // Elderly illustration positioned at right
               Positioned(
-                right: -120,
+                right: -160,
                 top: -20,
                 child: Image.asset(
                   'assets/images/caregiver_elderly.png',
@@ -193,51 +197,55 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
             ],
           ),
 
-
           // SOS Button (Patient version - Orange/Red color)
-          GestureDetector(
-            onTap: widget.onActionPressed,
-            child: Container(
-              width: double.infinity,
-              height: 75,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD77658), // Orange/coral color from Figma
-                borderRadius: BorderRadius.circular(13),
-                border: Border.all(color: const Color(0xFFC28F79)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Phone icon with shake animation
-                  AnimatedBuilder(
-                    animation: _shakeController,
-                    builder: (context, child) {
-                      return Transform.rotate(
-                        angle: math.sin(_shakeController.value * 2 * math.pi) * 0.3,
-                        child: child,
-                      );
-                    },
-                    child: Container(
-                      width: 34,
-                      height: 34,
-                      margin: const EdgeInsets.only(right: 16),
-                      child: const Icon(
-                        Icons.phone,
-                        color: Colors.white,
-                        size: 28,
+          Transform.translate(
+            offset: const Offset(0, -10),
+            child: GestureDetector(
+              onTap: widget.onActionPressed,
+              child: Container(
+                width: double.infinity,
+                height: 75,
+                decoration: BoxDecoration(
+                  color: AppColors.sosButton,
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(color: const Color(0xFFC28F79)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Phone icon with shake animation
+                    AnimatedBuilder(
+                      animation: _shakeController,
+                      builder: (context, child) {
+                        return Transform.rotate(
+                          angle:
+                              math.sin(_shakeController.value * 2 * math.pi) *
+                              0.3,
+                          child: child,
+                        );
+                      },
+                      child: Container(
+                        width: 34,
+                        height: 34,
+                        margin: const EdgeInsets.only(right: 16),
+                        child: const Icon(
+                          Icons.phone,
+                          color: Colors.white,
+                          size: 28,
+                        ),
                       ),
                     ),
-                  ),
-                  // SOS text
-                  Text(
-                    widget.actionButtonText,
-                    style: AppTextStyles.headline2.copyWith(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                    // SOS text
+                    Text(
+                      widget.actionButtonText,
+                      style: AppTextStyles.headline2.copyWith(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

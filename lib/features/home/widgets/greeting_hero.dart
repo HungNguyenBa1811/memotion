@@ -1,9 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 /// Hero section with greeting, mood card, avatar, and action button (Caregiver version)
-class GreetingHero extends StatelessWidget {
+class GreetingHero extends StatefulWidget {
   final String userName;
   final String greeting;
   final String? avatarUrl;
@@ -20,6 +22,29 @@ class GreetingHero extends StatelessWidget {
     this.actionButtonText = 'SITUATION HANDLING',
     this.onActionPressed,
   });
+
+  @override
+  State<GreetingHero> createState() => _GreetingHeroState();
+}
+
+class _GreetingHeroState extends State<GreetingHero>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shakeController;
+
+  @override
+  void initState() {
+    super.initState();
+    _shakeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _shakeController.dispose();
+    super.dispose();
+  }
 
   String _getFormattedDate() {
     final now = DateTime.now();
@@ -69,9 +94,9 @@ class GreetingHero extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.tealGreen.withOpacity(0.2),
-                  image: avatarUrl != null
+                  image: widget.avatarUrl != null
                       ? DecorationImage(
-                          image: NetworkImage(avatarUrl!),
+                          image: NetworkImage(widget.avatarUrl!),
                           fit: BoxFit.cover,
                         )
                       : const DecorationImage(
@@ -89,14 +114,7 @@ class GreetingHero extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$greeting,',
-                      style: AppTextStyles.headline2.copyWith(
-                        fontSize: 18,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    Text(
-                      userName,
+                      '${widget.greeting}, ${widget.userName}',
                       style: AppTextStyles.headline2.copyWith(
                         fontSize: 18,
                         color: AppColors.primary,
@@ -139,16 +157,20 @@ class GreetingHero extends StatelessWidget {
             children: [
               // Green mood card
               Container(
-                width: 320,
-                height: 140,
+                width: 240,
+                height: 160,
                 decoration: BoxDecoration(
                   color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(26),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(26),
+                    topRight: Radius.circular(26),
+                  ),
                   border: Border.all(color: AppColors.primary),
                 ),
-                padding: const EdgeInsets.only(left: 20, top: 20, right: 160),
+                padding: const EdgeInsets.only(left: 24, top: 20, right: 20),
                 child: Text(
-                  moodMessage ?? "Please pay attention to the patient's mood today",
+                  widget.moodMessage ??
+                      "Please pay attention to the patient's mood today",
                   style: AppTextStyles.headline3.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -159,72 +181,68 @@ class GreetingHero extends StatelessWidget {
               ),
               // Elderly illustration positioned at right (Caregiver version)
               Positioned(
-                right: -70,
-                top: -50,
+                right: -160,
+                top: -20,
                 child: Image.asset(
                   'assets/images/caregiver_elderly.png',
                   width: 200,
                   height: 200,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: AppColors.tealGreen.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Icon(
-                        Icons.elderly,
-                        size: 80,
-                        color: AppColors.tealGreen,
-                      ),
-                    );
+                    return const SizedBox(width: 200, height: 200);
                   },
                 ),
               ),
             ],
           ),
 
-          // const SizedBox(height: 16),
-
           // Action Button (Situation Handling)
-          GestureDetector(
-            onTap: onActionPressed,
-            child: Container(
-              width: double.infinity,
-              height: 75,
-              decoration: BoxDecoration(
-                color: AppColors.sosButton,
-                borderRadius: BorderRadius.circular(13),
-                border: Border.all(color: const Color(0xFFC28F79)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white24,
+          Transform.translate(
+            offset: const Offset(0, -10),
+            child: GestureDetector(
+              onTap: widget.onActionPressed,
+              child: Container(
+                width: double.infinity,
+                height: 75,
+                decoration: BoxDecoration(
+                  color: AppColors.sosButton,
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(color: const Color(0xFFC28F79)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AnimatedBuilder(
+                      animation: _shakeController,
+                      builder: (context, child) {
+                        return Transform.rotate(
+                          angle:
+                              math.sin(_shakeController.value * 2 * math.pi) *
+                              0.3,
+                          child: child,
+                        );
+                      },
+                      child: Container(
+                        width: 34,
+                        height: 34,
+                        margin: const EdgeInsets.only(right: 16),
+                        child: const Icon(
+                          Icons.phone,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.phone,
-                      color: Colors.white,
-                      size: 20,
+                    Text(
+                      widget.actionButtonText,
+                      style: AppTextStyles.headline2.copyWith(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    actionButtonText,
-                    style: AppTextStyles.sectionHeading.copyWith(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
