@@ -83,7 +83,7 @@ class PatientHomeScreen extends ConsumerWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Marked as taken!'),
-                        backgroundColor: AppColors.tealGreen,
+                        backgroundColor: AppColors.primary,
                       ),
                     );
                   },

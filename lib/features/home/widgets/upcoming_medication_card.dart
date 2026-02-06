@@ -41,19 +41,6 @@ class UpcomingMedicationCard extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Status indicator dot (top-right)
-          Positioned(
-            top: 21,
-            right: 25,
-            child: Container(
-              width: 15,
-              height: 15,
-              decoration: const BoxDecoration(
-                color: AppColors.tealGreen,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
           // Content
           Padding(
             padding: const EdgeInsets.all(20),
