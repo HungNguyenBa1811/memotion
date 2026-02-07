@@ -168,7 +168,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
                   ),
                   border: Border.all(color: AppColors.primary),
                 ),
-                padding: const EdgeInsets.only(left: 24, top: 20, right: 20),
+                padding: const EdgeInsets.only(left: 24, top: 20, right: 70),
                 child: Text(
                   widget.moodMessage ??
                       "You don't seem to be in a good mood today",

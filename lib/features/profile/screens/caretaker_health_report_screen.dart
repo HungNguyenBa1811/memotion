@@ -2,17 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../health_connect/models/health_data.dart';
+import '../../health_connect/providers/health_connect_providers.dart';
 import '../../home/widgets/health_summary_card.dart';
 
 /// Health Report Screen for Caretaker (Figma design node 538:4727)
 /// Displays progress indicator, today's health metrics (calories, steps, heart rate)
 /// and a summary card with vitals
-class CaretakerHealthReportScreen extends ConsumerWidget {
+class CaretakerHealthReportScreen extends ConsumerStatefulWidget {
   const CaretakerHealthReportScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CaretakerHealthReportScreen> createState() =>
+      _CaretakerHealthReportScreenState();
+}
+
+class _CaretakerHealthReportScreenState
+    extends ConsumerState<CaretakerHealthReportScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref.read(healthDataProvider.notifier).fetch());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final healthAsync = ref.watch(healthDataProvider);
+    final health = healthAsync.valueOrNull ?? const HealthData();
+    final isLoading = healthAsync.isLoading;
+
     return Scaffold(
       backgroundColor: AppColors.lightGreen,
       body: SafeArea(
@@ -20,8 +40,8 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Bar with back button and notification
-              _buildTopBar(context),
+              // Top Bar with back button and refresh
+              _buildTopBar(context, isLoading),
 
               const SizedBox(height: 16),
 
@@ -31,15 +51,15 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
               const SizedBox(height: 24),
 
               // Today's Information Section
-              _buildTodaysInfoSection(),
+              _buildTodaysInfoSection(health),
 
               const SizedBox(height: 24),
 
               // Health Summary Card (reused from home screen)
-              const HealthSummaryCard(
-                heartRate: '72',
+              HealthSummaryCard(
+                heartRate: '${health.heartRate}',
                 bloodPressure: '120/80',
-                steps: '8400',
+                steps: '${health.steps}',
                 statusLabel: 'Excellent',
               ),
 
@@ -52,7 +72,7 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTopBar(BuildContext context) {
+  Widget _buildTopBar(BuildContext context, bool isLoading) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Row(
@@ -62,36 +82,33 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
           GestureDetector(
             onTap: () => context.pop(),
             child: Container(
-              width: 56,
-              height: 56,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: const Color(0xFF00695C),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 24,
+              child: Center(
+                child: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Colors.white,
+                  size: 18,
+                ),
               ),
             ),
           ),
-          // Notification Icon
-          Stack(
-            children: [
-              Icon(Icons.notifications, color: AppColors.primary, size: 24),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
+          // Refresh Button
+          GestureDetector(
+            onTap: isLoading
+                ? null
+                : () => ref.read(healthDataProvider.notifier).fetch(),
+            child: isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Icon(Icons.refresh, color: AppColors.primary, size: 28),
           ),
         ],
       ),
@@ -155,7 +172,7 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   // Date
                   Text(
-                    '19 November 2025',
+                    DateFormat('dd MMMM yyyy').format(DateTime.now()),
                     style: GoogleFonts.lexend(
                       fontSize: 16,
                       fontWeight: FontWeight.w300,
@@ -220,7 +237,7 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTodaysInfoSection() {
+  Widget _buildTodaysInfoSection(HealthData health) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: IntrinsicHeight(
@@ -231,22 +248,22 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
             Expanded(
               child: Column(
                 children: [
-                  _buildCaloriesCard(),
+                  _buildCaloriesCard(health.calories.toInt().toString()),
                   const SizedBox(height: 12),
-                  _buildStepsCard(),
+                  _buildStepsCard(health.steps.toString()),
                 ],
               ),
             ),
             const SizedBox(width: 12),
             // Right column: Heart card spanning full height
-            Expanded(child: _buildHeartCard()),
+            Expanded(child: _buildHeartCard(health.heartRate.toString())),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCaloriesCard() {
+  Widget _buildCaloriesCard(String value) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -283,7 +300,7 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           // Value
           Text(
-            '1038',
+            value,
             style: GoogleFonts.sourceSans3(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -305,7 +322,7 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStepsCard() {
+  Widget _buildStepsCard(String value) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -338,7 +355,7 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           // Value
           Text(
-            '8400',
+            value,
             style: GoogleFonts.sourceSans3(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -360,7 +377,7 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeartCard() {
+  Widget _buildHeartCard(String value) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -401,7 +418,7 @@ class CaretakerHealthReportScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           // Value
           Text(
-            '74',
+            value,
             style: GoogleFonts.sourceSans3(
               fontSize: 18,
               fontWeight: FontWeight.w700,

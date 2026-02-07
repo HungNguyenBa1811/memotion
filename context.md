@@ -1,88 +1,46 @@
-{
-  "api_spec": {
-    "name": "Get Task Detail",
-    "description": "Retrieve detailed information for a specific task. This API provides comprehensive details about a task including instructions, completion status, associated patient information, and any additional notes.",
-    "method": "GET",
-    "endpoint": "/api/tasks/{task_id}",
-    "authorization": "Authenticated user required (task owner or assigned caretaker)."
-  },
-  "process_flow": [
-    "Validates user access to the specified task",
-    "Retrieves detailed task information from database"
-  ],
-  "parameters": [
-    {
-      "name": "task_id",
-      "in": "path",
-      "required": true,
-      "type": "string",
-      "description": "Unique identifier of the task"
-    }
-  ],
-  "responses": {
-    "200": {
-      "description": "Successful Response: Complete task details with all associated information.",
-      "media_type": "application/json",
-      "example": {
-        "code": "200",
-        "message": "",
-        "data": {
-          "title": "string",
-          "description": "string",
-          "task_duedate": "2026-01-24T18:01:21.724Z",
-          "task_type": "string",
-          "status": "string",
-          "owner_type": "string",
-          "task_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "care_plan_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "medication_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "nutrition_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "exercise_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "linked_task_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "medication_detail": {
-            "medication_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "name": "string",
-            "description": "string",
-            "dosage": "string",
-            "frequency_per_day": 0,
-            "notes": "string",
-            "image_path": "string"
-          },
-          "nutrition_detail": {
-            "nutrition_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "name": "string",
-            "calories": 0,
-            "description": "string",
-            "meal_type": "string",
-            "image_path": "string"
-          },
-          "exercise_detail": {
-            "exercise_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "name": "string",
-            "target_body_region": "string",
-            "description": "string",
-            "duration_minutes": 0,
-            "difficulty_level": 0,
-            "video_path": "string"
-          }
-        }
-      }
-    },
-    "422": {
-      "description": "Validation Error",
-      "media_type": "application/json",
-      "example": {
-        "detail": [
-          {
-            "loc": [
-              "string",
-              0
-            ],
-            "msg": "string",
-            "type": "string"
-          }
-        ]
-      }
-    }
-  }
-}
+# Role
+You are a Senior Flutter Developer.
+
+# Task
+Write a complete, runnable Flutter code to fetch health data on **Android ONLY** using the **LATEST version** of the `health` package (v10+).
+
+# CRITICAL CHANGE ALERT (Read Carefully)
+- **DO NOT USE `HealthFactory`**. It is deprecated/removed.
+- **USE `Health` class** (e.g., `Health()`).
+- You **MUST** configure the plugin to use **Health Connect** (not Google Fit) in the `main` function.
+
+# Context
+- Device: Android (Samsung Galaxy Watch FE -> Samsung Health -> Health Connect).
+- Goal: Display Steps, Heart Rate, and Calories.
+
+# Output Structure (File by File)
+
+## Step 1: `pubspec.yaml`
+- Add `health: ^10.0.0` (or latest).
+- Add `permission_handler`.
+
+## Step 2: `android/app/src/main/AndroidManifest.xml` (MANDATORY)
+- Provide the **EXACT** XML snippet.
+- **Permissions:**
+  - `ACTIVITY_RECOGNITION`
+  - `READ_STEPS`, `READ_HEART_RATE`, `READ_TOTAL_CALORIES_BURNED`, `READ_EXERCISE`.
+- **Activity Alias (CRITICAL for Android 14+):**
+  - Add the `<activity-alias>` for `ViewPermissionUsageActivity`.
+  - Add `<meta-data android:name="health_permissions" android:resource="@array/health_permissions" />` (if required by latest docs, otherwise stick to standard alias).
+
+## Step 3: `lib/main.dart` (The Logic)
+- **Init:** Inside `main()`, call `Health().configure(useHealthConnect: true)`.
+- **Data Types:** `[HealthDataType.STEPS, HealthDataType.HEART_RATE, HealthDataType.ACTIVE_ENERGY_BURNED]`.
+- **Authorization:**
+  - Use `Health().requestAuthorization(types)`.
+  - Handle the case where user denies permissions.
+- **Fetching Data:**
+  - **Steps & Calories:** Use `Health().getHealthDataFromTypes(...)` filtering by `DateTime.now().startOfDay`. Then **sum up** the values manually (since `value` is now a `NumericHealthValue`).
+  - **Heart Rate:** Get the list and take the **last** (most recent) item.
+- **UI:**
+  - A clean screen with a "Refresh" button.
+  - Display the total values.
+  - Show "0" if data is null/empty.
+
+# Tone
+Strict code only. Do not explain standard Flutter widgets. Focus on the `health` package implementation.
