@@ -70,6 +70,24 @@ class _OnboardingLoadingScreenState
     final notifier = ref.read(onboardingNotifierProvider.notifier);
 
     try {
+      await _doSubmit(notifier).timeout(
+        const Duration(minutes: 2),
+        onTimeout: () {
+          debugPrint('[OnboardingLoadingScreen] Timeout after 2 minutes, navigating back to step 1');
+          if (mounted) {
+            context.go(AppRoutes.onboardingStep1);
+          }
+        },
+      );
+    } catch (e) {
+      debugPrint('[OnboardingLoadingScreen] Error: $e');
+      if (mounted) {
+        context.go(AppRoutes.onboardingStep1);
+      }
+    }
+  }
+
+  Future<void> _doSubmit(dynamic notifier) async {
       // Step 1: Create patient (if needed) and post general profile
       setState(() => _currentStep = 0);
       await Future.delayed(const Duration(milliseconds: 500));
@@ -99,13 +117,6 @@ class _OnboardingLoadingScreenState
         }
       }
       // Note: On failure, submitFinalProfile already handles navigation to /onboarding/1
-    } catch (e) {
-      debugPrint('[OnboardingLoadingScreen] Error: $e');
-      // Navigate back to step 1 on error
-      if (mounted) {
-        context.go(AppRoutes.onboardingStep1);
-      }
-    }
   }
 
   @override

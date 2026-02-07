@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme.dart';
 import '../providers/workout_provider.dart';
 import '../widgets/calendar_day_picker.dart';
@@ -55,7 +56,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                   children: [
                     // Back button - circular with teal color (matching nutrition)
                     GestureDetector(
-                      onTap: () => context.pop(),
+                      onTap: () => context.go(AppRoutes.home),
                       child: Container(
                         width: 40,
                         height: 40,

@@ -182,7 +182,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
               ),
               // Elderly illustration positioned at right
               Positioned(
-                right: -160,
+                right: -130,
                 top: -20,
                 child: Image.asset(
                   'assets/images/caregiver_elderly.png',

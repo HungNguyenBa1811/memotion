@@ -282,12 +282,25 @@ class ProfileScreenContent extends ConsumerWidget {
       {
         'title': 'Edit Profile',
         'iconAssetSvg': 'assets/images/heart_icon.svg',
-        'action': () {},
+        'action': () {
+          final role = vm.userDetails?.role.toUpperCase() ?? '';
+          if (role == 'CARETAKER') {
+            context.push(AppRoutes.onboardingStep1);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Only caretakers can edit patient profiles'),
+              ),
+            );
+          }
+        },
       },
       {
         'title': 'Patient Information',
         'iconAssetSvg': 'assets/images/document_icon.svg',
-        'action': () {},
+        'action': () {
+          context.push(AppRoutes.caretakerHealthReport);
+        },
       },
       {
         'title': 'Help',

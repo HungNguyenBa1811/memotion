@@ -201,11 +201,32 @@ class OnboardingRepositoryDio {
       }
       return null;
     } on DioError catch (e) {
-      // If status is 400, skip this API (treat as success with empty data)
+      // If status is 400, try update care plan as backup
       if (e.response?.statusCode == 400) {
         debugPrint(
-          '[API] POST ${ApiConstants.generateCarePlan} - 400 received, skipping',
+          '[API] POST ${ApiConstants.generateCarePlan} - 400 received, trying update care plan as backup',
         );
+        try {
+          final updateBody = {
+            'plan_duration_days': planDurationDays,
+            'regenerate': regenerate,
+          };
+          debugPrint('[API] POST ${ApiConstants.updateCarePlan} - body: $updateBody');
+          final updateResp = await _dio.post(
+            ApiConstants.updateCarePlan,
+            data: updateBody,
+          );
+          debugPrint(
+            '[API] POST ${ApiConstants.updateCarePlan} - status: ${updateResp.statusCode}',
+          );
+          debugPrint(
+            '[API] POST ${ApiConstants.updateCarePlan} - response: ${updateResp.data}',
+          );
+        } catch (updateError) {
+          debugPrint(
+            '[API] POST ${ApiConstants.updateCarePlan} - failed (ignored): $updateError',
+          );
+        }
         return <String, dynamic>{'skipped': true};
       }
       debugPrint(

@@ -101,7 +101,7 @@ class _MedicationMainScreenContentState
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
-            onTap: () => context.pop(),
+            onTap: () => context.go(AppRoutes.home),
             child: Container(
               width: 40,
               height: 40,

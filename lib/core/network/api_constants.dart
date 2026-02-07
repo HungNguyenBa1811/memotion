@@ -19,6 +19,7 @@ class ApiConstants {
 
   // Care Plan Endpoints
   static const String generateCarePlan = '/api/care-plans/generate';
+  static const String updateCarePlan = '/api/care-plans/update';
 
   // Patient Profile Endpoints
   static const String patientProfileGeneral = '/api/patient-profiles/general';

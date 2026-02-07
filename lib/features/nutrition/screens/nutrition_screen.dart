@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/network/api_exceptions.dart';
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme.dart';
 import '../models/nutrition_task.dart';
 import '../providers/nutrition_provider.dart';
@@ -43,7 +44,7 @@ class NutritionScreenContent extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
-                    onTap: () => context.pop(),
+                    onTap: () => context.go(AppRoutes.home),
                     child: Container(
                       width: 40,
                       height: 40,
