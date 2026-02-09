@@ -1,3 +1,4 @@
+// ignore: dangling_library_doc_comments
 /// Pose Training Screen - Real-time Analysis with Video Sync
 /// 
 /// Phase 3 (Sync) screen showing:

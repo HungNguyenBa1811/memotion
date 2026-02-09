@@ -20,6 +20,7 @@ import '../../features/workout/screens/workout_training_complete_screen.dart';
 import '../../features/workout/screens/pose_detection_screen.dart';
 import '../../features/workout/screens/pose_training_screen.dart';
 import '../../features/medication/screens/medication_main_screen.dart';
+import '../../features/medication/screens/medication_reminder_screen.dart';
 import '../../features/medication/screens/medication_scan_screen.dart';
 import '../../features/profile/screens/caretaker_health_report_screen.dart';
 import '../../shared/widgets/main_shell.dart';
@@ -64,6 +65,7 @@ class AppRoutes {
   static const String poseTraining = '/pose-training';
   static const String medication = '/medication';
   static const String medicationScan = '/medication-scan';
+  static const String medicationReminder = '/medication-reminder';
   static const String caretakerHealthReport = '/caretaker-health-report';
 }
 
@@ -371,6 +373,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.medicationScan,
         builder: (context, state) => const MedicationScanScreen(),
+      ),
+
+      // Medication Reminder - alarm scheduler demo
+      GoRoute(
+        path: AppRoutes.medicationReminder,
+        builder: (context, state) => const MedicationReminderScreen(),
       ),
 
       // Caretaker Health Report - outside shell (no bottom nav)
