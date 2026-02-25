@@ -24,12 +24,12 @@ import 'step17_builder.dart';
 /// Giúp quản lý việc tạo widget cho mỗi step một cách tập trung
 /// Dễ mở rộng khi thêm step mới hoặc thay đổi logic
 class StepBuilderFactory {
-  static Widget buildStep(int step) {
+  static Widget buildStep(int step, {VoidCallback? onNext}) {
     switch (step) {
       case 1:
         return const Step1Builder();
       case 2:
-        return const Step1_1Builder(); // New: Username/Phone input
+        return const Step1_1Builder();
       case 3:
         return const Step2Builder();
       case 4:
@@ -59,7 +59,7 @@ class StepBuilderFactory {
       case 16:
         return const Step15Builder();
       case 17:
-        return const Step16Builder();
+        return Step16Builder(onNext: onNext);
       case 18:
         return const Step17Builder();
       default:

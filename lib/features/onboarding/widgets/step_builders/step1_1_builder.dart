@@ -104,32 +104,7 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
             ),
           ),
 
-          const SizedBox(height: 80),
-
-          // Illustration at bottom - centered
-          Center(
-            child: Image.asset(
-              'assets/images/onboarding/elderly4.png',
-              width: 193,
-              height: 220,
-              fit: BoxFit.contain,
-              errorBuilder: (_, _, _) => Container(
-                width: 193,
-                height: 220,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.image_not_supported_outlined,
-                  size: 48,
-                  color: Colors.grey[400],
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 60), // Space for FAB
+          const SizedBox(height: 24),
         ],
       ),
     );

@@ -46,8 +46,7 @@ class _Step4BuilderState extends ConsumerState<Step4Builder> {
           _buildHeader(context),
           const SizedBox(height: 24),
           _buildContent(context, ref, onboardingState),
-          const SizedBox(height: 20),
-          _buildImage(context),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -92,31 +91,4 @@ class _Step4BuilderState extends ConsumerState<Step4Builder> {
     );
   }
 
-  Widget _buildImage(BuildContext context) {
-    const config = OnboardingStep4Config();
-    return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Image.asset(
-          config.imagePath ?? 'assets/images/placeholder.png',
-          width: 240,
-          height: 240,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(
-            width: 240,
-            height: 240,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              Icons.image_not_supported_outlined,
-              size: 60,
-              color: Colors.grey[400],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

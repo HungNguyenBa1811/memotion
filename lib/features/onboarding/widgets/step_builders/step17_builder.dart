@@ -50,32 +50,7 @@ class Step17Builder extends ConsumerWidget {
                 ),
               ),
 
-              const SizedBox(height: 16),
-
-              // Main illustration - 276x360
-              Center(
-                child: Image.asset(
-                  'assets/images/onboarding/elderly2.png',
-                  width: 276,
-                  height: 360,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => Container(
-                    width: 276,
-                    height: 360,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      Icons.celebration,
-                      size: 80,
-                      color: Colors.grey[400],
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 100), // Space for bottom FAB
+              const SizedBox(height: 24),
             ],
           ),
         ),

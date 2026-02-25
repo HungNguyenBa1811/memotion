@@ -7,13 +7,9 @@ import '../providers/onboarding_provider.dart';
 import '../models/onboarding_data.dart';
 import '../widgets/widgets.dart';
 
-/// Màn hình onboarding refactored với Riverpod và clean architecture
-///
-/// - Sử dụng ConsumerStatefulWidget để tích hợp Riverpod
-/// - Tách logic thành Provider riêng
-/// - Các widget con được tách thành file riêng
-/// - Animation mượt mà giữa các step
-/// - Lưu trữ dữ liệu người dùng chọn vào state
+/// Onboarding wizard with split layout:
+/// - Top half: PageView that slides content on 'Next'
+/// - Bottom half: Static image with crossfade (only animates when image changes)
 class OnboardingScreenNew extends ConsumerStatefulWidget {
   final int initialStep;
 
@@ -24,151 +20,61 @@ class OnboardingScreenNew extends ConsumerStatefulWidget {
       _OnboardingScreenNewState();
 }
 
-class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _animationController;
-  late final Animation<double> _fadeAnimation;
-  late final Animation<Offset> _slideAnimation;
-
-  final TextEditingController _adviceController = TextEditingController();
-  final FocusNode _adviceFocusNode = FocusNode();
+class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew> {
+  late final PageController _pageController;
+  int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
+    _currentPage = widget.initialStep - 1;
+    _pageController = PageController(initialPage: _currentPage);
 
-    // Khởi tạo animation
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    );
-
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0.1, 0), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeOutCubic,
-          ),
-        );
-
-    // Sync với provider khi có step được truyền vào
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(onboardingProvider.notifier).goToStep(widget.initialStep);
-      _animationController.forward();
     });
   }
 
   @override
-  void didUpdateWidget(covariant OnboardingScreenNew oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialStep != widget.initialStep) {
-      _animateStepChange();
-      ref.read(onboardingProvider.notifier).goToStep(widget.initialStep);
-    }
-  }
-
-  void _animateStepChange() {
-    _animationController.reset();
-    _animationController.forward();
-  }
-
-  @override
   void dispose() {
-    _animationController.dispose();
-    _adviceController.dispose();
-    _adviceFocusNode.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
-  void _onNext() async {
+  void _onPageChanged(int index) {
+    setState(() => _currentPage = index);
+  }
+
+  void _goToNextPage() {
+    if (_currentPage < OnboardingConfig.totalSteps - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _onNext() {
     final notifier = ref.read(onboardingProvider.notifier);
     final state = ref.read(onboardingProvider);
 
-    // Lưu lời khuyên bác sĩ nếu đang ở step 4
-    if (state.currentStep == 4) {
-      notifier.setDoctorAdvice(_adviceController.text);
-    }
-
     if (state.currentStep < OnboardingConfig.totalSteps) {
-      _animateStepChange();
       notifier.nextStep();
-      _navigateToStep(state.currentStep + 1);
+      _goToNextPage();
     } else {
-      // Hoàn thành onboarding - navigate to loading screen để submit data
       context.go(AppRoutes.onboardingLoading);
     }
   }
 
-  void _navigateToStep(int step) {
-    switch (step) {
-      case 1:
-        context.go(AppRoutes.onboardingStep1);
-        break;
-      case 2:
-        context.go(AppRoutes.onboardingStep2);
-        break;
-      case 3:
-        context.go(AppRoutes.onboardingStep3);
-        break;
-      case 4:
-        context.go(AppRoutes.onboardingStep4);
-        break;
-      case 5:
-        context.go(AppRoutes.onboardingStep5);
-        break;
-      case 6:
-        context.go(AppRoutes.onboardingStep6);
-        break;
-      case 7:
-        context.go(AppRoutes.onboardingStep7);
-        break;
-      case 8:
-        context.go(AppRoutes.onboardingStep8);
-        break;
-      case 9:
-        context.go(AppRoutes.onboardingStep9);
-        break;
-      case 10:
-        context.go(AppRoutes.onboardingStep10);
-        break;
-      case 11:
-        context.go(AppRoutes.onboardingStep11);
-        break;
-      case 12:
-        context.go(AppRoutes.onboardingStep12);
-        break;
-      case 13:
-        context.go(AppRoutes.onboardingStep13);
-        break;
-      case 14:
-        context.go(AppRoutes.onboardingStep14);
-        break;
-      case 15:
-        context.go(AppRoutes.onboardingStep15);
-        break;
-      case 16:
-        context.go(AppRoutes.onboardingStep16);
-        break;
-      case 17:
-        context.go(AppRoutes.onboardingStep17);
-        break;
-      case 18:
-        context.go(AppRoutes.onboardingStep18);
-        break;
-      default:
-        context.go(AppRoutes.profile);
-    }
+  String? get _currentImagePath {
+    return OnboardingConfig.getStep(_currentPage + 1).imagePath;
   }
 
   @override
   Widget build(BuildContext context) {
     final onboardingState = ref.watch(onboardingProvider);
     final canProceed = ref.watch(canProceedProvider);
+    final imagePath = _currentImagePath;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -177,22 +83,30 @@ class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew>
         body: SafeArea(
           child: Column(
             children: [
-              _buildHeader(onboardingState.currentStep),
+              _buildHeader(_currentPage + 1),
+
+              // Top: PageView — only this section slides on 'Next'
               Expanded(
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: _buildStepContent(onboardingState),
+                child: PageView.builder(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  onPageChanged: _onPageChanged,
+                  itemCount: OnboardingConfig.totalSteps,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: StepBuilderFactory.buildStep(
+                        index + 1,
+                        onNext: _goToNextPage,
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ),
+
+              // Bottom: Static image — crossfades only when imagePath changes
+              _buildBottomImage(imagePath),
+
               _buildBottomNavigation(onboardingState, canProceed),
             ],
           ),
@@ -217,41 +131,50 @@ class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew>
             ),
           ),
           const Spacer(),
-          const SizedBox(width: 40), // Balance với back button
+          const SizedBox(width: 40),
         ],
       ),
     );
   }
 
-  Widget _buildStepContent(OnboardingData state) {
-    // Use the step builder factory for modular step rendering
-    return StepBuilderFactory.buildStep(state.currentStep);
+  /// Bottom image section.
+  /// Uses AnimatedSwitcher keyed by imagePath so it only crossfades
+  /// when the actual image changes between steps.
+  /// AnimatedContainer handles smooth height transition when imagePath
+  /// becomes null (e.g., the camera capture step).
+  Widget _buildBottomImage(String? imagePath) {
+    return ClipRect(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        height: imagePath != null ? 200.0 : 0.0,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          child: imagePath != null
+              ? Padding(
+                  key: ValueKey(imagePath),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Image.asset(
+                    imagePath,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const SizedBox(height: 200),
+                  ),
+                )
+              : const SizedBox.shrink(key: ValueKey('no-image')),
+        ),
+      ),
+    );
   }
-
-  // Step 1: Introduction
-  // (Step 1 rendered by `Step1Builder` now)
-
-  // Step 2 handled by modular step builders (Step2Builder)
-
-  // Step 3: Pain location
-  // (Step 3 rendered by `Step3Builder` now)
-
-  // Step 4: Doctor's advice
-  // (Step 4 rendered by `Step4Builder` now)
-
-  // Image helper removed — step builders render their own images now.
-
-  // Rehab icons are provided inside step builders when needed
 
   Widget _buildBottomNavigation(OnboardingData state, bool canProceed) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-      decoration: BoxDecoration(color: const Color.fromARGB(0, 0, 0, 0)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const SizedBox(width: 70),
-          // Next button
           OnboardingNextButton(onPressed: _onNext, isEnabled: canProceed),
         ],
       ),

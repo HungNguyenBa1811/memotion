@@ -1,16 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../../core/router/app_router.dart';
 import '../../models/onboarding_data.dart';
 import '../../providers/onboarding_notifier.dart';
-import '../../providers/onboarding_provider.dart';
 
 class Step16Builder extends ConsumerStatefulWidget {
-  const Step16Builder({super.key});
+  final VoidCallback? onNext;
+
+  const Step16Builder({super.key, this.onNext});
 
   @override
   ConsumerState<Step16Builder> createState() => _Step16BuilderState();
@@ -51,8 +50,7 @@ class _Step16BuilderState extends ConsumerState<Step16Builder> {
     setState(() => _isScanning = false);
 
     if (success) {
-      ref.read(onboardingProvider.notifier).nextStep();
-      context.go(AppRoutes.onboardingStep18);
+      widget.onNext?.call();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

@@ -10,9 +10,7 @@ class RouteConfig {
   /// Routes được phép khi đã authenticated (sau onboarding)
   static const Set<String> authenticatedRoutes = {
     '/onboarding/1',
-    '/onboarding/2',
-    '/onboarding/3',
-    '/onboarding/4',
+    '/onboarding/loading',
     '/home',
     '/medication',
     '/nutrition',

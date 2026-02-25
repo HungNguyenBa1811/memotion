@@ -38,8 +38,7 @@ class _Step9BuilderState extends ConsumerState<Step9Builder> {
           _buildHeader(context, config),
           const SizedBox(height: 24),
           _buildInput(context),
-          const SizedBox(height: 40),
-          _buildImage(context, config),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -87,30 +86,6 @@ class _Step9BuilderState extends ConsumerState<Step9Builder> {
         onChanged: (value) {
           // Save to provider if needed
         },
-      ),
-    );
-  }
-
-  Widget _buildImage(BuildContext context, OnboardingStep9Config config) {
-    return Center(
-      child: Image.asset(
-        config.imagePath ?? 'assets/images/onboarding/elderly3.png',
-        width: 270,
-        height: 270,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => Container(
-          width: 270,
-          height: 270,
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Icon(
-            Icons.image_not_supported_outlined,
-            size: 60,
-            color: Colors.grey[400],
-          ),
-        ),
       ),
     );
   }

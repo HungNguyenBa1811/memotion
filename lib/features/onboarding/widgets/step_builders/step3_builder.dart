@@ -26,8 +26,7 @@ class Step3Builder extends ConsumerWidget {
           _buildHeader(context),
           const SizedBox(height: 24),
           _buildContent(context, ref, onboardingState),
-          const SizedBox(height: 32),
-          _buildImage(context),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -87,31 +86,4 @@ class Step3Builder extends ConsumerWidget {
     );
   }
 
-  Widget _buildImage(BuildContext context) {
-    const config = OnboardingStep3Config();
-    return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Image.asset(
-          config.imagePath ?? 'assets/images/placeholder.png',
-          width: 240,
-          height: 240,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(
-            width: 240,
-            height: 240,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              Icons.image_not_supported_outlined,
-              size: 60,
-              color: Colors.grey[400],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

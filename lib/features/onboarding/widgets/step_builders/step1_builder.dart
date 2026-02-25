@@ -25,32 +25,6 @@ class Step1Builder extends StatelessWidget {
           ),
         ),
 
-        // Illustration - centered 270x270
-        Center(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.asset(
-              'assets/images/onboarding/elderly_couple.png',
-              width: 180,
-              height: 180,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Container(
-                width: 180,
-                height: 180,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Icon(
-                  Icons.image_not_supported_outlined,
-                  size: 60,
-                  color: Colors.grey[400],
-                ),
-              ),
-            ),
-          ),
-        ),
-
         const SizedBox(height: 20),
 
         // Title at bottom - Lexend bold 22px, left-aligned

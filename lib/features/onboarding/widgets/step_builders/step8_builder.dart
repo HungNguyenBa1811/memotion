@@ -20,8 +20,8 @@ class Step8Builder extends ConsumerWidget {
           const SizedBox(height: 24),
           _buildHeader(context, config),
           const SizedBox(height: 24),
-          _buildOptions(context, ref, state), 
-          _buildImage(context, config),
+          _buildOptions(context, ref, state),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -58,30 +58,6 @@ class Step8Builder extends ConsumerWidget {
           ),
         );
       }).toList(),
-    );
-  }
-
-  Widget _buildImage(BuildContext context, OnboardingStep8Config config) {
-    return Center(
-      child: Image.asset(
-        config.imagePath ?? 'assets/images/onboarding/elderly3.png',
-        width: 240,
-        height: 240,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => Container(
-          width: 240,
-          height: 240,
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Icon(
-            Icons.image_not_supported_outlined,
-            size: 60,
-            color: Colors.grey[400],
-          ),
-        ),
-      ),
     );
   }
 }

@@ -73,15 +73,6 @@ class Step14Builder extends ConsumerWidget {
               ),
               if (i != options.length - 1) const SizedBox(height: 12),
             ],
-            if (config.imagePath != null && config.imagePath!.isNotEmpty)
-              Center(
-                child: Image.asset(
-                  config.imagePath!,
-                  width: 270,
-                  height: 270,
-                  fit: BoxFit.contain,
-                ),
-              ),
             const SizedBox(height: 24),
           ],
         ),

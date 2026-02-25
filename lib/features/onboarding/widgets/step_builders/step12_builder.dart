@@ -69,16 +69,6 @@ class _Step12BuilderState extends ConsumerState<Step12Builder> {
               ),
             ),
 
-            const SizedBox(height: 32),
-            if (config.imagePath != null && config.imagePath!.isNotEmpty)
-              Center(
-                child: Image.asset(
-                  config.imagePath!,
-                  width: 270,
-                  height: 270,
-                  fit: BoxFit.contain,
-                ),
-              ),
             const SizedBox(height: 24),
           ],
         ),

@@ -80,8 +80,6 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
             ],
           ),
           const SizedBox(height: 24),
-          // Image - 193x220 với shadow theo Figma
-          Center(child: _buildImage()),
         ],
       ),
     );
@@ -338,34 +336,6 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
     );
   }
 
-  Widget _buildImage() {
-    const config = OnboardingStep2Config();
-    return Container(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.asset(
-          config.imagePath ?? 'assets/images/placeholder.png',
-          width: 133, // Figma width
-          height: 160, // Figma height
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(
-            width: 193,
-            height: 220,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.image_not_supported_outlined,
-              size: 60,
-              color: Colors.grey[400],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// Dialog picker cho chọn năm sinh
