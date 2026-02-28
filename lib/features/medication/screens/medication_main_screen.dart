@@ -8,6 +8,7 @@ import '../../../core/theme/theme.dart';
 import '../providers/medication_provider.dart';
 import '../models/medication.dart';
 import '../widgets/medication_task_card.dart';
+import '../data/medication_scheduler.dart';
 
 /// Original screen with bottom nav - kept for backwards compatibility
 class MedicationMainScreen extends ConsumerStatefulWidget {
@@ -37,6 +38,56 @@ class MedicationMainScreenContent extends ConsumerStatefulWidget {
 
 class _MedicationMainScreenContentState
     extends ConsumerState<MedicationMainScreenContent> {
+  // TEST: tap chuông → nhập số phút → schedule alarm. Xóa method này khi xong test.
+  Future<void> _scheduleTestAlarm(BuildContext context) async {
+    final controller = TextEditingController(text: '2');
+    final minutes = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Test alarm'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(labelText: 'Delay (phút)'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () =>
+                Navigator.pop(ctx, int.tryParse(controller.text) ?? 1),
+            child: const Text('Schedule'),
+          ),
+        ],
+      ),
+    );
+    if (minutes == null || !context.mounted) return;
+    final dueDate = DateTime.now().add(Duration(minutes: minutes));
+    await MedicationScheduler.syncTasks({
+      'code': '200',
+      'data': [
+        {
+          'task_id': 'test-${dueDate.millisecondsSinceEpoch}',
+          'task_duedate': dueDate.toIso8601String(),
+          'medication_detail': {
+            'name': 'Vitamin D3 1000IU',
+            'dosage': '1 viên',
+            'notes': 'Uống sau ăn tối',
+            'image_path': null,
+          },
+        },
+      ],
+    });
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Alarm set: $minutes phút nữa')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final selectedFilter = ref.watch(selectedFilterProvider);
@@ -118,29 +169,32 @@ class _MedicationMainScreenContentState
               ),
             ),
           ),
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: Stack(
-              children: [
-                Icon(
-                  Icons.notifications,
-                  color: AppColors.textPrimary,
-                  size: 24,
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary,
-                      shape: BoxShape.circle,
+          GestureDetector(
+            onTap: () => _scheduleTestAlarm(context),
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: Stack(
+                children: [
+                  Icon(
+                    Icons.notifications,
+                    color: AppColors.textPrimary,
+                    size: 24,
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

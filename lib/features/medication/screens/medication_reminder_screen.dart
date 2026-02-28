@@ -1,13 +1,8 @@
-import 'dart:async';
-
-import 'package:alarm/alarm.dart';
-import 'package:alarm/utils/alarm_set.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/theme.dart';
 import '../data/medication_scheduler.dart';
-import 'medication_alarm_screen.dart';
 
 /// Sample payload matching the API contract in context.md.
 const Map<String, dynamic> _sampleApiResponse = {
@@ -36,30 +31,7 @@ class MedicationReminderScreen extends ConsumerStatefulWidget {
 
 class _MedicationReminderScreenState
     extends ConsumerState<MedicationReminderScreen> {
-  StreamSubscription<AlarmSet>? _ringSub;
   String _status = 'Idle';
-
-  @override
-  void initState() {
-    super.initState();
-    _ringSub = Alarm.ringing.listen(_onAlarmRing);
-  }
-
-  @override
-  void dispose() {
-    _ringSub?.cancel();
-    super.dispose();
-  }
-
-  void _onAlarmRing(AlarmSet alarmSet) {
-    if (alarmSet.alarms.isEmpty) return;
-    final settings = alarmSet.alarms.first;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => MedicationAlarmScreen(alarmId: settings.id),
-      ),
-    );
-  }
 
   Future<void> _simulateSync() async {
     setState(() => _status = 'Syncing...');

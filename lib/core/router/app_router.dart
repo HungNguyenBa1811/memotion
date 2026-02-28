@@ -26,6 +26,10 @@ import '../../features/profile/screens/caretaker_health_report_screen.dart';
 import '../../shared/widgets/main_shell.dart';
 import 'route_config.dart';
 
+/// Shared root navigator key — dùng cho GoRouter và app-level alarm navigation.
+final GlobalKey<NavigatorState> rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'root');
+
 // Route names
 class AppRoutes {
   static const String onboarding = '/';
@@ -75,6 +79,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final authListenable = ref.watch(authListenableProvider);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.onboarding,
     debugLogDiagnostics: true,
     refreshListenable: authListenable,
