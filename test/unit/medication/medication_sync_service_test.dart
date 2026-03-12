@@ -5,7 +5,9 @@ import 'package:memotion/core/network/services/task_api_service.dart';
 import 'package:memotion/features/medication/data/alarm_schedule_engine.dart';
 import 'package:memotion/features/medication/data/medication_cache_store.dart';
 import 'package:memotion/features/medication/data/medication_sync_service.dart';
+import 'package:memotion/features/medication/data/pending_actions_queue.dart';
 import 'package:memotion/features/medication/models/medication_task.dart';
+import 'package:memotion/features/medication/models/pending_action.dart';
 import '../../helpers/test_data.dart';
 
 // ─── mocks ────────────────────────────────────────────────────────────────────
@@ -16,6 +18,8 @@ class MockCacheStore extends Mock implements MedicationCacheStore {}
 
 class MockAlarmEngine extends Mock implements AlarmScheduleEngine {}
 
+class MockPendingActionsQueue extends Mock implements PendingActionsQueue {}
+
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 const _okSchedule = ScheduleResult(scheduled: 1, skipped: 0, failed: 0);
@@ -25,21 +29,31 @@ void main() {
   setUpAll(() {
     registerFallbackValue(const Duration());
     registerFallbackValue(<MedicationTask>[]);
+    registerFallbackValue(PendingAction(
+      taskId: '',
+      type: PendingActionType.complete,
+      queuedAt: DateTime(2024),
+    ));
   });
 
   late MockTaskApiService apiService;
   late MockCacheStore cacheStore;
   late MockAlarmEngine alarmEngine;
+  late MockPendingActionsQueue pendingQueue;
   late MedicationSyncService syncService;
 
   setUp(() {
     apiService = MockTaskApiService();
     cacheStore = MockCacheStore();
     alarmEngine = MockAlarmEngine();
+    pendingQueue = MockPendingActionsQueue();
+    // Default: empty queue so refreshCache drain is a no-op
+    when(() => pendingQueue.getPending()).thenAnswer((_) async => []);
     syncService = MedicationSyncService(
       apiService: apiService,
       cacheStore: cacheStore,
       alarmEngine: alarmEngine,
+      pendingQueue: pendingQueue,
     );
   });
 
@@ -129,6 +143,7 @@ void main() {
             cachedAt: DateTime.now().subtract(const Duration(hours: 3)),
             taskCount: 1,
             source: 'api',
+            version: 1,
           ));
 
       final result = await syncService.syncOnAppLaunch();

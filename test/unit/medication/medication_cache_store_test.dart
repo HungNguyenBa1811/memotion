@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:memotion/features/medication/data/medication_cache_store.dart';
@@ -123,7 +125,7 @@ void main() {
         final before = DateTime.now();
         await store.persist([makeTask()]);
         final cachedAt = (await store.getMetadata())!.cachedAt;
-        expect(cachedAt.isAfter(before), isTrue);
+        expect(!cachedAt.isBefore(before), isTrue); // >= before
         expect(cachedAt.difference(before).inSeconds, lessThanOrEqualTo(2));
       });
     });
@@ -142,6 +144,71 @@ void main() {
         await store.persist([makeTask()]);
         await store.clear();
         expect(await store.isValid(), isFalse);
+      });
+    });
+
+    // ─── cache versioning ────────────────────────────────────────────────────
+
+    group('cache versioning', () {
+      test('persist stores a non-zero version in metadata', () async {
+        await store.persist([makeTask()]);
+        final meta = await store.getMetadata();
+        expect(meta!.version, greaterThan(0));
+      });
+
+      test('restore succeeds when persisted version matches current', () async {
+        await store.persist([makeTask()]);
+        expect(await store.restore(), isNotNull);
+      });
+
+      test('restore returns null and clears cache on version mismatch', () async {
+        // Write stale metadata with version 0 directly into SharedPreferences,
+        // simulating data written by an older build of the app.
+        final prefs = await SharedPreferences.getInstance();
+        final staleTask = makeTask();
+        final staleMeta = jsonEncode({
+          'cached_at': DateTime.now().toIso8601String(),
+          'task_count': 1,
+          'source': 'api',
+          'version': 0, // does not match _currentVersion = 1
+        });
+        await prefs.setString('medication_all_tasks_cache', jsonEncode([staleTask.toJson()]));
+        await prefs.setString('medication_cache_meta', staleMeta);
+
+        final result = await store.restore();
+        expect(result, isNull);
+      });
+
+      test('cache is cleared after version mismatch so next persist works', () async {
+        final prefs = await SharedPreferences.getInstance();
+        final staleMeta = jsonEncode({
+          'cached_at': DateTime.now().toIso8601String(),
+          'task_count': 1,
+          'source': 'api',
+          'version': 0,
+        });
+        await prefs.setString('medication_all_tasks_cache', jsonEncode([makeTask().toJson()]));
+        await prefs.setString('medication_cache_meta', staleMeta);
+
+        // Trigger version check → should clear
+        await store.restore();
+        expect(await store.getMetadata(), isNull);
+
+        // A fresh persist should work normally afterwards
+        await store.persist([makeTask(taskId: 'fresh')]);
+        final result = await store.restore();
+        expect(result, isNotNull);
+        expect(result!.first.taskId, 'fresh');
+      });
+
+      test('CacheMetadata.fromJson defaults version to 0 when field is absent', () {
+        final meta = CacheMetadata.fromJson({
+          'cached_at': DateTime.now().toIso8601String(),
+          'task_count': 1,
+          'source': 'api',
+          // 'version' intentionally omitted — old format
+        });
+        expect(meta.version, 0);
       });
     });
   });

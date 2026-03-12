@@ -280,4 +280,49 @@ Summary:
    
    All parts of this request have been completed. The bell icon test feature is intentionally kept as-is with a `// TEST:` comment. No further action is required unless the user requests removal of the bell icon test feature or other changes.
 
-If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: C:\Users\Hung Nguyen Ba\.claude\projects\d--Code-Mobile-memotion\06798ad1-45fd-4681-ae37-acf1e34d6818.jsonl
+---
+
+## Session 2 — 2026-03-12
+
+### Tasks Completed
+
+#### 1. Offline Medication Cache — Phase 3: Offline Completion Queue ✅
+
+**Files created:**
+- `lib/features/medication/models/pending_action.dart` — `PendingAction` model with `taskId`, `PendingActionType` (complete/skip), `queuedAt`, `medicationName`. JSON serialization. Equality by taskId+type.
+- `lib/features/medication/data/pending_actions_queue.dart` — Persistent queue in SharedPreferences as JSON array. `enqueue()` (deduplicates), `getPending()`, `remove()`, `clear()`, `isQueued()`, `pendingCount`, `hasPending`. `DrainResult` class.
+
+**Files modified:**
+- `lib/features/medication/data/medication_repository.dart` — Added `ConnectivityService` + `PendingActionsQueue` deps. `updateMedicationStatus()` checks `isOnline()` → if offline, enqueues `PendingAction` + returns local-only success. Catches `NetworkException` mid-request and queues for retry.
+- `lib/features/medication/data/medication_sync_service.dart` — Added `PendingActionsQueue` dep. `refreshCache()` now calls `_drainPendingActions()` before fetching. `SyncResult` includes `pendingActionsSynced`/`pendingActionsFailed`.
+- `lib/features/medication/providers/medication_provider.dart` — Added `pendingActionsQueueProvider`, `pendingActionsCountProvider`. Updated `medicationSyncServiceProvider` and `medicationRepositoryProvider` to pass new deps.
+- `lib/features/medication/screens/medication_main_screen.dart` — Offline banner shows "Offline — X action(s) pending sync" with count badge.
+
+#### 2. Verify Alarm Task Fetching ✅
+- Confirmed: `syncOnAppLaunch()` → `getAllMedicationTasks()` (bulk endpoint, no date filter) → `rescheduleAll()` correctly fetches ALL tasks and schedules alarms for future ones.
+
+#### 3. Workout Fullscreen Video Controls ✅ (then bug-fixed)
+
+**File modified:** `lib/features/workout/screens/workout_detail_screen.dart`
+
+**Initial implementation:**
+- Converted `_FullscreenVideoPage` from `StatelessWidget` to `StatefulWidget`
+- Added: seek slider, rewind/forward 10s buttons, play/pause center button, time display, auto-hide controls after 3s, tap to toggle visibility
+
+**Bug reported:** Fullscreen showed 00:00/00:00 duration, seek slider snapped back to 00:00.
+
+**Root cause:** Sharing a single `VideoPlayerController` between two `VideoPlayer` widgets (preview + fullscreen) — Android video backend can't share texture properly, causing controller values to reset.
+
+**Fix applied:**
+- `_FullscreenVideoPage` now creates its **own independent `VideoPlayerController`** instead of sharing with the preview
+- On open: preview pauses, passes `videoUrl` + current `position` to fullscreen page
+- Fullscreen page: creates own controller → initialize → seekTo(initialPosition) → play. Shows loading spinner until ready.
+- On close: disposes own controller, pops with current position. Preview resumes from that position.
+- Slider uses local `_dragValue` during drag (only `seekTo` on drag end) — prevents seek flooding
+- Added `_currentVideoUrl` field to `_WorkoutDetailScreenState` to pass URL to fullscreen
+
+### Phase Progress (Offline Medication Cache)
+- Phase 1: ✅ Core Cache & Auto-Sync
+- Phase 2: ✅ Connectivity & Refresh  
+- Phase 3: ✅ Offline Completion Queue
+- Phase 4: ❌ Not started (SQLite migration, cache versioning, unit tests, analytics)
