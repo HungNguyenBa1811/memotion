@@ -214,7 +214,7 @@ class PatientHomeScreen extends ConsumerWidget {
             const Text(
               'EMERGENCY CALL',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFFD77658),
               ),

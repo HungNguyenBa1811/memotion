@@ -60,7 +60,7 @@ class _Step13BuilderState extends ConsumerState<Step13Builder> {
               child: OnboardingTextInput(
                 controller: _controller,
                 maxLines: 1,
-                hintText: 'blood_glucose_level',
+                hintText: 'Blood Glucose Level',
                 onChanged: (v) {
                   final parsed = int.tryParse(v);
                   ref.read(onboardingProvider.notifier).setBloodSugar(parsed);
