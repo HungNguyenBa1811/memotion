@@ -38,6 +38,33 @@ class TaskApiService extends BaseApiService {
   }
 
   // ─────────────────────────────────────────────────────────────────
+  // ALL MEDICATION TASKS (bulk, no date filter)
+  // ─────────────────────────────────────────────────────────────────
+
+  /// Fetch ALL medication tasks for the current user (no date filter).
+  /// Used for bulk caching and alarm scheduling on app launch.
+  /// GET /api/tasks/medication
+  Future<List<TaskDto>> getAllMedicationTasks() async {
+    try {
+      return await get<List<TaskDto>>(
+        '/api/tasks/medication',
+        parser: (json) {
+          final response = ApiResponse.fromJson(
+            json as Map<String, dynamic>,
+            (data) => data,
+          );
+          final tasksList = response.data as List<dynamic>;
+          return tasksList
+              .map((e) => TaskDto.fromJson(e as Map<String, dynamic>))
+              .toList();
+        },
+      );
+    } on BadRequestException {
+      throw const PatientProfileNotFoundException();
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────
   // SHARED TASK OPERATIONS
   // ─────────────────────────────────────────────────────────────────
 

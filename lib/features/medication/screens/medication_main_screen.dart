@@ -82,9 +82,9 @@ class _MedicationMainScreenContentState
       ],
     });
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Alarm set: $minutes phút nữa')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Alarm set: $minutes phút nữa')));
     }
   }
 
@@ -95,6 +95,7 @@ class _MedicationMainScreenContentState
       filteredMedicationsProvider(selectedFilter),
     );
     final selectedDate = ref.watch(selectedDateProvider);
+    final isOffline = ref.watch(isOfflineProvider).valueOrNull ?? false;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -106,6 +107,9 @@ class _MedicationMainScreenContentState
               children: [
                 // Header
                 _buildHeader(context),
+
+                // Offline indicator — visible only when network is absent
+                if (isOffline) _buildOfflineBanner(),
 
                 // Date selector
                 _buildDateSelector(selectedDate),
@@ -469,5 +473,49 @@ class _MedicationMainScreenContentState
   String _getDayName(int weekday) {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return days[weekday - 1];
+  }
+
+  Widget _buildOfflineBanner() {
+    final pendingCount =
+        ref.watch(pendingActionsCountProvider).valueOrNull ?? 0;
+
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFFFFF3E0),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+      child: Row(
+        children: [
+          const Icon(Icons.wifi_off, size: 14, color: Color(0xFFE65100)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              pendingCount > 0
+                  ? 'Offline — $pendingCount action${pendingCount > 1 ? 's' : ''} pending sync'
+                  : 'Offline — showing cached data',
+              style: GoogleFonts.lexend(
+                fontSize: 12,
+                color: const Color(0xFFE65100),
+              ),
+            ),
+          ),
+          if (pendingCount > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE65100),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$pendingCount',
+                style: GoogleFonts.lexend(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

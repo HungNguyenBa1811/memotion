@@ -8,6 +8,7 @@ import 'package:health/health.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/medication/providers/medication_provider.dart';
 import 'features/medication/screens/medication_alarm_screen.dart';
 
 void main() async {
@@ -26,13 +27,39 @@ class MemotionApp extends ConsumerStatefulWidget {
 
 class _MemotionAppState extends ConsumerState<MemotionApp> {
   StreamSubscription<AlarmSet>? _ringSub;
+  StreamSubscription<bool>? _networkSub;
 
   @override
   void initState() {
     super.initState();
-    // Listener đặt ở root để hoạt động bất kể đang ở màn hình nào.
+    // Alarm listener placed at root so it fires regardless of current route.
     _ringSub = Alarm.ringing.listen(_onAlarmRing);
     _requestAlarmPermissions();
+    // Initial sync: fetch all tasks, cache, schedule alarms. Fire-and-forget.
+    _syncMedications();
+    // Auto-refresh when the device comes back online.
+    _listenNetworkRestore();
+  }
+
+  Future<void> _syncMedications() async {
+    final syncService = ref.read(medicationSyncServiceProvider);
+    final result = await syncService.syncOnAppLaunch();
+    if (mounted) {
+      ref.read(medicationSyncStatusProvider.notifier).state = result;
+    }
+  }
+
+  void _listenNetworkRestore() {
+    final connectivity = ref.read(connectivityServiceProvider);
+    _networkSub = connectivity.onConnectivityRestored.listen((_) async {
+      final syncService = ref.read(medicationSyncServiceProvider);
+      final result = await syncService.refreshCache();
+      if (mounted) {
+        ref.read(medicationSyncStatusProvider.notifier).state = result;
+        // Invalidate so the medication list screen re-fetches live data.
+        ref.invalidate(medicationsProvider);
+      }
+    });
   }
 
   /// Yêu cầu các quyền cần thiết cho alarm:
@@ -46,6 +73,7 @@ class _MemotionAppState extends ConsumerState<MemotionApp> {
   @override
   void dispose() {
     _ringSub?.cancel();
+    _networkSub?.cancel();
     super.dispose();
   }
 
