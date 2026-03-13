@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../providers/auth_provider.dart';
 
@@ -82,9 +83,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-          child: Form(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: ResponsiveUtils.formMaxWidth(context),
+            ),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: ResponsiveUtils.horizontalPadding(context),
+                vertical: 20,
+              ),
+              child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -222,6 +231,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   },
                 ),
               ],
+            ),
+          ),
             ),
           ),
         ),

@@ -26,11 +26,10 @@ class CalendarDayPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 90,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(days.length, (index) {
           final day = days[index];
           final isSelected = index == selectedIndex;
@@ -42,6 +41,7 @@ class CalendarDayPicker extends StatelessWidget {
               curve: Curves.easeInOut,
               width: 64,
               height: 84,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.primary : Colors.white,
                 borderRadius: BorderRadius.circular(15),

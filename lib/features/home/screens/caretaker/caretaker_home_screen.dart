@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../../providers/home_provider.dart';
 import '../../widgets/greeting_hero.dart';
 import '../../widgets/action_card.dart';
@@ -82,7 +83,9 @@ class CaretakerHomeScreen extends ConsumerWidget {
 
                 // Section title: "For Caregiver"
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ResponsiveUtils.horizontalPadding(context),
+                  ),
                   child: Text(
                     'For Caregiver',
                     style: AppTextStyles.headline1.copyWith(
@@ -95,67 +98,46 @@ class CaretakerHomeScreen extends ConsumerWidget {
 
                 const SizedBox(height: 16),
 
-                // Quick Actions Grid (2x2)
+                // Quick Actions Grid (responsive columns)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Column(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ResponsiveUtils.horizontalPadding(context),
+                  ),
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 162 / 171,
                     children: [
-                      // First row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ActionCard(
-                              title: 'Health\nCheck',
-                              iconAsset: 'assets/images/icon_heart_beat.png',
-                              icon: Icons.health_and_safety,
-                              iconColor: AppColors.primary,
-                              onTap: () {
-                                // Navigate to health check
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ActionCard(
-                              title: 'Medication\nReminder',
-                              iconAsset: 'assets/images/icon_medicine_file.png',
-                              icon: Icons.medication,
-                              iconColor: AppColors.primary,
-                              onTap: () {
-                                context.go('/medication');
-                              },
-                            ),
-                          ),
-                        ],
+                      ActionCard(
+                        title: 'Health\nCheck',
+                        iconAsset: 'assets/images/icon_heart_beat.png',
+                        icon: Icons.health_and_safety,
+                        iconColor: AppColors.primary,
+                        onTap: () {},
                       ),
-                      const SizedBox(height: 12),
-                      // Second row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ActionCard(
-                              title: 'Family\nChat',
-                              iconAsset: 'assets/images/icon_calls.png',
-                              icon: Icons.chat_bubble,
-                              iconColor: AppColors.primary,
-                              onTap: () {
-                                // Navigate to family chat
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ActionCard(
-                              title: 'Health\nRecord',
-                              iconAsset: 'assets/images/icon_health_check.png',
-                              icon: Icons.book,
-                              iconColor: AppColors.primary,
-                              onTap: () {
-                                context.push(AppRoutes.caretakerHealthReport);
-                              },
-                            ),
-                          ),
-                        ],
+                      ActionCard(
+                        title: 'Medication\nReminder',
+                        iconAsset: 'assets/images/icon_medicine_file.png',
+                        icon: Icons.medication,
+                        iconColor: AppColors.primary,
+                        onTap: () => context.go('/medication'),
+                      ),
+                      ActionCard(
+                        title: 'Family\nChat',
+                        iconAsset: 'assets/images/icon_calls.png',
+                        icon: Icons.chat_bubble,
+                        iconColor: AppColors.primary,
+                        onTap: () {},
+                      ),
+                      ActionCard(
+                        title: 'Health\nRecord',
+                        iconAsset: 'assets/images/icon_health_check.png',
+                        icon: Icons.book,
+                        iconColor: AppColors.primary,
+                        onTap: () => context.push(AppRoutes.caretakerHealthReport),
                       ),
                     ],
                   ),
@@ -173,7 +155,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
                 ),
 
                 // Bottom padding for navigation bar
-                const SizedBox(height: 120),
+                SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
               ],
             ),
           ),

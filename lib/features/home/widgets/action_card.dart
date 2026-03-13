@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/responsive_utils.dart';
 
 /// Quick action card widget for homepage (Figma design)
 /// Displays an icon image, title, and status badge
@@ -28,67 +29,70 @@ class ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final iconSize = ResponsiveUtils.isTabletOrLarger(context) ? 90.0 : 80.0;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 162,
-        height: 171,
-        decoration: BoxDecoration(
-          color: backgroundColor ?? AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(27),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.cardShadow,
-              offset: const Offset(0, 4),
-              blurRadius: 10,
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Status dot in top-right
-            if (showStatusDot)
-              Positioned(
-                top: 14,
-                right: 14,
-                child:
-                    badge ??
-                    Container(
-                      width: 15,
-                      height: 15,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
+      child: AspectRatio(
+        aspectRatio: 162 / 171,
+        child: Container(
+          decoration: BoxDecoration(
+            color: backgroundColor ?? AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(27),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.cardShadow,
+                offset: const Offset(0, 4),
+                blurRadius: 10,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              // Status dot in top-right
+              if (showStatusDot)
+                Positioned(
+                  top: 14,
+                  right: 14,
+                  child: badge ??
+                      Container(
+                        width: 15,
+                        height: 15,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-              ),
-            // Icon centered
-            Positioned(
-              top: 20,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: SizedBox(width: 80, height: 70, child: _buildIcon()),
-              ),
-            ),
-            // Title at bottom center
-            Positioned(
-              left: 10,
-              right: 10,
-              bottom: 10,
-              child: Text(
-                title,
-                style: AppTextStyles.cardTitle.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              // Icon + title grouped and centered together
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: iconSize,
+                        height: iconSize * 0.875,
+                        child: _buildIcon(),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        title,
+                        style: AppTextStyles.cardTitle.copyWith(
+                          fontSize: ResponsiveUtils.isTabletOrLarger(context) ? 16 : 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

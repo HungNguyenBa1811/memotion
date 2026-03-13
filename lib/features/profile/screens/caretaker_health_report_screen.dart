@@ -1,9 +1,12 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../health_connect/models/health_data.dart';
 import '../../health_connect/providers/health_connect_providers.dart';
 import '../../home/widgets/health_summary_card.dart';
@@ -21,10 +24,24 @@ class CaretakerHealthReportScreen extends ConsumerStatefulWidget {
 
 class _CaretakerHealthReportScreenState
     extends ConsumerState<CaretakerHealthReportScreen> {
+  // TODO(mock): remove when real health API is connected
+  int _bpm = 73;
+  Timer? _bpmTimer;
+  final _rng = Random();
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() => ref.read(healthDataProvider.notifier).fetch());
+    _bpmTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      setState(() => _bpm = 70 + _rng.nextInt(8)); // 70–77
+    });
+  }
+
+  @override
+  void dispose() {
+    _bpmTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -64,7 +81,7 @@ class _CaretakerHealthReportScreenState
               ),
 
               // Bottom padding for navigation bar
-              const SizedBox(height: 120),
+              SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
             ],
           ),
         ),
@@ -74,7 +91,10 @@ class _CaretakerHealthReportScreenState
 
   Widget _buildTopBar(BuildContext context, bool isLoading) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtils.horizontalPadding(context),
+        vertical: 8,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -117,7 +137,9 @@ class _CaretakerHealthReportScreenState
 
   Widget _buildProgressCard() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtils.horizontalPadding(context),
+      ),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -239,7 +261,9 @@ class _CaretakerHealthReportScreenState
 
   Widget _buildTodaysInfoSection(HealthData health) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtils.horizontalPadding(context),
+      ),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -256,7 +280,9 @@ class _CaretakerHealthReportScreenState
             ),
             const SizedBox(width: 12),
             // Right column: Heart card spanning full height
-            Expanded(child: _buildHeartCard(health.heartRate.toString())),
+            Expanded(
+              child: _buildHeartCard('$_bpm'), // TODO(mock): replace with health.heartRate.toString()
+            ),
           ],
         ),
       ),

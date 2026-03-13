@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/network/api_exceptions.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../providers/medication_provider.dart';
 import '../models/medication.dart';
 import '../widgets/medication_task_card.dart';
@@ -136,7 +137,7 @@ class _MedicationMainScreenContentState
           // Floating QR button - positioned bottom right, above navbar
           Positioned(
             right: 30,
-            bottom: 120, // Above the bottom navbar
+            bottom: ResponsiveUtils.bottomNavPadding(context),
             child: FloatingActionButton(
               onPressed: () => context.push(AppRoutes.medicationScan),
               backgroundColor: AppColors.primary,
@@ -208,8 +209,9 @@ class _MedicationMainScreenContentState
 
   Widget _buildDateSelector(DateTime selectedDate) {
     final now = DateTime.now();
-    // 5 days: 2 days before + today + 2 days after
-    final dates = List.generate(5, (i) => now.add(Duration(days: i - 2)));
+    final dayCount = ResponsiveUtils.dateSelectorDays(context);
+    final offset = dayCount ~/ 2;
+    final dates = List.generate(dayCount, (i) => now.add(Duration(days: i - offset)));
 
     return SizedBox(
       height: 84,
@@ -440,8 +442,24 @@ class _MedicationMainScreenContentState
       );
     }
 
+    final hPad = ResponsiveUtils.horizontalPadding(context);
+    final cols = ResponsiveUtils.listColumns(context);
+    if (cols > 1) {
+      return GridView.builder(
+        padding: EdgeInsets.fromLTRB(hPad, 0, hPad, ResponsiveUtils.bottomNavPadding(context) + 40),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 2.8,
+        ),
+        itemCount: medications.length,
+        itemBuilder: (context, index) =>
+            MedicationTaskCard(medication: medications[index]),
+      );
+    }
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 160),
+      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, ResponsiveUtils.bottomNavPadding(context) + 40),
       itemCount: medications.length,
       itemBuilder: (context, index) {
         return Padding(

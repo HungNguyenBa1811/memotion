@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../providers/profile_provider.dart';
 
 /// Original screen - kept for backwards compatibility
@@ -21,13 +24,40 @@ class ProfileScreen extends ConsumerWidget {
 }
 
 /// Content version without bottom nav - used inside MainShell
-class ProfileScreenContent extends ConsumerWidget {
+class ProfileScreenContent extends ConsumerStatefulWidget {
   final VoidCallback? onLogout;
 
   const ProfileScreenContent({super.key, this.onLogout});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreenContent> createState() =>
+      _ProfileScreenContentState();
+}
+
+class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
+  // TODO(mock): remove when real health API is connected
+  int _bpm = 73;
+  Timer? _bpmTimer;
+  final _rng = Random();
+
+  @override
+  void initState() {
+    super.initState();
+    _bpmTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      setState(() => _bpm = 70 + _rng.nextInt(8)); // 70–77
+    });
+  }
+
+  @override
+  void dispose() {
+    _bpmTimer?.cancel();
+    super.dispose();
+  }
+
+  VoidCallback? get onLogout => widget.onLogout;
+
+  @override
+  Widget build(BuildContext context) {
     final vm = ref.watch(profileViewModelProvider);
     final user = vm.user;
 
@@ -47,8 +77,8 @@ class ProfileScreenContent extends ConsumerWidget {
               const SizedBox(height: 20),
               // Profile avatar
               Container(
-                width: 90,
-                height: 90,
+                width: ResponsiveUtils.avatarSize(context),
+                height: ResponsiveUtils.avatarSize(context),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.grey.shade300, width: 2),
@@ -88,50 +118,69 @@ class ProfileScreenContent extends ConsumerWidget {
               const SizedBox(height: 8),
 
               // Health stats row (Heart Rate / Energy / Weight)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildHealthStat(
-                      svgAsset: 'assets/images/heartbeat_icon.svg',
-                      fallbackIcon: Icons.favorite,
-                      label: 'Heart Rate',
-                      value: '215bpm',
+              Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: ResponsiveUtils.contentMaxWidth(context),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: ResponsiveUtils.horizontalPadding(context),
                     ),
-                    Container(
-                      width: 1,
-                      height: 44,
-                      color: AppColors.background,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildHealthStat(
+                          svgAsset: 'assets/images/heartbeat_icon.svg',
+                          fallbackIcon: Icons.favorite,
+                          label: 'Heart Rate',
+                          value: '$_bpm bpm', // TODO(mock): replace with real API
+                          // value: '215bpm',
+                        ),
+                        Container(
+                          width: 1,
+                          height: 44,
+                          color: AppColors.background,
+                        ),
+                        _buildHealthStat(
+                          svgAsset: 'assets/images/fire_icon.svg',
+                          fallbackIcon: Icons.local_fire_department,
+                          label: 'Energy',
+                          value: '756cal',
+                        ),
+                        Container(
+                          width: 1,
+                          height: 44,
+                          color: AppColors.background,
+                        ),
+                        _buildHealthStat(
+                          svgAsset: 'assets/images/weight_icon.svg',
+                          fallbackIcon: Icons.fitness_center,
+                          label: 'Weight',
+                          value: '103lbs',
+                        ),
+                      ],
                     ),
-                    _buildHealthStat(
-                      svgAsset: 'assets/images/fire_icon.svg',
-                      fallbackIcon: Icons.local_fire_department,
-                      label: 'Energy',
-                      value: '756cal',
-                    ),
-                    Container(
-                      width: 1,
-                      height: 44,
-                      color: AppColors.background,
-                    ),
-                    _buildHealthStat(
-                      svgAsset: 'assets/images/weight_icon.svg',
-                      fallbackIcon: Icons.fitness_center,
-                      label: 'Weight',
-                      value: '103lbs',
-                    ),
-                  ],
+                  ),
                 ),
               ),
               const SizedBox(height: 32),
 
               // Menu items matching Figma order
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _buildFigmaMenu(context, ref),
+              Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: ResponsiveUtils.contentMaxWidth(context),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: ResponsiveUtils.horizontalPadding(context),
+                    ),
+                    child: _buildFigmaMenu(context, ref),
+                  ),
+                ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
             ],
           ),
         ),

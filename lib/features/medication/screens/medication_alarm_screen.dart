@@ -2,6 +2,7 @@ import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../data/medication_scheduler.dart';
 import '../models/medication_task.dart';
 
@@ -84,8 +85,16 @@ class _MedicationAlarmScreenState extends State<MedicationAlarmScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: ResponsiveUtils.formMaxWidth(context),
+            ),
+            child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: ResponsiveUtils.horizontalPadding(context),
+            vertical: 32,
+          ),
           child: Column(
             children: [
               const Spacer(),
@@ -118,8 +127,8 @@ class _MedicationAlarmScreenState extends State<MedicationAlarmScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: SizedBox(
-                  width: 160,
-                  height: 160,
+                  width: ResponsiveUtils.medicationImageSize(context),
+                  height: ResponsiveUtils.medicationImageSize(context),
                   child: imageUrl != null
                       ? Image.network(
                           imageUrl,
@@ -182,6 +191,8 @@ class _MedicationAlarmScreenState extends State<MedicationAlarmScreen> {
               ),
               const SizedBox(height: 16),
             ],
+          ),
+        ),
           ),
         ),
       ),

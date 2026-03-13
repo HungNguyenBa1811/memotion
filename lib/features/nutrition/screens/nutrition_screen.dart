@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/network/api_exceptions.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../models/nutrition_task.dart';
 import '../providers/nutrition_provider.dart';
 import '../widgets/nutrition_task_card.dart';
@@ -39,7 +40,10 @@ class NutritionScreenContent extends ConsumerWidget {
           children: [
             // Header with back and notification
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: EdgeInsets.symmetric(
+                horizontal: ResponsiveUtils.horizontalPadding(context),
+                vertical: 16,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -106,7 +110,7 @@ class NutritionScreenContent extends ConsumerWidget {
 
             // Title
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.horizontalPadding(context)),
               child: Text(
                 'Nutrition Plan',
                 style: GoogleFonts.lexend(
@@ -120,7 +124,7 @@ class NutritionScreenContent extends ConsumerWidget {
 
             // Subtitle
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.horizontalPadding(context)),
               child: Text(
                 'Your daily meal tasks',
                 style: GoogleFonts.lexend(
@@ -134,7 +138,7 @@ class NutritionScreenContent extends ConsumerWidget {
 
             // Category pills (filter by meal type)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.horizontalPadding(context)),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -261,14 +265,28 @@ class NutritionScreenContent extends ConsumerWidget {
       );
     }
 
+    final hPad = ResponsiveUtils.horizontalPadding(context);
+    final bottomPad = ResponsiveUtils.bottomNavPadding(context) + 40;
+    if (ResponsiveUtils.isTabletOrLarger(context)) {
+      return GridView.builder(
+        padding: EdgeInsets.fromLTRB(hPad, 0, hPad, bottomPad),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 2.8,
+        ),
+        itemCount: tasks.length,
+        itemBuilder: (context, index) => NutritionTaskCard(task: tasks[index]),
+      );
+    }
     return ListView.builder(
-      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 160),
+      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, bottomPad),
       itemCount: tasks.length,
       itemBuilder: (context, index) {
-        final task = tasks[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: NutritionTaskCard(task: task),
+          child: NutritionTaskCard(task: tasks[index]),
         );
       },
     );
