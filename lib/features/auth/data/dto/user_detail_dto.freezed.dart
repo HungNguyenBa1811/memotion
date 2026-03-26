@@ -26,8 +26,6 @@ mixin _$UserDetailDto {
   String get email => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
-  @JsonKey(name: 'is_first_login')
-  bool get isFirstLogin => throw _privateConstructorUsedError;
   String get role => throw _privateConstructorUsedError;
   @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
@@ -55,7 +53,6 @@ abstract class $UserDetailDtoCopyWith<$Res> {
     @JsonKey(name: 'full_name') String fullName,
     String email,
     @JsonKey(name: 'is_active') bool isActive,
-    @JsonKey(name: 'is_first_login') bool isFirstLogin,
     String role,
     @JsonKey(name: 'user_id') String userId,
     String phone,
@@ -81,7 +78,6 @@ class _$UserDetailDtoCopyWithImpl<$Res, $Val extends UserDetailDto>
     Object? fullName = null,
     Object? email = null,
     Object? isActive = null,
-    Object? isFirstLogin = null,
     Object? role = null,
     Object? userId = null,
     Object? phone = null,
@@ -100,10 +96,6 @@ class _$UserDetailDtoCopyWithImpl<$Res, $Val extends UserDetailDto>
             isActive: null == isActive
                 ? _value.isActive
                 : isActive // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            isFirstLogin: null == isFirstLogin
-                ? _value.isFirstLogin
-                : isFirstLogin // ignore: cast_nullable_to_non_nullable
                       as bool,
             role: null == role
                 ? _value.role
@@ -140,7 +132,6 @@ abstract class _$$UserDetailDtoImplCopyWith<$Res>
     @JsonKey(name: 'full_name') String fullName,
     String email,
     @JsonKey(name: 'is_active') bool isActive,
-    @JsonKey(name: 'is_first_login') bool isFirstLogin,
     String role,
     @JsonKey(name: 'user_id') String userId,
     String phone,
@@ -165,7 +156,6 @@ class __$$UserDetailDtoImplCopyWithImpl<$Res>
     Object? fullName = null,
     Object? email = null,
     Object? isActive = null,
-    Object? isFirstLogin = null,
     Object? role = null,
     Object? userId = null,
     Object? phone = null,
@@ -184,10 +174,6 @@ class __$$UserDetailDtoImplCopyWithImpl<$Res>
         isActive: null == isActive
             ? _value.isActive
             : isActive // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        isFirstLogin: null == isFirstLogin
-            ? _value.isFirstLogin
-            : isFirstLogin // ignore: cast_nullable_to_non_nullable
                   as bool,
         role: null == role
             ? _value.role
@@ -217,7 +203,6 @@ class _$UserDetailDtoImpl implements _UserDetailDto {
     @JsonKey(name: 'full_name') required this.fullName,
     required this.email,
     @JsonKey(name: 'is_active') required this.isActive,
-    @JsonKey(name: 'is_first_login') required this.isFirstLogin,
     required this.role,
     @JsonKey(name: 'user_id') required this.userId,
     required this.phone,
@@ -236,9 +221,6 @@ class _$UserDetailDtoImpl implements _UserDetailDto {
   @JsonKey(name: 'is_active')
   final bool isActive;
   @override
-  @JsonKey(name: 'is_first_login')
-  final bool isFirstLogin;
-  @override
   final String role;
   @override
   @JsonKey(name: 'user_id')
@@ -250,7 +232,7 @@ class _$UserDetailDtoImpl implements _UserDetailDto {
 
   @override
   String toString() {
-    return 'UserDetailDto(fullName: $fullName, email: $email, isActive: $isActive, isFirstLogin: $isFirstLogin, role: $role, userId: $userId, phone: $phone, patient: $patient)';
+    return 'UserDetailDto(fullName: $fullName, email: $email, isActive: $isActive, role: $role, userId: $userId, phone: $phone, patient: $patient)';
   }
 
   @override
@@ -263,8 +245,6 @@ class _$UserDetailDtoImpl implements _UserDetailDto {
             (identical(other.email, email) || other.email == email) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
-            (identical(other.isFirstLogin, isFirstLogin) ||
-                other.isFirstLogin == isFirstLogin) &&
             (identical(other.role, role) || other.role == role) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.phone, phone) || other.phone == phone) &&
@@ -278,7 +258,6 @@ class _$UserDetailDtoImpl implements _UserDetailDto {
     fullName,
     email,
     isActive,
-    isFirstLogin,
     role,
     userId,
     phone,
@@ -304,7 +283,6 @@ abstract class _UserDetailDto implements UserDetailDto {
     @JsonKey(name: 'full_name') required final String fullName,
     required final String email,
     @JsonKey(name: 'is_active') required final bool isActive,
-    @JsonKey(name: 'is_first_login') required final bool isFirstLogin,
     required final String role,
     @JsonKey(name: 'user_id') required final String userId,
     required final String phone,
@@ -322,9 +300,6 @@ abstract class _UserDetailDto implements UserDetailDto {
   @override
   @JsonKey(name: 'is_active')
   bool get isActive;
-  @override
-  @JsonKey(name: 'is_first_login')
-  bool get isFirstLogin;
   @override
   String get role;
   @override

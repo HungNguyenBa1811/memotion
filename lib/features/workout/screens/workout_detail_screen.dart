@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/network/api_constants.dart';
 import '../providers/workout_provider.dart';
@@ -338,24 +339,89 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
 
           const SizedBox(height: 40),
 
-          // "Lets Workout" button - centered, 163x36px, border-radius 32px
-          Center(
-            child: GestureDetector(
-              onTap: workout.isCompleted
-                  ? null
-                  : () => _startWorkoutExercise(workout),
+          // Action buttons row
+          if (!workout.isCompleted)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  // "Lets Workout" — use phone camera (existing flow)
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _startWorkoutExercise(workout),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Lets Workout',
+                            style: GoogleFonts.lexend(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFFFAFAF5),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // "PC Mode" — connect to Desktop app via QR scan
+                  GestureDetector(
+                    onTap: () => _connectToPc(workout),
+                    child: Container(
+                      height: 44,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(32),
+                        border: Border.all(
+                          color: AppColors.primary,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.computer_rounded,
+                            size: 18,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'PC Mode',
+                            style: GoogleFonts.lexend(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            // Completed state — single disabled button
+            Center(
               child: Container(
                 width: 163,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: workout.isCompleted
-                      ? AppColors.textSecondary.withOpacity(0.3)
-                      : AppColors.primary,
+                  color: AppColors.textSecondary.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(32),
                 ),
                 child: Center(
                   child: Text(
-                    workout.isCompleted ? 'Completed' : 'Lets Workout',
+                    'Completed',
                     style: GoogleFonts.lexend(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -365,7 +431,6 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                 ),
               ),
             ),
-          ),
 
           const SizedBox(height: 140),
         ],
@@ -798,6 +863,16 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _connectToPc(WorkoutTask workout) {
+    context.push(
+      AppRoutes.pcQrScan,
+      extra: {
+        'workoutId': workout.id,
+        'exerciseType': _getExerciseType(workout.type),
+      },
     );
   }
 

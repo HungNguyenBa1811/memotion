@@ -9,14 +9,34 @@ import '../../../core/utils/responsive_utils.dart';
 import '../models/nutrition_task.dart';
 import '../providers/nutrition_provider.dart';
 import '../widgets/nutrition_task_card.dart';
+import '../widgets/nutrition_vertical_card.dart';
+import '../widgets/nutrition_horizontal_card.dart';
+import '../../../features/profile/providers/profile_provider.dart';
+import 'patient/patient_nutrition_screen.dart';
 
-/// Original screen - kept for backwards compatibility
+/// Role-aware entry point: CARETAKER → NutritionScreenContent, PATIENT → PatientNutritionScreenContent
 class NutritionScreen extends ConsumerWidget {
   const NutritionScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const NutritionScreenContent();
+    final profileViewModel = ref.watch(profileViewModelProvider);
+
+    if (profileViewModel.isLoadingUserDetails) {
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+    }
+
+    final role =
+        profileViewModel.userDetails?.role.toUpperCase() ?? 'PATIENT';
+
+    if (role == 'CARETAKER') {
+      return const NutritionScreenContent();
+    } else {
+      return const PatientNutritionScreenContent();
+    }
   }
 }
 
@@ -267,28 +287,84 @@ class NutritionScreenContent extends ConsumerWidget {
 
     final hPad = ResponsiveUtils.horizontalPadding(context);
     final bottomPad = ResponsiveUtils.bottomNavPadding(context) + 40;
-    if (ResponsiveUtils.isTabletOrLarger(context)) {
-      return GridView.builder(
-        padding: EdgeInsets.fromLTRB(hPad, 0, hPad, bottomPad),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 2.8,
-        ),
-        itemCount: tasks.length,
-        itemBuilder: (context, index) => NutritionTaskCard(task: tasks[index]),
-      );
-    }
-    return ListView.builder(
-      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, bottomPad),
-      itemCount: tasks.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: NutritionTaskCard(task: tasks[index]),
-        );
-      },
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(bottom: bottomPad),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Vertical cards - horizontal scrollable list (API-driven)
+          SizedBox(
+            height: 300,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: hPad),
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: EdgeInsets.only(
+                    right: index < tasks.length - 1 ? 16 : 0,
+                  ),
+                  child: NutritionVerticalCard(task: tasks[index]),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Popular recipes section header
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: hPad),
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Popular ',
+                    style: GoogleFonts.lexend(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'recipes',
+                    style: GoogleFonts.lexend(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFFACACAC),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Horizontal card - hardcoded demo
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: hPad),
+            child: const NutritionHorizontalCard(),
+          ),
+          const SizedBox(height: 16),
+
+          // Additional horizontal cards from API (using existing task card style)
+          if (tasks.length > 2)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: hPad),
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: (tasks.length - 2).clamp(0, 3),
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: NutritionTaskCard(task: tasks[index + 2]),
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
     );
   }
 

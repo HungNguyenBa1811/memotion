@@ -141,7 +141,6 @@ class AuthApiService extends BaseApiService {
       debugPrint('│ ✅ AUTH: User details fetched successfully');
       debugPrint('│ User ID: ${response.data!.userId}');
       debugPrint('│ Email: ${response.data!.email}');
-      debugPrint('│ Is First Login: ${response.data!.isFirstLogin}');
       debugPrint('│ Role: ${response.data!.role}');
       debugPrint(
         '└─────────────────────────────────────────────────────────────',

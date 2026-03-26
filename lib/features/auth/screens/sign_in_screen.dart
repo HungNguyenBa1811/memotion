@@ -40,9 +40,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         .read(authProvider.notifier)
         .login(_emailController.text.trim(), _passwordController.text);
 
-    // Router sẽ tự động redirect dựa trên is_first_login
-    // Nếu is_first_login = true -> /onboarding/1
-    // Nếu is_first_login = false -> /home
     if (success && mounted) {
       // Do nothing - let router redirect handle it automatically
     }

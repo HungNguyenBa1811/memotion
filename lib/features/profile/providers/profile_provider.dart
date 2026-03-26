@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/providers/auth_provider.dart';
+import '../../home/providers/home_provider.dart';
 import '../../medication/providers/medication_provider.dart';
 import '../../nutrition/providers/nutrition_provider.dart';
 import '../../workout/providers/workout_provider.dart';
@@ -35,6 +36,14 @@ class ProfileViewModel extends ChangeNotifier {
     await loadStats();
     await loadUserDetails();
     notifyListeners();
+
+    // Re-load user details whenever the user authenticates (e.g. after re-login)
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.status == AuthStatus.authenticated &&
+          previous?.status != AuthStatus.authenticated) {
+        loadUserDetails();
+      }
+    });
   }
 
   Future<void> loadStats() async {
@@ -100,6 +109,9 @@ class ProfileViewModel extends ChangeNotifier {
     isLoadingUserDetails = false;
 
     // Invalidate global providers so feature data is re-fetched for next user
+    try {
+      ref.invalidate(homeProvider);
+    } catch (_) {}
     try {
       ref.invalidate(medicationsProvider);
     } catch (_) {}

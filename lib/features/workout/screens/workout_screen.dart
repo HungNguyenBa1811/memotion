@@ -10,14 +10,32 @@ import '../models/workout_model.dart';
 import '../providers/workout_provider.dart';
 import '../widgets/calendar_day_picker.dart';
 import '../widgets/workout_task_card.dart';
+import '../../../features/profile/providers/profile_provider.dart';
+import 'patient/patient_workout_screen.dart';
 
-/// Original screen - kept for backwards compatibility
+/// Role-aware entry point: CARETAKER → WorkoutScreenContent, PATIENT → PatientWorkoutScreenContent
 class WorkoutScreen extends ConsumerWidget {
   const WorkoutScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const WorkoutScreenContent();
+    final profileViewModel = ref.watch(profileViewModelProvider);
+
+    if (profileViewModel.isLoadingUserDetails) {
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+    }
+
+    final role =
+        profileViewModel.userDetails?.role.toUpperCase() ?? 'PATIENT';
+
+    if (role == 'CARETAKER') {
+      return const WorkoutScreenContent();
+    } else {
+      return const PatientWorkoutScreenContent();
+    }
   }
 }
 

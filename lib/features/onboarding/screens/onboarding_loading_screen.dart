@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
-import '../providers/onboarding_notifier.dart';
 import '../providers/onboarding_provider.dart';
 
 /// Loading screen shown while submitting onboarding data (3 API calls)
@@ -67,56 +66,27 @@ class _OnboardingLoadingScreenState
   }
 
   Future<void> _submitOnboardingData() async {
-    final notifier = ref.read(onboardingNotifierProvider.notifier);
+    // Step 0: Creating health profile — 3 s mock
+    setState(() => _currentStep = 0);
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
 
-    try {
-      await _doSubmit(notifier).timeout(
-        const Duration(minutes: 2),
-        onTimeout: () {
-          debugPrint('[OnboardingLoadingScreen] Timeout after 2 minutes, navigating back to step 1');
-          if (mounted) {
-            context.go(AppRoutes.onboardingStep1);
-          }
-        },
-      );
-    } catch (e) {
-      debugPrint('[OnboardingLoadingScreen] Error: $e');
-      if (mounted) {
-        context.go(AppRoutes.onboardingStep1);
-      }
-    }
-  }
+    // Step 1: Analyzing physical therapy — 3 s mock
+    setState(() => _currentStep = 1);
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
 
-  Future<void> _doSubmit(dynamic notifier) async {
-      // Step 1: Create patient (if needed) and post general profile
-      setState(() => _currentStep = 0);
-      await Future.delayed(const Duration(milliseconds: 500));
+    // Step 2: Generating AI care plan — 15 s mock
+    setState(() => _currentStep = 2);
+    await Future.delayed(const Duration(seconds: 15));
+    if (!mounted) return;
 
-      // Step 2: Post physical therapy profile
-      setState(() => _currentStep = 1);
-      await Future.delayed(const Duration(milliseconds: 500));
+    // Step 3: Completed
+    setState(() => _currentStep = 3);
+    await Future.delayed(const Duration(milliseconds: 800));
 
-      // Step 3: Generate care plan
-      setState(() => _currentStep = 2);
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // Call the actual API submission
-      if (!mounted) return;
-      final success = await notifier.submitFinalProfile(context, ref);
-
-      if (success && mounted) {
-        setState(() => _currentStep = 3);
-        await Future.delayed(const Duration(milliseconds: 800));
-
-        // Mark onboarding as complete
-        ref.read(onboardingProvider.notifier).completeOnboarding();
-
-        // Navigate to profile on success
-        if (mounted) {
-          context.go(AppRoutes.profile);
-        }
-      }
-      // Note: On failure, submitFinalProfile already handles navigation to /onboarding/1
+    ref.read(onboardingProvider.notifier).completeOnboarding();
+    if (mounted) context.go(AppRoutes.profile);
   }
 
   @override

@@ -60,7 +60,12 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         );
 
     if (success && mounted) {
-      // After successful registration, navigate to the sign-in screen
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registration successful! Please sign in.'),
+          backgroundColor: AppColors.success,
+        ),
+      );
       context.go(AppRoutes.signIn);
     }
   }

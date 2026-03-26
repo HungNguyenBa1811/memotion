@@ -19,7 +19,9 @@ import '../../features/workout/screens/workout_training_screen.dart';
 import '../../features/workout/screens/workout_training_complete_screen.dart';
 import '../../features/workout/screens/pose_detection_screen.dart';
 import '../../features/workout/screens/pose_training_screen.dart';
-import '../../features/medication/screens/medication_main_screen.dart';
+import '../../features/workout/screens/qr_scan_screen.dart';
+import '../../features/workout/screens/pc_standby_screen.dart';
+import '../../features/medication/screens/medication_screen.dart';
 import '../../features/medication/screens/medication_reminder_screen.dart';
 import '../../features/medication/screens/medication_scan_screen.dart';
 import '../../features/profile/screens/caretaker_health_report_screen.dart';
@@ -50,6 +52,8 @@ class AppRoutes {
   static const String workoutTrainingComplete = '/workout-training-complete';
   static const String poseDetection = '/pose-detection';
   static const String poseTraining = '/pose-training';
+  static const String pcQrScan = '/pc-qr-scan';
+  static const String pcStandby = '/pc-standby';
   static const String medication = '/medication';
   static const String medicationScan = '/medication-scan';
   static const String medicationReminder = '/medication-reminder';
@@ -96,23 +100,9 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final isAuthenticated = status == AuthStatus.authenticated;
 
-      // Case 1: Đã authenticated nhưng đang ở public route (sign-in, registration, landing)
-      // -> Redirect đến authenticated area dựa trên role và is_first_login
+      // Case 1: Đã authenticated nhưng đang ở public route -> về home
       if (isAuthenticated && isPublicRoute) {
-        // Nếu role = PATIENT -> skip onboarding, đi thẳng home
-        if (authState.isPatient) {
-          return RouteConfig.homeRoute; // /home
-        }
-
-        final isFirstLogin = authState.isFirstLogin ?? true;
-
-        // Nếu is_first_login = true -> đi onboarding
-        // Nếu is_first_login = false -> đi home/profile
-        if (isFirstLogin) {
-          return RouteConfig.authenticatedRedirect; // /onboarding/1
-        } else {
-          return RouteConfig.homeRoute; // /home
-        }
+        return RouteConfig.homeRoute;
       }
 
       // Case 2: Chưa authenticated nhưng đang ở protected route
@@ -234,6 +224,30 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
 
+      // PC QR Scan - Android scans PC QR to initiate pairing
+      GoRoute(
+        path: AppRoutes.pcQrScan,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return QrScanScreen(
+            workoutId: extra?['workoutId'] ?? '',
+            exerciseType: extra?['exerciseType'] ?? 'arm_raise',
+          );
+        },
+      ),
+
+      // PC Standby - Android waits while PC runs the session
+      GoRoute(
+        path: AppRoutes.pcStandby,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return PcStandbyScreen(
+            workoutId: extra?['workoutId'] ?? '',
+            exerciseType: extra?['exerciseType'] ?? 'arm_raise',
+          );
+        },
+      ),
+
       // Medication Scan - outside shell (no bottom nav)
       GoRoute(
         path: AppRoutes.medicationScan,
@@ -283,8 +297,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.medication,
-                builder: (context, state) =>
-                    const MedicationMainScreenContent(),
+                builder: (context, state) => const MedicationScreen(),
               ),
             ],
           ),
@@ -293,7 +306,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.nutrition,
-                builder: (context, state) => const NutritionScreenContent(),
+                builder: (context, state) => const NutritionScreen(),
               ),
             ],
           ),
@@ -302,7 +315,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.workout,
-                builder: (context, state) => const WorkoutScreenContent(),
+                builder: (context, state) => const WorkoutScreen(),
               ),
             ],
           ),

@@ -15,7 +15,6 @@ class AuthState {
   final User? user;
   final String? accessToken;
   final String? error;
-  final bool? isFirstLogin;
   final String? role;
 
   const AuthState({
@@ -23,7 +22,6 @@ class AuthState {
     this.user,
     this.accessToken,
     this.error,
-    this.isFirstLogin,
     this.role,
   });
 
@@ -35,7 +33,6 @@ class AuthState {
     User? user,
     String? accessToken,
     String? error,
-    bool? isFirstLogin,
     String? role,
   }) {
     return AuthState(
@@ -43,7 +40,6 @@ class AuthState {
       user: user ?? this.user,
       accessToken: accessToken ?? this.accessToken,
       error: error,
-      isFirstLogin: isFirstLogin ?? this.isFirstLogin,
       role: role ?? this.role,
     );
   }
@@ -85,14 +81,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
         accessToken: token,
       );
 
-      // Gọi API /api/users/me để lấy thông tin user và is_first_login
       final userDetailResult = await _authRepository.getUserDetails();
 
       switch (userDetailResult) {
         case Success(:final data):
           debugPrint('🔐 AuthNotifier: Session restored successfully');
-          debugPrint('🔐 AuthNotifier: is_first_login = ${data.isFirstLogin}');
-          debugPrint('🔐 AuthNotifier: role = ${data.role}');
+debugPrint('🔐 AuthNotifier: role = ${data.role}');
 
           final user = User(
             id: data.userId,
@@ -105,7 +99,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
             status: AuthStatus.authenticated,
             user: user,
             accessToken: token,
-            isFirstLogin: data.isFirstLogin,
             role: data.role,
           );
 
@@ -170,7 +163,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     debugPrint('│ 🎉 AUTH PROVIDER: Login successful');
     debugPrint('│ Email: $email');
     debugPrint('│ Token: ${data.accessToken.substring(0, 20)}...');
-    debugPrint('│ Is First Login: ${data.isFirstLogin}');
     debugPrint('│ Saving token to secure storage...');
     debugPrint(
       '└─────────────────────────────────────────────────────────────',
@@ -187,13 +179,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     String? role;
     User user;
-    bool isFirstLogin = data.isFirstLogin;
 
     switch (userDetailResult) {
       case Success(:final data):
         debugPrint('🔐 AuthNotifier: Got user details - role: ${data.role}');
         role = data.role;
-        isFirstLogin = data.isFirstLogin;
         user = User(
           id: data.userId,
           email: data.email,
@@ -215,7 +205,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       status: AuthStatus.authenticated,
       user: user,
       accessToken: accessToken,
-      isFirstLogin: isFirstLogin,
       role: role,
     );
     return true;
