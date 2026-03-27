@@ -38,6 +38,10 @@ class _PatientNutritionScreenContentState
       filteredNutritionTasksProvider(selectedFilter),
     );
 
+    // Demo card is always shown; API tasks are appended when available
+    final apiTasks = nutritionTasksAsync.valueOrNull ?? [];
+    final displayTasks = [_ketoSaladDemo, ...apiTasks];
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -49,12 +53,13 @@ class _PatientNutritionScreenContentState
             _buildFilterPills(selectedFilter),
             const SizedBox(height: 20),
             Expanded(
-              child: nutritionTasksAsync.when(
-                data: (tasks) => _buildPagedCards(context, tasks),
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppColors.primary),
-                ),
-                error: (error, _) => _buildErrorWidget(ref, error),
+              child: _buildPagedCards(
+                context,
+                displayTasks,
+                isLoading: nutritionTasksAsync.isLoading,
+                apiError: nutritionTasksAsync.hasError
+                    ? nutritionTasksAsync.error
+                    : null,
               ),
             ),
           ],
@@ -62,6 +67,17 @@ class _PatientNutritionScreenContentState
       ),
     );
   }
+
+  NutritionTask get _ketoSaladDemo => NutritionTask(
+        id: 'demo_keto_salad',
+        name: 'Keto Salad',
+        description: 'Beans & fruits',
+        calories: 370,
+        mealType: 'lunch',
+        time: '12:00',
+        scheduledDate: DateTime.now(),
+        status: NutritionStatus.pending,
+      );
 
   Widget _buildHeader(BuildContext context, WidgetRef ref) {
     return Padding(
@@ -190,27 +206,60 @@ class _PatientNutritionScreenContentState
     );
   }
 
-  Widget _buildPagedCards(BuildContext context, List<NutritionTask> tasks) {
-    if (tasks.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.restaurant_menu,
-                size: 72, color: AppColors.primary.withOpacity(0.3)),
-            const SizedBox(height: 16),
-            Text(
-              'No meals for today',
-              style: GoogleFonts.lexend(
-                  fontSize: 16, color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-      );
-    }
-
+  Widget _buildPagedCards(
+    BuildContext context,
+    List<NutritionTask> tasks, {
+    bool isLoading = false,
+    Object? apiError,
+  }) {
     return Column(
       children: [
+        // Inline API state: loading spinner or error banner
+        if (isLoading)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: SizedBox(
+              height: 2,
+              child: LinearProgressIndicator(
+                color: AppColors.secondary,
+                backgroundColor: Colors.transparent,
+              ),
+            ),
+          )
+        else if (apiError != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Row(
+              children: [
+                Icon(
+                  apiError is PatientProfileNotFoundException
+                      ? Icons.person_off
+                      : Icons.error_outline,
+                  size: 16,
+                  color: apiError is PatientProfileNotFoundException
+                      ? AppColors.primary
+                      : Colors.red.shade300,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    apiError is PatientProfileNotFoundException
+                        ? 'No patient profile — showing demo meal.'
+                        : 'Could not load meals — showing demo.',
+                    style: GoogleFonts.lexend(
+                        fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ),
+                if (apiError is! PatientProfileNotFoundException)
+                  GestureDetector(
+                    onTap: () => ref.invalidate(nutritionTasksProvider),
+                    child: const Icon(Icons.refresh,
+                        size: 16, color: AppColors.primary),
+                  ),
+              ],
+            ),
+          ),
+
         // Counter "X / N"
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
@@ -288,59 +337,9 @@ class _PatientNutritionScreenContentState
     );
   }
 
-  Widget _buildErrorWidget(WidgetRef ref, Object error) {
-    final isPatientNotFound = error is PatientProfileNotFoundException;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isPatientNotFound ? Icons.person_off : Icons.error_outline,
-              size: 64,
-              color: isPatientNotFound
-                  ? AppColors.primary
-                  : Colors.red.shade300,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              isPatientNotFound
-                  ? 'No patient profile yet'
-                  : 'Unable to load meals',
-              style: GoogleFonts.lexend(
-                  fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isPatientNotFound
-                  ? 'Please contact your doctor to set up your nutrition plan.'
-                  : error.toString(),
-              textAlign: TextAlign.center,
-              style:
-                  GoogleFonts.lexend(fontSize: 14, color: Colors.grey[600]),
-            ),
-            if (!isPatientNotFound) ...[
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: () => ref.invalidate(nutritionTasksProvider),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Try again'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
 }
 
-// ─── Full-width patient card ─────────────────────────────────────────────────
+// ─── Full-width patient card — same layout as Keto Salad, scaled to screen ───
 
 class _PatientNutritionCard extends StatelessWidget {
   final NutritionTask task;
@@ -352,207 +351,136 @@ class _PatientNutritionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── Image area ────────────────────────────────────────────
-            Expanded(
-              flex: 5,
-              child: ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(32)),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Container(
-                      color: task.mealColor.withOpacity(0.08),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Image fills ~86% of card width, same circle + border style as caretaker
+          final imageSize = constraints.maxWidth * 0.86;
+          // Image overlaps ~45% above the card top edge
+          final imageOverlap = imageSize * 0.45;
+
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // White card bg — pill top, gentle bottom (same radius as caretaker)
+              Positioned(
+                top: imageOverlap,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(70),
+                      topRight: Radius.circular(70),
+                      bottomLeft: Radius.circular(27),
+                      bottomRight: Radius.circular(27),
                     ),
-                    Center(
-                      child: Transform.rotate(
-                        angle: -0.08,
-                        child: Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: task.mealColor.withOpacity(0.35),
-                                blurRadius: 32,
-                                offset: const Offset(6, 8),
-                              ),
-                            ],
-                          ),
-                          child: ClipOval(child: _buildImage()),
-                        ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
-                    ),
-                    // Meal type badge
-                    Positioned(
-                      top: 16,
-                      right: 16,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: task.mealColor.withOpacity(0.14),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: task.mealColor.withOpacity(0.4)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(task.mealIcon,
-                                size: 14, color: task.mealColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              task.mealType,
-                              style: GoogleFonts.lexend(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: task.mealColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            // ── Detail area ───────────────────────────────────────────
-            Expanded(
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 18, 24, 20),
+              // Circular image — -11° tilt, white bg, 1px black border
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Transform.rotate(
+                    angle: -0.194,
+                    child: Container(
+                      width: imageSize,
+                      height: imageSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        border: Border.all(color: Colors.black, width: 1),
+                      ),
+                      child: ClipOval(child: _buildImage(imageSize)),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Text — scaled up font sizes for patient readability
+              Positioned(
+                bottom: 32,
+                left: 28,
+                right: 28,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Time
-                    Row(
-                      children: [
-                        Icon(Icons.access_time_rounded,
-                            size: 14, color: task.mealColor),
-                        const SizedBox(width: 4),
-                        Text(
-                          task.time,
-                          style: GoogleFonts.lexend(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: task.mealColor,
-                          ),
-                        ),
-                        if (task.remainingTime != null) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            '· ${task.remainingTime}',
-                            style: GoogleFonts.lexend(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    // Name
                     Text(
                       task.name,
                       style: GoogleFonts.lexend(
-                        fontSize: 22,
+                        fontSize: 28,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF1B4332),
-                        height: 1.2,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 4),
                     if (task.description != null &&
-                        task.description!.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                        task.description!.isNotEmpty)
                       Text(
                         task.description!,
                         style: GoogleFonts.lexend(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                          height: 1.4,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w300,
+                          color: const Color(0xFF1B4332),
                         ),
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                    const Spacer(),
-                    // Calories + tap hint
+                    const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (task.calories != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: task.mealColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              '${task.calories} kcal',
-                              style: GoogleFonts.lexend(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: task.mealColor,
-                              ),
-                            ),
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        Row(
-                          children: [
-                            Text(
-                              'View details',
-                              style: GoogleFonts.lexend(
-                                fontSize: 13,
-                                color: task.mealColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(Icons.arrow_forward_ios_rounded,
-                                size: 12, color: task.mealColor),
-                          ],
+                        Text(
+                          task.calories != null
+                              ? '${task.calories} Kcal'
+                              : '',
+                          style: GoogleFonts.lexend(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1B4332),
+                          ),
+                        ),
+                        Icon(
+                          Icons.favorite_outline,
+                          size: 28,
+                          color:
+                              const Color(0xFF4DB6AC).withOpacity(0.7),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildImage() {
+  Widget _buildImage(double size) {
     if (task.imagePath != null && task.imagePath!.isNotEmpty) {
       return Image.network(
         '${ApiConstants.baseUrl}${task.imagePath}',
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => _buildPlaceholder(),
+        width: size,
+        height: size,
+        errorBuilder: (_, __, ___) => _buildPlaceholder(size),
         loadingBuilder: (_, child, progress) {
           if (progress == null) return child;
           return Center(
@@ -568,13 +496,13 @@ class _PatientNutritionCard extends StatelessWidget {
         },
       );
     }
-    return _buildPlaceholder();
+    return _buildPlaceholder(size);
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(double size) {
     return Container(
       color: task.mealColor.withOpacity(0.1),
-      child: Icon(task.mealIcon, size: 80, color: task.mealColor),
+      child: Icon(task.mealIcon, size: size * 0.4, color: task.mealColor),
     );
   }
 }

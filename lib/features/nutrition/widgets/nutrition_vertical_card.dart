@@ -28,18 +28,19 @@ class NutritionVerticalCard extends StatelessWidget {
         );
       },
       child: SizedBox(
-        width: 200,
-        height: 280,
+        // Card width 227px; image fills width-2px; total height gives room for text
+        width: 227,
+        height: 300,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            // White card background
+            // White card background — rounded pill top, gentle bottom corners
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
               child: Container(
-                height: 200,
+                height: 220,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: const BorderRadius.only(
@@ -48,37 +49,24 @@ class NutritionVerticalCard extends StatelessWidget {
                     bottomLeft: Radius.circular(27),
                     bottomRight: Radius.circular(27),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
               ),
             ),
 
-            // Food image with rotation effect
+            // Food image — floats above card with -11° tilt (matches Figma: -0.194 rad)
             Positioned(
               top: 0,
               left: 0,
               right: 0,
               child: Center(
                 child: Transform.rotate(
-                  angle: -0.15, // Slight tilt to the left
+                  angle: -0.194,
                   child: Container(
-                    width: 160,
-                    height: 160,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(80),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(5, 5),
-                        ),
-                      ],
+                    width: 190,
+                    height: 190,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
                     ),
                     child: ClipOval(
                       child: _buildImage(),
@@ -88,7 +76,7 @@ class NutritionVerticalCard extends StatelessWidget {
               ),
             ),
 
-            // Text content at bottom
+            // Text content — title 24px, subtitle 16px, calories 16px (Figma spec)
             Positioned(
               bottom: 16,
               left: 16,
@@ -97,11 +85,10 @@ class NutritionVerticalCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title
                   Text(
                     task.name,
                     style: GoogleFonts.lexend(
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF1B4332),
                     ),
@@ -110,7 +97,6 @@ class NutritionVerticalCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
 
-                  // Description
                   if (task.description != null && task.description!.isNotEmpty)
                     Text(
                       task.description!,
@@ -122,23 +108,19 @@ class NutritionVerticalCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
 
-                  // Calories and favorite row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Calories
                       Text(
                         task.calories != null ? '${task.calories} Kcal' : '',
                         style: GoogleFonts.lexend(
-                          fontSize: 14,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1B4332),
                         ),
                       ),
-
-                      // Favorite heart icon
                       GestureDetector(
                         onTap: onFavorite,
                         child: Icon(
@@ -163,8 +145,8 @@ class NutritionVerticalCard extends StatelessWidget {
       return Image.network(
         '${ApiConstants.baseUrl}${task.imagePath}',
         fit: BoxFit.cover,
-        width: 160,
-        height: 160,
+        width: 180,
+        height: 180,
         errorBuilder: (context, error, stackTrace) {
           return _buildPlaceholder();
         },

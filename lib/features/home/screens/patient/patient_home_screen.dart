@@ -5,6 +5,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../features/medication/providers/medication_provider.dart';
 import '../../providers/home_provider.dart';
 import '../../widgets/patient_greeting_hero.dart';
 import '../../widgets/action_card.dart';
@@ -20,6 +21,7 @@ class PatientHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final homeState = ref.watch(homeProvider);
     final homeNotifier = ref.read(homeProvider.notifier);
+    final firstMed = ref.watch(firstMedicationTodayProvider);
 
     if (homeState.isLoading) {
       return const Scaffold(
@@ -58,6 +60,27 @@ class PatientHomeScreen extends ConsumerWidget {
 
                 const SizedBox(height: 24),
 
+                // Upcoming Medication Card (Patient perspective)
+                UpcomingMedicationCard(
+                  title: firstMed?.name ?? 'Upcoming Schedule',
+                  time: firstMed?.time ?? dashboardData?.upcomingMedication?.time ?? '10:00 AM',
+                  dosage: firstMed?.dosage ?? dashboardData?.upcomingMedication?.dosage ?? 'Take 1 Vitamin C tablet after meal',
+                  imageUrl: firstMed?.imageUrl.isNotEmpty == true ? firstMed!.imageUrl : dashboardData?.upcomingMedication?.imageUrl,
+                  onTakenPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Marked as taken!'),
+                        backgroundColor: AppColors.primary,
+                      ),
+                    );
+                  },
+                  onDetailsPressed: () {
+                    context.go('/medication');
+                  },
+                ),
+
+                const SizedBox(height: 24),
+
                 // Section title: "For Grandpa/Grandma"
                 Padding(
                   padding: EdgeInsets.symmetric(
@@ -74,29 +97,6 @@ class PatientHomeScreen extends ConsumerWidget {
                 ),
 
                 const SizedBox(height: 16),
-
-                // Upcoming Medication Card (Patient perspective)
-                UpcomingMedicationCard(
-                  title: 'Upcoming Schedule',
-                  time: dashboardData?.upcomingMedication?.time ?? '10:00 AM',
-                  dosage:
-                      dashboardData?.upcomingMedication?.dosage ??
-                      'Take 1 Vitamin C tablet after meal',
-                  imageUrl: dashboardData?.upcomingMedication?.imageUrl,
-                  onTakenPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Marked as taken!'),
-                        backgroundColor: AppColors.primary,
-                      ),
-                    );
-                  },
-                  onDetailsPressed: () {
-                    context.go('/medication');
-                  },
-                ),
-
-                const SizedBox(height: 24),
 
                 // Quick Actions Grid (responsive columns)
                 Padding(

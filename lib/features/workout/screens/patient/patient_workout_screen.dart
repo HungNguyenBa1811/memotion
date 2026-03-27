@@ -131,28 +131,7 @@ class _PatientWorkoutScreenContentState
               ),
             ],
           ),
-          SizedBox(
-            width: 40,
-            height: 40,
-            child: Stack(
-              children: [
-                const Icon(Icons.notifications,
-                    color: AppColors.textPrimary, size: 24),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          const SizedBox(width: 40),
         ],
       ),
     );

@@ -119,6 +119,12 @@ final selectedDateProvider = StateProvider<DateTime>((ref) {
   return DateTime.now();
 });
 
+/// First pending medication for today — used by home screen card.
+/// Returns null when the list is empty or still loading.
+final firstMedicationTodayProvider = Provider<Medication?>((ref) {
+  return ref.watch(medicationsProvider).valueOrNull?.firstOrNull;
+});
+
 /// Provider for scanned medication result
 final scannedMedicationProvider = StateProvider<Medication?>((ref) {
   return null;

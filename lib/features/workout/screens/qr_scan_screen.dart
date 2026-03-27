@@ -174,33 +174,17 @@ class _ScanOverlay extends StatelessWidget {
 
         return Stack(
           children: [
-            // Dark overlay — uses BlendMode.dstOut to punch a hole
-            ColorFiltered(
-              colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.62),
-                BlendMode.srcOut,
-              ),
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      backgroundBlendMode: BlendMode.dstOut,
-                    ),
-                  ),
-                  Positioned(
-                    left: left,
-                    top: top,
-                    child: Container(
-                      width: scanSize,
-                      height: scanSize,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                ],
+            // Dark overlay with a transparent cutout for the QR scan area.
+            // Uses PathFillType.evenOdd so the inner rect becomes a genuine
+            // transparent hole — reliable on all platforms including PlatformViews.
+            CustomPaint(
+              size: Size(constraints.maxWidth, constraints.maxHeight),
+              painter: _ScanOverlayPainter(
+                scanRect: RRect.fromRectAndRadius(
+                  Rect.fromLTWH(left, top, scanSize, scanSize),
+                  const Radius.circular(16),
+                ),
+                overlayColor: Colors.black.withOpacity(0.62),
               ),
             ),
 
@@ -254,6 +238,26 @@ class _ScanOverlay extends StatelessWidget {
       },
     );
   }
+}
+
+class _ScanOverlayPainter extends CustomPainter {
+  final RRect scanRect;
+  final Color overlayColor;
+
+  const _ScanOverlayPainter({required this.scanRect, required this.overlayColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..fillType = PathFillType.evenOdd
+      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..addRRect(scanRect);
+    canvas.drawPath(path, Paint()..color = overlayColor);
+  }
+
+  @override
+  bool shouldRepaint(_ScanOverlayPainter old) =>
+      old.scanRect != scanRect || old.overlayColor != overlayColor;
 }
 
 /// Four L-shaped corner brackets drawn with CustomPaint.

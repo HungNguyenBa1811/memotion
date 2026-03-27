@@ -8,7 +8,6 @@ import '../../../core/theme/theme.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../models/nutrition_task.dart';
 import '../providers/nutrition_provider.dart';
-import '../widgets/nutrition_task_card.dart';
 import '../widgets/nutrition_vertical_card.dart';
 import '../widgets/nutrition_horizontal_card.dart';
 import '../../../features/profile/providers/profile_provider.dart';
@@ -200,12 +199,16 @@ class NutritionScreenContent extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
 
-            // Content - API data
+            // Content — demo card always visible; API tasks appended when available
             Expanded(
-              child: nutritionTasksAsync.when(
-                data: (tasks) => _buildTasksList(context, ref, tasks),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => _buildErrorWidget(ref, error),
+              child: _buildTasksList(
+                context,
+                ref,
+                nutritionTasksAsync.valueOrNull ?? [],
+                isLoading: nutritionTasksAsync.isLoading,
+                apiError: nutritionTasksAsync.hasError
+                    ? nutritionTasksAsync.error
+                    : null,
               ),
             ),
           ],
@@ -260,30 +263,11 @@ class NutritionScreenContent extends ConsumerWidget {
   Widget _buildTasksList(
     BuildContext context,
     WidgetRef ref,
-    List<NutritionTask> tasks,
-  ) {
-    if (tasks.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.restaurant_menu,
-              size: 80,
-              color: AppColors.primary.withOpacity(0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No nutrition tasks for today',
-              style: GoogleFonts.lexend(
-                fontSize: 18,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    List<NutritionTask> tasks, {
+    bool isLoading = false,
+    Object? apiError,
+  }) {
+    final displayTasks = tasks;
 
     final hPad = ResponsiveUtils.horizontalPadding(context);
     final bottomPad = ResponsiveUtils.bottomNavPadding(context) + 40;
@@ -293,19 +277,19 @@ class NutritionScreenContent extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Vertical cards - horizontal scrollable list (API-driven)
+          // Featured vertical cards — demo card always visible
           SizedBox(
-            height: 300,
+            height: 315,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: EdgeInsets.symmetric(horizontal: hPad),
-              itemCount: tasks.length,
+              itemCount: displayTasks.length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: EdgeInsets.only(
-                    right: index < tasks.length - 1 ? 16 : 0,
+                    right: index < displayTasks.length - 1 ? 16 : 0,
                   ),
-                  child: NutritionVerticalCard(task: tasks[index]),
+                  child: NutritionVerticalCard(task: displayTasks[index]),
                 );
               },
             ),
@@ -340,15 +324,16 @@ class NutritionScreenContent extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
 
-          // Horizontal card - hardcoded demo
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: hPad),
-            child: const NutritionHorizontalCard(),
-          ),
-          const SizedBox(height: 16),
-
-          // Additional horizontal cards from API (using existing task card style)
-          if (tasks.length > 2)
+          // API state: loading indicator or error banner inline
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (apiError != null)
+            _buildInlineApiError(ref, apiError)
+          // Additional API task cards when data is present
+          else if (tasks.length > 2)
             Padding(
               padding: EdgeInsets.symmetric(horizontal: hPad),
               child: ListView.builder(
@@ -358,7 +343,7 @@ class NutritionScreenContent extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
-                    child: NutritionTaskCard(task: tasks[index + 2]),
+                    child: NutritionHorizontalCard(task: tasks[index + 2]),
                   );
                 },
               ),
@@ -368,55 +353,34 @@ class NutritionScreenContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorWidget(WidgetRef ref, Object error) {
-    // Check if error is PatientProfileNotFoundException
+  Widget _buildInlineApiError(WidgetRef ref, Object error) {
     final isPatientNotFound = error is PatientProfileNotFoundException;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isPatientNotFound ? Icons.person_off : Icons.error_outline,
-              size: 64,
-              color: isPatientNotFound
-                  ? AppColors.primary
-                  : Colors.red.shade300,
-            ),
-            const SizedBox(height: 16),
-            Text(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Row(
+        children: [
+          Icon(
+            isPatientNotFound ? Icons.person_off : Icons.error_outline,
+            size: 20,
+            color: isPatientNotFound ? AppColors.primary : Colors.red.shade300,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
               isPatientNotFound
-                  ? 'No patient profile yet'
-                  : 'Failed to load nutrition tasks',
-              style: GoogleFonts.lexend(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+                  ? 'No patient profile — contact your doctor for a plan.'
+                  : 'Could not load tasks. Tap to retry.',
+              style: GoogleFonts.lexend(fontSize: 13, color: Colors.grey),
             ),
-            const SizedBox(height: 8),
-            Text(
-              isPatientNotFound
-                  ? 'Please contact your doctor to create a patient profile and receive a nutrition plan.'
-                  : error.toString(),
-              textAlign: TextAlign.center,
-              style: GoogleFonts.lexend(fontSize: 14, color: Colors.grey),
+          ),
+          if (!isPatientNotFound)
+            GestureDetector(
+              onTap: () => ref.invalidate(nutritionTasksProvider),
+              child: Icon(Icons.refresh, size: 20, color: AppColors.primary),
             ),
-            const SizedBox(height: 20),
-            if (!isPatientNotFound)
-              ElevatedButton.icon(
-                onPressed: () => ref.invalidate(nutritionTasksProvider),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }
+
 }

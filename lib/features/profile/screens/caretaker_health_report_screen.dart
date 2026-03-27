@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +9,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../../health_connect/models/health_data.dart';
 import '../../health_connect/providers/health_connect_providers.dart';
+import '../../health_connect/providers/heart_rate_provider.dart';
 import '../../home/widgets/health_summary_card.dart';
 
 /// Health Report Screen for Caretaker (Figma design node 538:4727)
@@ -24,24 +25,10 @@ class CaretakerHealthReportScreen extends ConsumerStatefulWidget {
 
 class _CaretakerHealthReportScreenState
     extends ConsumerState<CaretakerHealthReportScreen> {
-  // TODO(mock): remove when real health API is connected
-  int _bpm = 73;
-  Timer? _bpmTimer;
-  final _rng = Random();
-
   @override
   void initState() {
     super.initState();
     Future.microtask(() => ref.read(healthDataProvider.notifier).fetch());
-    _bpmTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() => _bpm = 70 + _rng.nextInt(8)); // 70–77
-    });
-  }
-
-  @override
-  void dispose() {
-    _bpmTimer?.cancel();
-    super.dispose();
   }
 
   @override
@@ -49,6 +36,7 @@ class _CaretakerHealthReportScreenState
     final healthAsync = ref.watch(healthDataProvider);
     final health = healthAsync.valueOrNull ?? const HealthData();
     final isLoading = healthAsync.isLoading;
+    final hrState = ref.watch(heartRateProvider);
 
     return Scaffold(
       backgroundColor: AppColors.lightGreen,
@@ -68,13 +56,13 @@ class _CaretakerHealthReportScreenState
               const SizedBox(height: 24),
 
               // Today's Information Section
-              _buildTodaysInfoSection(health),
+              _buildTodaysInfoSection(health, hrState),
 
               const SizedBox(height: 24),
 
               // Health Summary Card (reused from home screen)
               HealthSummaryCard(
-                heartRate: '${health.heartRate}',
+                heartRate: hrState.bpm > 0 ? '${hrState.bpm}' : '${health.heartRate}',
                 bloodPressure: '120/80',
                 steps: '${health.steps}',
                 statusLabel: 'Excellent',
@@ -117,18 +105,28 @@ class _CaretakerHealthReportScreenState
               ),
             ),
           ),
-          // Refresh Button
-          GestureDetector(
-            onTap: isLoading
-                ? null
-                : () => ref.read(healthDataProvider.notifier).fetch(),
-            child: isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Icon(Icons.refresh, color: AppColors.primary, size: 28),
+          Row(
+            children: [
+              // BLE connect button
+              GestureDetector(
+                onTap: () => _showBleScanDialog(context),
+                child: Icon(Icons.bluetooth, color: AppColors.primary, size: 28),
+              ),
+              const SizedBox(width: 12),
+              // Refresh HC button
+              GestureDetector(
+                onTap: isLoading
+                    ? null
+                    : () => ref.read(healthDataProvider.notifier).fetch(),
+                child: isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(Icons.refresh, color: AppColors.primary, size: 28),
+              ),
+            ],
           ),
         ],
       ),
@@ -259,7 +257,7 @@ class _CaretakerHealthReportScreenState
     );
   }
 
-  Widget _buildTodaysInfoSection(HealthData health) {
+  Widget _buildTodaysInfoSection(HealthData health, HrState hrState) {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: ResponsiveUtils.horizontalPadding(context),
@@ -268,7 +266,6 @@ class _CaretakerHealthReportScreenState
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Left column: Calories and Steps stacked
             Expanded(
               child: Column(
                 children: [
@@ -279,9 +276,8 @@ class _CaretakerHealthReportScreenState
               ),
             ),
             const SizedBox(width: 12),
-            // Right column: Heart card spanning full height
             Expanded(
-              child: _buildHeartCard('$_bpm'), // TODO(mock): replace with health.heartRate.toString()
+              child: _buildHeartCard(hrState),
             ),
           ],
         ),
@@ -403,7 +399,10 @@ class _CaretakerHealthReportScreenState
     );
   }
 
-  Widget _buildHeartCard(String value) {
+  Widget _buildHeartCard(HrState hrState) {
+    final bpmText = hrState.bpm > 0 ? '${hrState.bpm}' : '--';
+    final isLive = hrState.isLive;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -429,12 +428,35 @@ class _CaretakerHealthReportScreenState
                 ),
               ),
               const Spacer(),
-              // Heart icon
               Icon(Icons.favorite, color: Colors.red.shade300, size: 20),
             ],
           ),
-          const SizedBox(height: 12),
-          // Chart area (simplified wave pattern)
+          // Source indicator
+          if (hrState.source != HrSource.none) ...[
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isLive ? const Color(0xFF66BB6A) : const Color(0xFF9E9E9E),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  hrState.sourceLabel,
+                  style: GoogleFonts.mavenPro(
+                    fontSize: 10,
+                    color: isLive ? const Color(0xFF66BB6A) : const Color(0xFF9E9E9E),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 8),
+          // Chart area
           Expanded(
             child: CustomPaint(
               size: const Size(double.infinity, double.infinity),
@@ -444,7 +466,7 @@ class _CaretakerHealthReportScreenState
           const SizedBox(height: 8),
           // Value
           Text(
-            value,
+            bpmText,
             style: GoogleFonts.sourceSans3(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -452,7 +474,6 @@ class _CaretakerHealthReportScreenState
             ),
           ),
           const SizedBox(height: 4),
-          // Unit
           Text(
             'bpm',
             style: GoogleFonts.mavenPro(
@@ -463,6 +484,17 @@ class _CaretakerHealthReportScreenState
           ),
         ],
       ),
+    );
+  }
+
+  void _showBleScanDialog(BuildContext context) {
+    final hrNotifier = ref.read(heartRateProvider.notifier);
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => _BleScanSheet(notifier: hrNotifier),
     );
   }
 }
@@ -543,4 +575,130 @@ class _HeartRateChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ── BLE Scan Bottom Sheet ─────────────────────────────────────────────────
+
+class _BleScanSheet extends ConsumerStatefulWidget {
+  const _BleScanSheet({required this.notifier});
+  final HeartRateNotifier notifier;
+
+  @override
+  ConsumerState<_BleScanSheet> createState() => _BleScanSheetState();
+}
+
+class _BleScanSheetState extends ConsumerState<_BleScanSheet> {
+  final _devices = <BluetoothDevice>[];
+  bool _scanning = false;
+  StreamSubscription<BluetoothDevice>? _scanSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _startScan();
+  }
+
+  @override
+  void dispose() {
+    _scanSub?.cancel();
+    widget.notifier.stopScan();
+    super.dispose();
+  }
+
+  void _startScan() {
+    setState(() {
+      _devices.clear();
+      _scanning = true;
+    });
+    _scanSub = widget.notifier.scanForDevices().listen(
+      (device) {
+        if (!_devices.any((d) => d.remoteId == device.remoteId)) {
+          setState(() => _devices.add(device));
+        }
+      },
+      onDone: () => setState(() => _scanning = false),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Text(
+                'Connect Watch',
+                style: GoogleFonts.lexend(
+                  fontSize: 16, fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              if (_scanning)
+                const SizedBox(
+                  width: 20, height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: _startScan,
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (_devices.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: Text(
+                  _scanning ? 'Scanning for HR devices…' : 'No devices found.\nMake sure Memotion HR app is running on your watch.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lexend(color: Colors.grey, fontSize: 13),
+                ),
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _devices.length,
+              separatorBuilder: (context, i) => const Divider(height: 1),
+              itemBuilder: (_, i) {
+                final device = _devices[i];
+                final name = device.platformName.isNotEmpty
+                    ? device.platformName
+                    : device.remoteId.str;
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.watch, color: AppColors.primary),
+                  title: Text(name, style: GoogleFonts.lexend(fontSize: 14)),
+                  subtitle: Text(device.remoteId.str,
+                      style: GoogleFonts.lexend(fontSize: 11, color: Colors.grey)),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    widget.notifier.connectToDevice(device);
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
 }

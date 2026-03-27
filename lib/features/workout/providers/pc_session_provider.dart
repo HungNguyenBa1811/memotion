@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/token_storage.dart';
@@ -62,18 +63,22 @@ class PcSessionNotifier extends StateNotifier<PcSessionState> {
     );
 
     try {
+      debugPrint('[PcSession] 🔌 Connecting to wsUrl=${payload.wsUrl}');
       await _service.connect(payload.wsUrl);
 
       _messageSub = _service.messages.listen(_onMessage);
       _connSub = _service.connectionState.listen(_onConnectionChange);
 
       final jwt = await TokenStorage.instance.getAccessToken() ?? '';
+      debugPrint('[PcSession] 🔑 JWT ${jwt.isEmpty ? "EMPTY (unauthenticated!)" : "present (len=${jwt.length})"}');
+      debugPrint('[PcSession] → pair_request workoutId=$workoutId exerciseType=$exerciseType');
       _service.send(PcMessage.buildPairRequest(
         jwt: jwt,
         workoutId: workoutId,
         exerciseType: exerciseType,
       ));
     } catch (e) {
+      debugPrint('[PcSession] ❌ Connect failed: $e');
       state = state.copyWith(
         status: PcSessionStatus.sessionFailed,
         errorMessage: 'Cannot connect to PC: $e',
@@ -90,36 +95,43 @@ class PcSessionNotifier extends StateNotifier<PcSessionState> {
   // ── Private ──
 
   void _onMessage(PcMessage msg) {
+    debugPrint('[PcSession] ← msg type=${msg.type} payload=${msg.payload}');
     switch (msg.type) {
       case 'pair_confirmed':
+        debugPrint('[PcSession] ✅ Paired! Starting heartbeat.');
         state = state.copyWith(status: PcSessionStatus.paired);
         _heartbeat.start();
 
       case 'session_started':
         final sid = msg.payload['session_id'] as String?;
+        debugPrint('[PcSession] ▶️ Session started sessionId=$sid');
         state = state.copyWith(
           status: PcSessionStatus.sessionStarted,
           sessionId: sid,
         );
 
       case 'session_complete':
+        debugPrint('[PcSession] 🏁 Session complete');
         _heartbeat.stop();
         state = state.copyWith(status: PcSessionStatus.sessionComplete);
 
       case 'session_failed':
+        final reason = msg.payload['reason'] as String? ?? 'Session failed on PC';
+        debugPrint('[PcSession] ❌ session_failed reason=$reason');
         _heartbeat.stop();
         state = state.copyWith(
           status: PcSessionStatus.sessionFailed,
-          errorMessage:
-              msg.payload['reason'] as String? ?? 'Session failed on PC',
+          errorMessage: reason,
         );
 
       case 'heartbeat_pong':
+        debugPrint('[PcSession] 💓 pong');
         _heartbeat.receivedPong();
     }
   }
 
   void _onConnectionChange(bool connected) {
+    debugPrint('[PcSession] 🔗 connectionChange connected=$connected status=${state.status}');
     if (!connected &&
         state.status != PcSessionStatus.sessionComplete &&
         state.status != PcSessionStatus.idle) {
@@ -132,6 +144,7 @@ class PcSessionNotifier extends StateNotifier<PcSessionState> {
   }
 
   void _onHeartbeatTimeout() {
+    debugPrint('[PcSession] ⏱️ Heartbeat timeout');
     _cleanupConnections();
     state = state.copyWith(
       status: PcSessionStatus.disconnected,

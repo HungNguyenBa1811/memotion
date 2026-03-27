@@ -483,9 +483,7 @@ class _NutritionDetailContent extends ConsumerWidget {
                   bottom: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: isCompleted
-                      ? AppColors.primary
-                      : AppColors.primary.withValues(alpha: 0.15),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(70),
                 ),
                 child: Text(
@@ -493,7 +491,7 @@ class _NutritionDetailContent extends ConsumerWidget {
                   style: GoogleFonts.lexend(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: isCompleted ? AppColors.textOnPrimary : AppColors.primary,
+                    color: AppColors.textOnPrimary,
                     height: 1.12,
                   ),
                 ),

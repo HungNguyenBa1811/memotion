@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/network/api_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -144,19 +145,20 @@ class UpcomingMedicationCard extends StatelessWidget {
                     color: const Color(0xFFF7F7F7),
                     borderRadius: BorderRadius.circular(27),
                   ),
-                  child: Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(27),
                     child: imageUrl != null
                         ? Image.network(
-                            imageUrl!,
-                            width: 60,
+                            '${ApiConstants.baseUrl}$imageUrl',
+                            width: 120,
                             height: 120,
-                            fit: BoxFit.contain,
+                            fit: BoxFit.cover,
                           )
                         : Image.asset(
                             'assets/images/medication/medication_pills.png',
-                            width: 60,
+                            width: 120,
                             height: 120,
-                            fit: BoxFit.contain,
+                            fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return const Icon(
                                 Icons.medication,

@@ -250,7 +250,7 @@ class _PcStandbyScreenState extends ConsumerState<PcStandbyScreen>
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ));
     Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) context.pop();
+      if (mounted && context.canPop()) context.pop();
     });
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/pc_session_model.dart';
@@ -33,6 +34,7 @@ class PcPairingService {
   bool get isConnected => _isConnected;
 
   Future<void> connect(String wsUrl) async {
+    debugPrint('[PcPairing] 🔌 Connecting to $wsUrl');
     developer.log('[PcPairing] Connecting to $wsUrl');
     await _closeChannel();
 
@@ -45,11 +47,16 @@ class PcPairingService {
     );
     _isConnected = true;
     _connectionController.add(true);
+    debugPrint('[PcPairing] ✅ WebSocket connected');
     developer.log('[PcPairing] Connected');
   }
 
   void send(String message) {
-    if (!_isConnected || _channel == null) return;
+    if (!_isConnected || _channel == null) {
+      debugPrint('[PcPairing] ⚠️ send() called but not connected — dropped: $message');
+      return;
+    }
+    debugPrint('[PcPairing] → SEND: $message');
     developer.log('[PcPairing] → $message');
     _channel!.sink.add(message);
   }
@@ -61,23 +68,28 @@ class PcPairingService {
   // ── Private ──
 
   void _onData(dynamic raw) {
+    debugPrint('[PcPairing] ← RAW: $raw');
     try {
       final json = jsonDecode(raw as String) as Map<String, dynamic>;
       final msg = PcMessage.fromJson(json);
+      debugPrint('[PcPairing] ← RECV type=${msg.type} payload=${msg.payload}');
       developer.log('[PcPairing] ← ${msg.type}');
       _messageController.add(msg);
     } catch (e) {
+      debugPrint('[PcPairing] ❌ Parse error: $e | raw=$raw');
       developer.log('[PcPairing] Parse error: $e');
     }
   }
 
   void _onError(Object error) {
+    debugPrint('[PcPairing] ❌ WS error: $error');
     developer.log('[PcPairing] WS error: $error');
     _isConnected = false;
     _connectionController.add(false);
   }
 
   void _onDone() {
+    debugPrint('[PcPairing] 🔴 Connection closed (onDone)');
     developer.log('[PcPairing] Connection closed');
     _isConnected = false;
     _connectionController.add(false);
