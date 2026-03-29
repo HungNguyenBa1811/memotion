@@ -58,13 +58,25 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    
+    // Tách biệt hoàn toàn layout giữa Mobile và Tablet
+    if (isTablet) {
+      return _buildTabletLayout(context);
+    } else {
+      return _buildMobileLayout(context);
+    }
+  }
+
+  // ─── TABLET LAYOUT (Nguyên bản cũ chứa scale bự) ──────────────────────────
+  Widget _buildTabletLayout(BuildContext context) {
     final vm = ref.watch(profileViewModelProvider);
     final user = vm.user;
     final hrState = ref.watch(heartRateProvider);
     final bpmText = hrState.bpm > 0 ? '${hrState.bpm} bpm' : '-- bpm';
-    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isTablet = true;
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final scale = isLarge ? 1.5 : isTablet ? 1.3 : 1.0;
+    final scale = isLarge ? 1.5 : 1.3;
     final textScale = ResponsiveUtils.textScaleFactor(context) * scale;
 
     // Left Section
@@ -115,7 +127,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
         ),
         SizedBox(height: 16 * scale),
 
-        // Health stats row (Heart Rate / Energy / Weight)
+        // Health stats row
         Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -197,7 +209,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
             icon: Icon(
               Icons.bluetooth,
               color: hrState.isLive ? AppColors.primary : Colors.grey,
-              size: isTablet ? 36 : 24,
+              size: 36,
             ),
             onPressed: () => _showBleScanDialog(context),
           ),
@@ -218,94 +230,158 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
     );
   }
 
-  // ignore: unused_element
-  Widget _buildStatItem(String label, String value, IconData icon) {
-    return Column(
+  // ─── MOBILE LAYOUT (Kích thước gốc thanh lịch đã refactor) ─────────────────
+  Widget _buildMobileLayout(BuildContext context) {
+    final vm = ref.watch(profileViewModelProvider);
+    final user = vm.user;
+    final hrState = ref.watch(heartRateProvider);
+    final bpmText = hrState.bpm > 0 ? '${hrState.bpm} bpm' : '-- bpm';
+    
+    // Thuần túy tính theo ResponsiveUtils
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+
+    // Left Section
+    final userProfileSection = Column(
       children: [
-        Icon(icon, color: AppColors.primary, size: 24),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: AppTextStyles.headline3.copyWith(color: AppColors.primary),
+        const SizedBox(height: 20),
+        // Profile avatar (Mặc định 90px theo utils)
+        Container(
+          width: ResponsiveUtils.avatarSize(context),
+          height: ResponsiveUtils.avatarSize(context),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.grey.shade300, width: 2),
+          ),
+          child: user?.avatarUrl != null
+              ? ClipOval(
+                  child: Image.network(
+                    user!.avatarUrl!,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : ClipOval(
+                  child: Image.asset(
+                    'assets/images/Avatar.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
         ),
-        const SizedBox(height: 4),
-        Text(label, style: AppTextStyles.caption),
+        const SizedBox(height: 18),
+
+        // User name
+        Text(
+          vm.displayName,
+          style: AppTextStyles.headline2.copyWith(
+            fontWeight: FontWeight.w600,
+            fontSize: 24 * textScale * 0.8,
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // User email
+        Text(
+          vm.displayEmail,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+            fontSize: 14 * textScale * 0.8,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Health stats row
+        Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: ResponsiveUtils.horizontalPadding(context),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildHealthStat(
+                  svgAsset: 'assets/images/heartbeat_icon.svg',
+                  fallbackIcon: Icons.favorite,
+                  label: 'Heart Rate',
+                  value: bpmText,
+                  textScale: textScale,
+                  iconSize: 32,
+                ),
+                Container(
+                  width: 1,
+                  height: 44,
+                  color: AppColors.background,
+                ),
+                _buildHealthStat(
+                  svgAsset: 'assets/images/fire_icon.svg',
+                  fallbackIcon: Icons.local_fire_department,
+                  label: 'Energy',
+                  value: '756cal',
+                  textScale: textScale,
+                  iconSize: 32,
+                ),
+                Container(
+                  width: 1,
+                  height: 44,
+                  color: AppColors.background,
+                ),
+                _buildHealthStat(
+                  svgAsset: 'assets/images/weight_icon.svg',
+                  fallbackIcon: Icons.fitness_center,
+                  label: 'Weight',
+                  value: '103lbs',
+                  textScale: textScale,
+                  iconSize: 32,
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
-  }
 
-  // ignore: unused_element
-  Widget _buildDivider() {
-    return Container(height: 40, width: 1, color: AppColors.divider);
-  }
-
-  // ignore: unused_element
-  Widget _buildMenuSection() {
-    final menuItems = [
-      _MenuItem(
-        iconWidget: Image.asset(
-          'assets/images/icon_user.png',
-          width: 22,
-          height: 22,
-          color: AppColors.textPrimary,
+    // Right Section
+    final menuSection = Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: ResponsiveUtils.horizontalPadding(context),
         ),
-        title: 'Account',
-        onTap: () {},
+        child: _buildFigmaMenu(context, ref, false, textScale, 1.0),
       ),
-      _MenuItem(
-        icon: Icons.notifications_outlined,
-        title: 'Notifications',
-        onTap: () {},
-      ),
-      _MenuItem(icon: Icons.lock_outline, title: 'Security', onTap: () {}),
-      _MenuItem(
-        icon: Icons.help_outline,
-        title: 'Help & Support',
-        onTap: () {},
-      ),
-      _MenuItem(icon: Icons.info_outline, title: 'About', onTap: () {}),
-    ];
+    );
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        title: Text('Profile', style: AppTextStyles.headline2.copyWith(fontSize: 20 * textScale)),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.bluetooth,
+              color: hrState.isLive ? AppColors.primary : Colors.grey,
+              size: 24,
+            ),
+            onPressed: () => _showBleScanDialog(context),
           ),
         ],
       ),
-      child: Column(
-        children: menuItems.map((item) {
-          final isLast = item == menuItems.last;
-          return Column(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
             children: [
-              ListTile(
-                leading:
-                    item.iconWidget ??
-                    Icon(item.icon, color: AppColors.textPrimary),
-                title: Text(item.title, style: AppTextStyles.bodyMedium),
-                trailing: const Icon(
-                  Icons.chevron_right,
-                  color: AppColors.textSecondary,
-                ),
-                onTap: item.onTap,
-              ),
-              if (!isLast)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Divider(height: 1, color: AppColors.divider),
-                ),
+              userProfileSection,
+              const SizedBox(height: 32),
+              menuSection,
+              SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
             ],
-          );
-        }).toList(),
+          ),
+        ),
       ),
     );
   }
 
+  // ─── UTILS ────────────────────────────────────────────────────────────────
   Widget _buildHealthStat({
     String? svgAsset,
     IconData? fallbackIcon,
@@ -318,7 +394,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
       child: Column(
         children: [
           // Icon
-          Container(
+          SizedBox(
             width: iconSize,
             height: iconSize,
             child: Center(
@@ -423,8 +499,9 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
       },
     ];
 
-    final iconBoxSize = 72.0 * scale;
-    final iconImageSize = 42.0 * scale;
+    // Sử dụng iconBoxSize tuỳ chỉnh theo scale của Tablet (hoặc 48 trên Mobile)
+    final iconBoxSize = isTablet ? 72.0 * scale : 48.0; 
+    final iconImageSize = isTablet ? 42.0 * scale : 24.0;
 
     return Column(
       children: items.asMap().entries.map((entry) {
@@ -439,7 +516,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: 12,
-                  vertical: 8 * scale,
+                  vertical: isTablet ? 8 * scale : 12,
                 ),
                 child: Row(
                   children: [
@@ -476,7 +553,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
                             : Icon(it['icon'] as IconData, color: Colors.white, size: iconImageSize),
                       ),
                     ),
-                    SizedBox(width: 24 * scale),
+                    SizedBox(width: isTablet ? 24 * scale : 16),
                     Expanded(
                       child: Text(
                         it['title'] as String,
@@ -489,7 +566,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
                     Icon(
                       Icons.chevron_right,
                       color: AppColors.textSecondary,
-                      size: 40 * scale,
+                      size: isTablet ? 40 * scale : 24,
                     ),
                   ],
                 ),
@@ -497,7 +574,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
             ),
             if (!isLast)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 37),
+                padding: EdgeInsets.symmetric(horizontal: isTablet ? 37 : 16),
                 child: Divider(
                   height: 1,
                   thickness: 1,
@@ -568,22 +645,7 @@ class _SvgAssetWithFallbackState extends State<SvgAssetWithFallback> {
   }
 }
 
-class _MenuItem {
-  final IconData? icon;
-  final Widget? iconWidget;
-  final String title;
-  final VoidCallback onTap;
-
-  const _MenuItem({
-    this.icon,
-    this.iconWidget,
-    required this.title,
-    required this.onTap,
-  });
-}
-
 // ── BLE Scan Bottom Sheet ──────────────────────────────────────────────────
-
 class _BleScanSheet extends ConsumerStatefulWidget {
   const _BleScanSheet({required this.notifier});
   final HeartRateNotifier notifier;

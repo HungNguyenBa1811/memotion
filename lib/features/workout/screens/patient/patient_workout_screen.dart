@@ -9,11 +9,9 @@ import '../../models/workout_model.dart';
 import '../../providers/workout_provider.dart';
 import '../../widgets/calendar_day_picker.dart';
 import '../../widgets/workout_vertical_card.dart';
-import '../../widgets/workout_task_card.dart';
 
 /// Workout screen for PATIENT (Elderly) role.
-/// Displays one large vertical card per workout task in a PageView (Mobile)
-/// or a Split-Pane Master-Detail layout (Tablet).
+/// Displays one large vertical card per workout task in a horizontal PageView (slideshow).
 class PatientWorkoutScreenContent extends ConsumerStatefulWidget {
   const PatientWorkoutScreenContent({super.key});
 
@@ -71,107 +69,69 @@ class _PatientWorkoutScreenContentState
   Widget build(BuildContext context) {
     final workoutState = ref.watch(workoutListProvider);
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final calendarScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final cardScale = isLarge ? 1.5 : isTablet ? 1.3 : 1.0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
-        child: isTablet
-            ? _buildTabletLayout(workoutState)
-            : _buildMobileLayout(workoutState),
-      ),
-    );
-  }
-
-  Widget _buildMobileLayout(WorkoutListState workoutState) {
-    return Column(
-      children: [
-        _buildHeader(context),
-        const SizedBox(height: 12),
-        CalendarDayPicker(
-          days: _calendarDays,
-          selectedIndex: _selectedDayIndex,
-          onDaySelected: (index) {
-            setState(() => _selectedDayIndex = index);
-            _resetSelection();
-            ref
-                .read(workoutListProvider.notifier)
-                .selectDate(_calendarDays[index].date);
-          },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header + Title + Calendar (constrained width on tablet)
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isTablet
+                    ? ResponsiveUtils.horizontalPadding(context)
+                    : 0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(context),
+                  _buildTitleSection(context),
+                  const SizedBox(height: 16),
+                  CalendarDayPicker(
+                    days: _calendarDays,
+                    scale: calendarScale,
+                    selectedIndex: _selectedDayIndex,
+                    onDaySelected: (index) {
+                      setState(() => _selectedDayIndex = index);
+                      _resetSelection();
+                      ref
+                          .read(workoutListProvider.notifier)
+                          .selectDate(_calendarDays[index].date);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: isTablet ? 40 * calendarScale : 4),
+            // PageView slideshow — same on both mobile and tablet
+            Expanded(
+              child: _buildContent(
+                context, 
+                workoutState, 
+                cardScale: cardScale
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 20),
-        Expanded(child: _buildContent(context, workoutState, isTablet: false)),
-      ],
-    );
-  }
-
-  Widget _buildTabletLayout(WorkoutListState workoutState) {
-    final hPad = ResponsiveUtils.horizontalPadding(context);
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: hPad),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Left Pane: Master List
-          Expanded(
-            flex: 4,
-            child: Column(
-              children: [
-                _buildHeader(context, isTablet: true),
-                const SizedBox(height: 12),
-                CalendarDayPicker(
-                  days: _calendarDays,
-                  selectedIndex: _selectedDayIndex,
-                  onDaySelected: (index) {
-                    setState(() => _selectedDayIndex = index);
-                    _resetSelection();
-                    ref
-                        .read(workoutListProvider.notifier)
-                        .selectDate(_calendarDays[index].date);
-                  },
-                ),
-                const SizedBox(height: 20),
-                Expanded(child: _buildContent(context, workoutState, isTablet: true)),
-              ],
-            ),
-          ),
-          const SizedBox(width: 32),
-          // Right Pane: Detail View
-          Expanded(
-            flex: 6,
-            child: Column(
-              children: [
-                const SizedBox(height: 32), // Top spacing alignment
-                Expanded(
-                  child: workoutState.isLoading || workoutState.error != null || workoutState.workouts.isEmpty
-                      ? const SizedBox.shrink()
-                      : Padding(
-                          padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 16),
-                          child: WorkoutVerticalCard(
-                            workout: workoutState.workouts[
-                                _selectedIndex < workoutState.workouts.length ? _selectedIndex : 0],
-                            onStart: () => context.push(
-                              '/workout-detail',
-                              extra: {
-                                'workoutId': workoutState.workouts[
-                                    _selectedIndex < workoutState.workouts.length ? _selectedIndex : 0].id
-                              },
-                            ),
-                          ),
-                        ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, {bool isTablet = false}) {
-    final textScale = ResponsiveUtils.textScaleFactor(context);
+  Widget _buildHeader(BuildContext context) {
+    final isTabletMode = ResponsiveUtils.isTabletOrLarger(context);
+    final iconSize = isTabletMode ? 32.0 : 24.0;
+
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isTablet ? 0 : 20, vertical: 16),
+      padding: EdgeInsets.symmetric(
+        vertical: 16,
+        horizontal: isTabletMode ? 0 : 20,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -185,38 +145,77 @@ class _PatientWorkoutScreenContentState
                 shape: BoxShape.circle,
               ),
               child: const Center(
-                child: Icon(Icons.arrow_back_ios_new,
-                    color: Colors.white, size: 18),
+                child: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Colors.white,
+                  size: 18,
+                ),
               ),
             ),
           ),
-          Column(
-            children: [
-              Text(
-                'Daily Tasks',
-                style: GoogleFonts.lexend(
-                  fontSize: 18 * textScale,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF070707),
+          SizedBox(
+            width: iconSize,
+            height: iconSize,
+            child: Stack(
+              children: [
+                Icon(
+                  Icons.notifications,
+                  color: AppColors.textPrimary,
+                  size: iconSize,
                 ),
-              ),
-              Text(
-                'Your workout plan',
-                style: GoogleFonts.lexend(
-                  fontSize: 12 * textScale,
-                  color: const Color(0xFF070707).withOpacity(0.5),
-                  fontWeight: FontWeight.w400,
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: AppColors.secondary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(width: 40),
         ],
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, WorkoutListState workoutState, {required bool isTablet}) {
+  Widget _buildTitleSection(BuildContext context) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final isTabletMode = ResponsiveUtils.isTabletOrLarger(context);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isTabletMode ? 0 : 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Daily Tasks',
+            style: GoogleFonts.lexend(
+              fontSize: 24 * textScale,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF070707),
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Your workout plan',
+            style: GoogleFonts.lexend(
+              fontSize: 14 * textScale,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF070707).withOpacity(0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, WorkoutListState workoutState, {required double cardScale}) {
     if (workoutState.isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primary),
@@ -281,7 +280,7 @@ class _PatientWorkoutScreenContentState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.event_available_outlined,
+            const Icon(Icons.event_available_outlined,
                 size: 72, color: AppColors.textSecondary),
             const SizedBox(height: 16),
             Text(
@@ -300,39 +299,10 @@ class _PatientWorkoutScreenContentState
       );
     }
 
-    return isTablet
-        ? _buildTabletList(workoutState.workouts)
-        : _buildPagedCards(context, workoutState.workouts);
+    return _buildPagedCards(context, workoutState.workouts, cardScale: cardScale);
   }
 
-  Widget _buildTabletList(List<WorkoutTask> workouts) {
-    return ListView.builder(
-      padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 16),
-      itemCount: workouts.length,
-      itemBuilder: (context, index) {
-        final isSelected = index == _selectedIndex;
-        return GestureDetector(
-          onTap: () => setState(() => _selectedIndex = index),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(27),
-              border: isSelected
-                  ? Border.all(color: AppColors.primary, width: 2)
-                  : Border.all(color: Colors.transparent, width: 2),
-            ),
-            child: WorkoutTaskCard(
-              workout: workouts[index],
-              onTap: () => setState(() => _selectedIndex = index),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPagedCards(
-      BuildContext context, List<WorkoutTask> workouts) {
+  Widget _buildPagedCards(BuildContext context, List<WorkoutTask> workouts, {required double cardScale}) {
     return PageView.builder(
       controller: _pageController,
       itemCount: workouts.length,
@@ -346,13 +316,20 @@ class _PatientWorkoutScreenContentState
             20,
             0,
             20,
-            ResponsiveUtils.bottomNavPadding(context) + 16,
+            ResponsiveUtils.bottomNavPadding(context) + 20,
           ),
-          child: WorkoutVerticalCard(
-            workout: workout,
-            onStart: () => context.push(
-              '/workout-detail',
-              extra: {'workoutId': workout.id},
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 650 * cardScale),
+              child: WorkoutVerticalCard(
+                workout: workout,
+                scale: cardScale,
+                onStart: () => context.push(
+                  '/workout-detail',
+                  extra: {'workoutId': workout.id},
+                ),
+              ),
             ),
           ),
         );
