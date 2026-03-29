@@ -4,7 +4,8 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/responsive_utils.dart';
 
 /// Quick action card widget for homepage (Figma design)
-/// Displays an icon image, title, and status badge
+/// Displays an icon image, title, and status badge.
+/// Set [circular] to true for a perfect circle shape (width == height).
 class ActionCard extends StatelessWidget {
   final String title;
   final IconData? icon;
@@ -14,6 +15,7 @@ class ActionCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? badge;
   final bool showStatusDot;
+  final bool circular;
 
   const ActionCard({
     super.key,
@@ -25,10 +27,13 @@ class ActionCard extends StatelessWidget {
     this.onTap,
     this.badge,
     this.showStatusDot = true,
+    this.circular = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (circular) return _buildCircular(context);
+
     final iconSize = ResponsiveUtils.isTabletOrLarger(context) ? 90.0 : 80.0;
     return GestureDetector(
       onTap: onTap,
@@ -49,7 +54,6 @@ class ActionCard extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              // Status dot in top-right
               if (showStatusDot)
                 Positioned(
                   top: 14,
@@ -64,7 +68,6 @@ class ActionCard extends StatelessWidget {
                         ),
                       ),
                 ),
-              // Icon + title grouped and centered together
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -74,7 +77,7 @@ class ActionCard extends StatelessWidget {
                       SizedBox(
                         width: iconSize,
                         height: iconSize * 0.875,
-                        child: _buildIcon(),
+                        child: _buildIconWidget(),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -98,7 +101,71 @@ class ActionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIcon() {
+  Widget _buildCircular(BuildContext context) {
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final iconSize = isTablet ? 36.0 : 32.0;
+    final fontSize = isTablet ? 13.0 : 12.0;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final size = constraints.maxWidth;
+            return Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                color: backgroundColor ?? AppColors.cardBackground,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.cardShadow,
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: 0,
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildCircularIcon(iconSize),
+                  const SizedBox(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      title,
+                      style: AppTextStyles.cardTitle.copyWith(
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCircularIcon(double size) {
+    if (iconAsset != null) {
+      return Image.asset(iconAsset!, width: size, height: size, fit: BoxFit.contain);
+    }
+    if (icon != null) {
+      return Icon(icon, size: size, color: iconColor ?? AppColors.primary);
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildIconWidget() {
     if (iconAsset != null) {
       return Image.asset(iconAsset!, fit: BoxFit.contain);
     }

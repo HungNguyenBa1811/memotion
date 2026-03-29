@@ -8,9 +8,13 @@ import '../../../../core/utils/responsive_utils.dart';
 import '../../models/medication.dart';
 import '../../providers/medication_provider.dart';
 import '../../widgets/medication_vertical_card.dart';
+import '../../widgets/medication_task_card.dart';
+import '../../../workout/widgets/calendar_day_picker.dart';
+import '../../../workout/models/workout_model.dart';
 
 /// Medication screen for PATIENT (Elderly) role.
-/// Displays one large vertical card per medication in a PageView.
+/// Displays one large vertical card per medication in a PageView (Mobile)
+/// or a Split-Pane Master-Detail layout (Tablet).
 class PatientMedicationScreenContent extends ConsumerStatefulWidget {
   const PatientMedicationScreenContent({super.key});
 
@@ -22,12 +26,40 @@ class PatientMedicationScreenContent extends ConsumerStatefulWidget {
 class _PatientMedicationScreenContentState
     extends ConsumerState<PatientMedicationScreenContent> {
   final PageController _pageController = PageController();
-  int _currentPage = 0;
+  int _selectedIndex = 0;
+  late int _selectedDayIndex;
+  late List<CalendarDay> _calendarDays;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _rebuildCalendarDays();
+  }
+
+  void _rebuildCalendarDays() {
+    final dayCount = ResponsiveUtils.dateSelectorDays(context);
+    final offset = dayCount ~/ 2;
+    final now = DateTime.now();
+    _calendarDays = List.generate(dayCount, (i) {
+      final date = now.add(Duration(days: i - offset));
+      return CalendarDay(date: date, dayOfWeek: '', month: '', isSelected: i == offset);
+    });
+    _selectedDayIndex = offset;
+  }
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _resetSelection() {
+    setState(() {
+      _selectedIndex = 0;
+    });
+    if (_pageController.hasClients) {
+      _pageController.jumpToPage(0);
+    }
   }
 
   @override
@@ -38,36 +70,185 @@ class _PatientMedicationScreenContentState
     );
     final selectedDate = ref.watch(selectedDateProvider);
     final isOffline = ref.watch(isOfflineProvider).valueOrNull ?? false;
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
-        child: Column(
-          children: [
-            _buildHeader(context),
-            if (isOffline) _buildOfflineBanner(),
-            _buildDateSelector(selectedDate),
-            const SizedBox(height: 16),
-            _buildFilterTabs(selectedFilter),
-            const SizedBox(height: 16),
-            Expanded(
-              child: medicationsAsync.when(
-                data: (medications) => _buildPagedCards(medications),
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
-                error: (error, _) => _buildErrorWidget(error),
-              ),
-            ),
-          ],
-        ),
+        child: isTablet
+            ? _buildTabletLayout(medicationsAsync, selectedDate, selectedFilter, isOffline)
+            : _buildMobileLayout(medicationsAsync, selectedDate, selectedFilter, isOffline),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildMobileLayout(
+    AsyncValue<List<Medication>> medicationsAsync, 
+    DateTime selectedDate, 
+    MedicationFilter selectedFilter, 
+    bool isOffline
+  ) {
+    return Column(
+      children: [
+        _buildHeader(context),
+        if (isOffline) _buildOfflineBanner(),
+        CalendarDayPicker(
+          days: _calendarDays,
+          selectedIndex: _selectedDayIndex,
+          onDaySelected: (index) {
+            setState(() => _selectedDayIndex = index);
+            ref.read(selectedDateProvider.notifier).state =
+                _calendarDays[index].date;
+            _resetSelection();
+          },
+        ),
+        const SizedBox(height: 16),
+        _buildFilterTabs(selectedFilter),
+        const SizedBox(height: 16),
+        Expanded(
+          child: medicationsAsync.when(
+            data: (medications) => _buildPagedCards(medications),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => _buildErrorWidget(error),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabletLayout(
+    AsyncValue<List<Medication>> medicationsAsync, 
+    DateTime selectedDate, 
+    MedicationFilter selectedFilter, 
+    bool isOffline
+  ) {
+    final hPad = ResponsiveUtils.horizontalPadding(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: hPad),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Left Pane: Master List
+          Expanded(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildHeader(context, isTablet: true),
+                if (isOffline) _buildOfflineBanner(),
+                CalendarDayPicker(
+          days: _calendarDays,
+          selectedIndex: _selectedDayIndex,
+          onDaySelected: (index) {
+            setState(() => _selectedDayIndex = index);
+            ref.read(selectedDateProvider.notifier).state =
+                _calendarDays[index].date;
+            _resetSelection();
+          },
+        ),
+                const SizedBox(height: 16),
+                _buildFilterTabs(selectedFilter),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: medicationsAsync.when(
+                    data: (medications) => _buildTabletList(medications),
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (error, _) => _buildErrorWidget(error),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 24),
+          // Right Pane: Detail View
+          Expanded(
+            flex: 6,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: 16 + (isOffline ? 40 : 0)),
+                Expanded(
+                  child: medicationsAsync.when(
+                    data: (medications) {
+                      if (medications.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      final validIndex = _selectedIndex < medications.length ? _selectedIndex : 0;
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 16),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 560),
+                          child: MedicationVerticalCard(
+                            medication: medications[validIndex],
+                            onTaken: () => ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Marked as taken!'),
+                                backgroundColor: AppColors.primary,
+                              ),
+                            ),
+                            onSkip: () => ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Dose skipped.'),
+                                backgroundColor: Color(0xFF6B7280),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, _) => const SizedBox.shrink(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabletList(List<Medication> medications) {
+    if (medications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.medication_outlined, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'No medications found',
+              style: GoogleFonts.lexend(fontSize: 16, color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    return ListView.builder(
+      padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 16),
+      itemCount: medications.length,
+      itemBuilder: (context, index) {
+        final isSelected = index == _selectedIndex;
+        return GestureDetector(
+          onTap: () => setState(() => _selectedIndex = index),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(27),
+              border: isSelected ? Border.all(color: AppColors.primary, width: 2) : Border.all(color: Colors.transparent, width: 2),
+            ),
+            child: MedicationTaskCard(medication: medications[index]),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, {bool isTablet = false}) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isTablet ? 0 : 20, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -92,7 +273,7 @@ class _PatientMedicationScreenContentState
           Text(
             'My Medications',
             style: GoogleFonts.lexend(
-              fontSize: 18,
+              fontSize: 18 * ResponsiveUtils.textScaleFactor(context),
               fontWeight: FontWeight.w600,
               color: const Color(0xFF1A1A2E),
             ),
@@ -120,90 +301,13 @@ class _PatientMedicationScreenContentState
     );
   }
 
-  Widget _buildDateSelector(DateTime selectedDate) {
-    final now = DateTime.now();
-    final dayCount = ResponsiveUtils.dateSelectorDays(context);
-    final offset = dayCount ~/ 2;
-    final dates = List.generate(
-        dayCount, (i) => now.add(Duration(days: i - offset)));
-
-    return SizedBox(
-      height: 84,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: dates.map((date) {
-          final isSelected = date.day == selectedDate.day &&
-              date.month == selectedDate.month &&
-              date.year == selectedDate.year;
-
-          return GestureDetector(
-            onTap: () {
-              ref.read(selectedDateProvider.notifier).state = date;
-              _pageController.jumpToPage(0);
-              setState(() => _currentPage = 0);
-            },
-            child: Container(
-              width: 64,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: isSelected
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 32,
-                        ),
-                      ],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _getMonthName(date.month),
-                    style: GoogleFonts.lexend(
-                      fontSize: 11,
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF24252C),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    date.day.toString(),
-                    style: GoogleFonts.lexend(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF24252C),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _getDayName(date.weekday),
-                    style: GoogleFonts.lexend(
-                      fontSize: 11,
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF24252C),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
 
   Widget _buildFilterTabs(MedicationFilter selectedFilter) {
     final medicationsAsync = ref.watch(medicationsProvider);
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: isTablet ? 0 : 20),
       child: Container(
         height: 56,
         decoration: BoxDecoration(
@@ -236,8 +340,7 @@ class _PatientMedicationScreenContentState
               child: GestureDetector(
                 onTap: () {
                   ref.read(selectedFilterProvider.notifier).state = filter;
-                  _pageController.jumpToPage(0);
-                  setState(() => _currentPage = 0);
+                  _resetSelection();
                 },
                 child: Container(
                   margin: const EdgeInsets.all(8),
@@ -307,91 +410,38 @@ class _PatientMedicationScreenContentState
       );
     }
 
-    return Column(
-      children: [
-        // Page indicator: "X / N"
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '${_currentPage + 1}',
-                style: GoogleFonts.lexend(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
-                ),
-              ),
-              Text(
-                ' / ${medications.length}',
-                style: GoogleFonts.lexend(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF9CA3AF),
-                ),
-              ),
-            ],
+    return PageView.builder(
+      controller: _pageController,
+      itemCount: medications.length,
+      onPageChanged: (index) {
+        setState(() => _selectedIndex = index);
+      },
+      itemBuilder: (context, index) {
+        final medication = medications[index];
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            0,
+            20,
+            ResponsiveUtils.bottomNavPadding(context) + 16,
           ),
-        ),
-        // Cards PageView
-        Expanded(
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: medications.length,
-            onPageChanged: (index) => setState(() => _currentPage = index),
-            itemBuilder: (context, index) {
-              final medication = medications[index];
-              return Padding(
-                padding: EdgeInsets.fromLTRB(
-                  20,
-                  0,
-                  20,
-                  ResponsiveUtils.bottomNavPadding(context) + 16,
-                ),
-                child: MedicationVerticalCard(
-                  medication: medication,
-                  onTaken: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Marked as taken!'),
-                      backgroundColor: AppColors.primary,
-                    ),
-                  ),
-                  onSkip: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Dose skipped.'),
-                      backgroundColor: Color(0xFF6B7280),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        // Dot indicators
-        if (medications.length > 1)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                medications.length,
-                (i) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: i == _currentPage ? 20 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: i == _currentPage
-                        ? AppColors.primary
-                        : Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
+          child: MedicationVerticalCard(
+            medication: medication,
+            onTaken: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Marked as taken!'),
+                backgroundColor: AppColors.primary,
+              ),
+            ),
+            onSkip: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Dose skipped.'),
+                backgroundColor: Color(0xFF6B7280),
               ),
             ),
           ),
-      ],
+        );
+      },
     );
   }
 
@@ -477,16 +527,4 @@ class _PatientMedicationScreenContentState
     );
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return months[month - 1];
-  }
-
-  String _getDayName(int weekday) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[weekday - 1];
-  }
 }

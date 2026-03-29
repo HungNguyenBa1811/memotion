@@ -12,11 +12,13 @@ import '../providers/pc_session_provider.dart';
 class QrScanScreen extends ConsumerStatefulWidget {
   final String workoutId;
   final String exerciseType;
+  final String? videoUrl;
 
   const QrScanScreen({
     super.key,
     required this.workoutId,
     required this.exerciseType,
+    this.videoUrl,
   });
 
   @override
@@ -53,6 +55,7 @@ class _QrScanScreenState extends ConsumerState<QrScanScreen> {
             payload,
             workoutId: widget.workoutId,
             exerciseType: widget.exerciseType,
+            videoUrl: widget.videoUrl,
           );
 
       if (mounted) {

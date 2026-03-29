@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_exceptions.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../data/workout_repository.dart';
 import '../data/api_workout_repository.dart';
 import '../models/workout_model.dart';
@@ -101,9 +102,9 @@ class _DefaultDate implements DateTime {
 class WorkoutListNotifier extends StateNotifier<WorkoutListState> {
   final WorkoutRepository _repository;
 
-  WorkoutListNotifier(this._repository) : super(const WorkoutListState()) {
-    // Initialize with today's workouts
-    loadWorkoutsForDate(DateTime.now());
+  WorkoutListNotifier(this._repository, {bool autoLoad = true})
+      : super(const WorkoutListState()) {
+    if (autoLoad) loadWorkoutsForDate(DateTime.now());
   }
 
   /// Load workouts for a specific date
@@ -162,8 +163,12 @@ class WorkoutListNotifier extends StateNotifier<WorkoutListState> {
 /// Provider for workout list state
 final workoutListProvider =
     StateNotifierProvider<WorkoutListNotifier, WorkoutListState>((ref) {
+      final authState = ref.watch(authProvider);
       final repository = ref.watch(workoutRepositoryProvider);
-      return WorkoutListNotifier(repository);
+      return WorkoutListNotifier(
+        repository,
+        autoLoad: authState.status == AuthStatus.authenticated,
+      );
     });
 
 /// State class for workout detail

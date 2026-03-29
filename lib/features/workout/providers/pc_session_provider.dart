@@ -55,6 +55,7 @@ class PcSessionNotifier extends StateNotifier<PcSessionState> {
     PcQrPayload payload, {
     required String workoutId,
     required String exerciseType,
+    String? videoUrl,
   }) async {
     state = state.copyWith(
       status: PcSessionStatus.connecting,
@@ -71,11 +72,12 @@ class PcSessionNotifier extends StateNotifier<PcSessionState> {
 
       final jwt = await TokenStorage.instance.getAccessToken() ?? '';
       debugPrint('[PcSession] 🔑 JWT ${jwt.isEmpty ? "EMPTY (unauthenticated!)" : "present (len=${jwt.length})"}');
-      debugPrint('[PcSession] → pair_request workoutId=$workoutId exerciseType=$exerciseType');
+      debugPrint('[PcSession] → pair_request workoutId=$workoutId exerciseType=$exerciseType videoUrl=$videoUrl');
       _service.send(PcMessage.buildPairRequest(
         jwt: jwt,
         workoutId: workoutId,
         exerciseType: exerciseType,
+        videoUrl: videoUrl,
       ));
     } catch (e) {
       debugPrint('[PcSession] ❌ Connect failed: $e');

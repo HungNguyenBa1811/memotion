@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/responsive_utils.dart';
 
 /// Floating health summary card with vitals (Figma design)
 /// Shows: "Today's Vitals" label, status text, blood pressure, heart rate
@@ -10,6 +11,7 @@ class HealthSummaryCard extends StatelessWidget {
   final String steps;
   final String statusLabel;
   final String? backgroundImageUrl;
+  final EdgeInsetsGeometry? margin;
 
   const HealthSummaryCard({
     super.key,
@@ -18,13 +20,18 @@ class HealthSummaryCard extends StatelessWidget {
     this.steps = '5,420',
     this.statusLabel = 'Very Good',
     this.backgroundImageUrl,
+    this.margin,
   });
 
   @override
   Widget build(BuildContext context) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final horizontalPadding = ResponsiveUtils.horizontalPadding(context);
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 14),
-      height: 99,
+      margin: margin ?? EdgeInsets.symmetric(horizontal: horizontalPadding),
+      height: isTablet ? 120 : 99,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -42,18 +49,15 @@ class HealthSummaryCard extends StatelessWidget {
             // Use app color gradient (from Figma) instead of image background
             Positioned.fill(
               child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.primary, AppColors.tealAccent],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                ),
+                color: AppColors.primary,
               ),
             ),
             // Content
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: EdgeInsets.symmetric(
+                horizontal: isTablet ? 24 : 16, 
+                vertical: isTablet ? 16 : 10,
+              ),
               child: Row(
                 children: [
                   // Left section: Status
@@ -67,7 +71,7 @@ class HealthSummaryCard extends StatelessWidget {
                         Text(
                           "Today's Vitals",
                           style: AppTextStyles.bodySmall.copyWith(
-                            fontSize: 11,
+                            fontSize: 11 * textScale,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF889D93),
                           ),
@@ -76,7 +80,7 @@ class HealthSummaryCard extends StatelessWidget {
                         Text(
                           statusLabel,
                           style: AppTextStyles.largeStat.copyWith(
-                            fontSize: 20,
+                            fontSize: 20 * textScale,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFFDDE2DF),
                           ),
@@ -95,7 +99,7 @@ class HealthSummaryCard extends StatelessWidget {
                         Text(
                           'BLOOD PRESSURE',
                           style: AppTextStyles.caption.copyWith(
-                            fontSize: 7,
+                            fontSize: 7 * textScale,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF799087),
                           ),
@@ -104,7 +108,7 @@ class HealthSummaryCard extends StatelessWidget {
                         Text(
                           bloodPressure,
                           style: AppTextStyles.headline2.copyWith(
-                            fontSize: 15,
+                            fontSize: 15 * textScale,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFFC3CCC7),
                           ),
@@ -115,7 +119,7 @@ class HealthSummaryCard extends StatelessWidget {
                   // Divider
                   Container(
                     width: 2,
-                    height: 45,
+                    height: isTablet ? 60 : 45,
                     color: Colors.white.withOpacity(0.3),
                   ),
                   const SizedBox(width: 12),
@@ -130,7 +134,7 @@ class HealthSummaryCard extends StatelessWidget {
                         Text(
                           'HEART RATE',
                           style: AppTextStyles.caption.copyWith(
-                            fontSize: 7,
+                            fontSize: 7 * textScale,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF81968D),
                           ),
@@ -145,7 +149,7 @@ class HealthSummaryCard extends StatelessWidget {
                             Text(
                               heartRate,
                               style: AppTextStyles.numericStat.copyWith(
-                                fontSize: 13,
+                                fontSize: 13 * textScale,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFFC6CFCA),
                               ),
@@ -154,7 +158,7 @@ class HealthSummaryCard extends StatelessWidget {
                             Text(
                               'bpm',
                               style: AppTextStyles.bodySmall.copyWith(
-                                fontSize: 9,
+                                fontSize: 9 * textScale,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFFABB7B0),
                               ),

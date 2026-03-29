@@ -23,7 +23,6 @@ class PatientNutritionScreenContent extends ConsumerStatefulWidget {
 class _PatientNutritionScreenContentState
     extends ConsumerState<PatientNutritionScreenContent> {
   final PageController _pageController = PageController();
-  int _currentPage = 0;
 
   @override
   void dispose() {
@@ -38,9 +37,7 @@ class _PatientNutritionScreenContentState
       filteredNutritionTasksProvider(selectedFilter),
     );
 
-    // Demo card is always shown; API tasks are appended when available
-    final apiTasks = nutritionTasksAsync.valueOrNull ?? [];
-    final displayTasks = [_ketoSaladDemo, ...apiTasks];
+    final displayTasks = nutritionTasksAsync.valueOrNull ?? [];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -67,17 +64,6 @@ class _PatientNutritionScreenContentState
       ),
     );
   }
-
-  NutritionTask get _ketoSaladDemo => NutritionTask(
-        id: 'demo_keto_salad',
-        name: 'Keto Salad',
-        description: 'Beans & fruits',
-        calories: 370,
-        mealType: 'lunch',
-        time: '12:00',
-        scheduledDate: DateTime.now(),
-        status: NutritionStatus.pending,
-      );
 
   Widget _buildHeader(BuildContext context, WidgetRef ref) {
     return Padding(
@@ -123,20 +109,7 @@ class _PatientNutritionScreenContentState
               ),
             ],
           ),
-          GestureDetector(
-            onTap: () => ref.invalidate(nutritionTasksProvider),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Icon(Icons.refresh, color: AppColors.primary, size: 20),
-              ),
-            ),
-          ),
+          const SizedBox(width: 40),
         ],
       ),
     );
@@ -164,7 +137,6 @@ class _PatientNutritionScreenContentState
               onTap: () {
                 ref.read(nutritionFilterProvider.notifier).state = filter;
                 _pageController.jumpToPage(0);
-                setState(() => _currentPage = 0);
               },
               child: Container(
                 padding:
@@ -260,38 +232,12 @@ class _PatientNutritionScreenContentState
             ),
           ),
 
-        // Counter "X / N"
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '${_currentPage + 1}',
-                style: GoogleFonts.lexend(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.secondary,
-                ),
-              ),
-              Text(
-                ' / ${tasks.length}',
-                style: GoogleFonts.lexend(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF9CA3AF),
-                ),
-              ),
-            ],
-          ),
-        ),
-
         // PageView with large cards
         Expanded(
           child: PageView.builder(
             controller: _pageController,
             itemCount: tasks.length,
-            onPageChanged: (i) => setState(() => _currentPage = i),
+            onPageChanged: (_) {},
             itemBuilder: (context, index) => Padding(
               padding: EdgeInsets.fromLTRB(
                 20,
@@ -310,29 +256,6 @@ class _PatientNutritionScreenContentState
           ),
         ),
 
-        // Dot indicators
-        if (tasks.length > 1)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                tasks.length,
-                (i) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: i == _currentPage ? 20 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: i == _currentPage
-                        ? AppColors.secondary
-                        : Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }
@@ -398,10 +321,9 @@ class _PatientNutritionCard extends StatelessWidget {
                     child: Container(
                       width: imageSize,
                       height: imageSize,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.white,
-                        border: Border.all(color: Colors.black, width: 1),
                       ),
                       child: ClipOval(child: _buildImage(imageSize)),
                     ),

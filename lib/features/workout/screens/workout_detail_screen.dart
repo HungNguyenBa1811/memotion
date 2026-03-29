@@ -872,6 +872,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
       extra: {
         'workoutId': workout.id,
         'exerciseType': _getExerciseType(workout.type),
+        'videoPath': workout.videoPath,
       },
     );
   }

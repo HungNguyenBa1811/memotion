@@ -115,6 +115,10 @@ class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew> {
     );
   }
 
+  void _onSkip() {
+    context.go(AppRoutes.profile);
+  }
+
   Widget _buildHeader(int currentStep) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
@@ -131,7 +135,17 @@ class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew> {
             ),
           ),
           const Spacer(),
-          const SizedBox(width: 40),
+          GestureDetector(
+            onTap: _onSkip,
+            child: Text(
+              'Skip',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         ],
       ),
     );

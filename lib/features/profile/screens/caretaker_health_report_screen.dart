@@ -10,7 +10,6 @@ import '../../../core/utils/responsive_utils.dart';
 import '../../health_connect/models/health_data.dart';
 import '../../health_connect/providers/health_connect_providers.dart';
 import '../../health_connect/providers/heart_rate_provider.dart';
-import '../../home/widgets/health_summary_card.dart';
 
 /// Health Report Screen for Caretaker (Figma design node 538:4727)
 /// Displays progress indicator, today's health metrics (calories, steps, heart rate)
@@ -37,40 +36,30 @@ class _CaretakerHealthReportScreenState
     final health = healthAsync.valueOrNull ?? const HealthData();
     final isLoading = healthAsync.isLoading;
     final hrState = ref.watch(heartRateProvider);
+    final hPad = ResponsiveUtils.horizontalPadding(context);
 
     return Scaffold(
       backgroundColor: AppColors.lightGreen,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Bar with back button and refresh
-              _buildTopBar(context, isLoading),
-
-              const SizedBox(height: 16),
-
-              // Progress Card
-              _buildProgressCard(),
-
-              const SizedBox(height: 24),
-
-              // Today's Information Section
-              _buildTodaysInfoSection(health, hrState),
-
-              const SizedBox(height: 24),
-
-              // Health Summary Card (reused from home screen)
-              HealthSummaryCard(
-                heartRate: hrState.bpm > 0 ? '${hrState.bpm}' : '${health.heartRate}',
-                bloodPressure: '120/80',
-                steps: '${health.steps}',
-                statusLabel: 'Excellent',
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: ResponsiveUtils.contentMaxWidth(context),
               ),
-
-              // Bottom padding for navigation bar
-              SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
-            ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTopBar(context, isLoading),
+                  const SizedBox(height: 16),
+                  _buildProgressCard(padding: hPad),
+                  const SizedBox(height: 24),
+                  _buildTodaysInfoSection(health, hrState, padding: hPad),
+                  const SizedBox(height: 24),
+                  SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -90,8 +79,8 @@ class _CaretakerHealthReportScreenState
           GestureDetector(
             onTap: () => context.pop(),
             child: Container(
-              width: 40,
-              height: 40,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
                 color: const Color(0xFF00695C),
                 shape: BoxShape.circle,
@@ -100,7 +89,7 @@ class _CaretakerHealthReportScreenState
                 child: Icon(
                   Icons.arrow_back_ios_new,
                   color: Colors.white,
-                  size: 18,
+                  size: 20,
                 ),
               ),
             ),
@@ -110,7 +99,10 @@ class _CaretakerHealthReportScreenState
               // BLE connect button
               GestureDetector(
                 onTap: () => _showBleScanDialog(context),
-                child: Icon(Icons.bluetooth, color: AppColors.primary, size: 28),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(Icons.bluetooth, color: AppColors.primary, size: 32),
+                ),
               ),
               const SizedBox(width: 12),
               // Refresh HC button
@@ -118,13 +110,16 @@ class _CaretakerHealthReportScreenState
                 onTap: isLoading
                     ? null
                     : () => ref.read(healthDataProvider.notifier).fetch(),
-                child: isLoading
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(Icons.refresh, color: AppColors.primary, size: 28),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(Icons.refresh, color: AppColors.primary, size: 32),
+                ),
               ),
             ],
           ),
@@ -133,10 +128,12 @@ class _CaretakerHealthReportScreenState
     );
   }
 
-  Widget _buildProgressCard() {
+  Widget _buildProgressCard({required double padding}) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: ResponsiveUtils.horizontalPadding(context),
+        horizontal: padding,
       ),
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -166,13 +163,13 @@ class _CaretakerHealthReportScreenState
                       Icon(
                         Icons.data_thresholding_outlined,
                         color: AppColors.primary,
-                        size: 24,
+                        size: 24 * textScale,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         'Progress',
                         style: GoogleFonts.lexend(
-                          fontSize: 16,
+                          fontSize: 16 * textScale,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primary,
                         ),
@@ -184,7 +181,7 @@ class _CaretakerHealthReportScreenState
                   Text(
                     '95%',
                     style: GoogleFonts.lexend(
-                      fontSize: 48,
+                      fontSize: 48 * textScale,
                       fontWeight: FontWeight.w600,
                       color: AppColors.primary,
                     ),
@@ -194,7 +191,7 @@ class _CaretakerHealthReportScreenState
                   Text(
                     DateFormat('dd MMMM yyyy').format(DateTime.now()),
                     style: GoogleFonts.lexend(
-                      fontSize: 16,
+                      fontSize: 16 * textScale,
                       fontWeight: FontWeight.w300,
                       color: Colors.black,
                     ),
@@ -206,15 +203,15 @@ class _CaretakerHealthReportScreenState
             Expanded(
               flex: 4,
               child: SizedBox(
-                width: 110,
-                height: 110,
+                width: 110 * textScale,
+                height: 110 * textScale,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     // Background circle
                     SizedBox(
-                      width: 110,
-                      height: 110,
+                      width: 110 * textScale,
+                      height: 110 * textScale,
                       child: CircularProgressIndicator(
                         value: 1.0,
                         strokeWidth: 12,
@@ -226,8 +223,8 @@ class _CaretakerHealthReportScreenState
                     ),
                     // Progress circle
                     SizedBox(
-                      width: 110,
-                      height: 110,
+                      width: 110 * textScale,
+                      height: 110 * textScale,
                       child: CircularProgressIndicator(
                         value: 0.9, // 9/10 = 90%
                         strokeWidth: 12,
@@ -242,7 +239,7 @@ class _CaretakerHealthReportScreenState
                     Text(
                       '9/10',
                       style: GoogleFonts.nunito(
-                        fontSize: 24,
+                        fontSize: 24 * textScale,
                         fontWeight: FontWeight.w900,
                         color: AppColors.primary,
                       ),
@@ -257,10 +254,10 @@ class _CaretakerHealthReportScreenState
     );
   }
 
-  Widget _buildTodaysInfoSection(HealthData health, HrState hrState) {
+  Widget _buildTodaysInfoSection(HealthData health, HrState hrState, {required double padding}) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: ResponsiveUtils.horizontalPadding(context),
+        horizontal: padding,
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -286,6 +283,7 @@ class _CaretakerHealthReportScreenState
   }
 
   Widget _buildCaloriesCard(String value) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -305,7 +303,7 @@ class _CaretakerHealthReportScreenState
               Text(
                 'Calories',
                 style: GoogleFonts.sourceSans3(
-                  fontSize: 14,
+                  fontSize: 14 * textScale,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF040415),
                 ),
@@ -315,7 +313,7 @@ class _CaretakerHealthReportScreenState
               Icon(
                 Icons.local_fire_department,
                 color: Colors.green.shade300,
-                size: 20,
+                size: 24 * textScale,
               ),
             ],
           ),
@@ -324,7 +322,7 @@ class _CaretakerHealthReportScreenState
           Text(
             value,
             style: GoogleFonts.sourceSans3(
-              fontSize: 18,
+              fontSize: 18 * textScale,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF040415),
             ),
@@ -334,7 +332,7 @@ class _CaretakerHealthReportScreenState
           Text(
             'Kcal',
             style: GoogleFonts.mavenPro(
-              fontSize: 12,
+              fontSize: 12 * textScale,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF7F7F7F),
             ),
@@ -345,6 +343,7 @@ class _CaretakerHealthReportScreenState
   }
 
   Widget _buildStepsCard(String value) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -364,14 +363,14 @@ class _CaretakerHealthReportScreenState
               Text(
                 'Steps',
                 style: GoogleFonts.sourceSans3(
-                  fontSize: 14,
+                  fontSize: 14 * textScale,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF040415),
                 ),
               ),
               const Spacer(),
               // Shoe icon
-              Icon(Icons.directions_run, color: Colors.blue.shade300, size: 20),
+              Icon(Icons.directions_run, color: Colors.blue.shade300, size: 24 * textScale),
             ],
           ),
           const SizedBox(height: 12),
@@ -379,7 +378,7 @@ class _CaretakerHealthReportScreenState
           Text(
             value,
             style: GoogleFonts.sourceSans3(
-              fontSize: 18,
+              fontSize: 18 * textScale,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF040415),
             ),
@@ -389,7 +388,7 @@ class _CaretakerHealthReportScreenState
           Text(
             'Steps',
             style: GoogleFonts.mavenPro(
-              fontSize: 12,
+              fontSize: 12 * textScale,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF7F7F7F),
             ),
@@ -400,6 +399,7 @@ class _CaretakerHealthReportScreenState
   }
 
   Widget _buildHeartCard(HrState hrState) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
     final bpmText = hrState.bpm > 0 ? '${hrState.bpm}' : '--';
     final isLive = hrState.isLive;
 
@@ -422,13 +422,13 @@ class _CaretakerHealthReportScreenState
               Text(
                 'Heart',
                 style: GoogleFonts.sourceSans3(
-                  fontSize: 14,
+                  fontSize: 14 * textScale,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF040415),
                 ),
               ),
               const Spacer(),
-              Icon(Icons.favorite, color: Colors.red.shade300, size: 20),
+              Icon(Icons.favorite, color: Colors.red.shade300, size: 24 * textScale),
             ],
           ),
           // Source indicator
@@ -448,7 +448,7 @@ class _CaretakerHealthReportScreenState
                 Text(
                   hrState.sourceLabel,
                   style: GoogleFonts.mavenPro(
-                    fontSize: 10,
+                    fontSize: 10 * textScale,
                     color: isLive ? const Color(0xFF66BB6A) : const Color(0xFF9E9E9E),
                   ),
                 ),
@@ -468,7 +468,7 @@ class _CaretakerHealthReportScreenState
           Text(
             bpmText,
             style: GoogleFonts.sourceSans3(
-              fontSize: 18,
+              fontSize: 18 * textScale,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF040415),
             ),
@@ -477,7 +477,7 @@ class _CaretakerHealthReportScreenState
           Text(
             'bpm',
             style: GoogleFonts.mavenPro(
-              fontSize: 12,
+              fontSize: 12 * textScale,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF7F7F7F),
             ),
@@ -622,8 +622,13 @@ class _BleScanSheetState extends ConsumerState<_BleScanSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        24,
+        16,
+        24,
+        32 + ResponsiveUtils.bottomNavPadding(context),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

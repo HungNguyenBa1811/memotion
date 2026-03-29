@@ -10,7 +10,6 @@ import '../../providers/home_provider.dart';
 import '../../widgets/greeting_hero.dart';
 import '../../widgets/action_card.dart';
 import '../../widgets/upcoming_medication_card.dart';
-import '../../widgets/health_summary_card.dart';
 
 /// Homepage screen for CARETAKER role (Figma design)
 /// Displays greeting, situation handling button, medication reminder, quick actions, and health summary
@@ -34,6 +33,85 @@ class CaretakerHomeScreen extends ConsumerWidget {
 
     final dashboardData = homeState.data;
 
+    // Hero + medication widgets
+    final heroSection = GreetingHero(
+      userName: 'Sir/Madam',
+      greeting: _getGreeting(),
+      avatarUrl: dashboardData?.avatarUrl,
+      moodMessage: "Please pay attention to the patient's mood today",
+      actionButtonText: 'SITUATION HANDLING',
+      onActionPressed: () {
+        homeNotifier.triggerSOS();
+        _showSituationHandlingDialog(context);
+      },
+    );
+
+    final medicationSection = UpcomingMedicationCard(
+      title: firstMed?.name ?? 'Remind to take medicine',
+      time: firstMed?.time ?? dashboardData?.upcomingMedication?.time ?? '10:00 AM',
+      dosage: firstMed?.dosage ?? dashboardData?.upcomingMedication?.dosage ?? 'Take 1 Vitamin C tablet after meal',
+      imageUrl: firstMed?.imageUrl.isNotEmpty == true ? firstMed!.imageUrl : dashboardData?.upcomingMedication?.imageUrl,
+      onTakenPressed: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Marked as taken!'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      },
+      onDetailsPressed: () {
+        context.go('/medication');
+      },
+    );
+
+    final titleSection = Text(
+      'For Caregiver',
+      style: AppTextStyles.headline1.copyWith(
+        fontSize: 22 * ResponsiveUtils.textScaleFactor(context),
+        fontWeight: FontWeight.w700,
+        color: AppColors.primary,
+      ),
+    );
+
+    final actionsGrid = GridView.count(
+      crossAxisCount: ResponsiveUtils.cardColumns(context),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 162 / 171,
+      children: [
+        ActionCard(
+          title: 'Health\nCheck',
+          iconAsset: 'assets/images/icon_heart_beat.png',
+          icon: Icons.health_and_safety,
+          iconColor: AppColors.primary,
+          onTap: () {},
+        ),
+        ActionCard(
+          title: 'Medication\nReminder',
+          iconAsset: 'assets/images/icon_medicine_file.png',
+          icon: Icons.medication,
+          iconColor: AppColors.primary,
+          onTap: () => context.go('/medication'),
+        ),
+        ActionCard(
+          title: 'Family\nChat',
+          iconAsset: 'assets/images/icon_calls.png',
+          icon: Icons.chat_bubble,
+          iconColor: AppColors.primary,
+          onTap: () {},
+        ),
+        ActionCard(
+          title: 'Health\nRecord',
+          iconAsset: 'assets/images/icon_health_check.png',
+          icon: Icons.book,
+          iconColor: AppColors.primary,
+          onTap: () => context.push(AppRoutes.caretakerHealthReport),
+        ),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: AppColors.lightGreen,
       body: SafeArea(
@@ -42,121 +120,31 @@ class CaretakerHomeScreen extends ConsumerWidget {
           color: AppColors.tealGreen,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Greeting Hero with situation handling button (Caretaker version)
-                GreetingHero(
-                  userName: 'Sir/Madam',
-                  greeting: _getGreeting(),
-                  avatarUrl: dashboardData?.avatarUrl,
-                  moodMessage: "Please pay attention to the patient's mood today",
-                  actionButtonText: 'SITUATION HANDLING',
-                  onActionPressed: () {
-                    homeNotifier.triggerSOS();
-                    _showSituationHandlingDialog(context);
-                  },
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: ResponsiveUtils.contentMaxWidth(context),
                 ),
-
-                const SizedBox(height: 24),
-
-                // Upcoming Medication Card (Caregiver perspective)
-                UpcomingMedicationCard(
-                  title: firstMed?.name ?? 'Remind to take medicine',
-                  time: firstMed?.time ?? dashboardData?.upcomingMedication?.time ?? '10:00 AM',
-                  dosage: firstMed?.dosage ?? dashboardData?.upcomingMedication?.dosage ?? 'Take 1 Vitamin C tablet after meal',
-                  imageUrl: firstMed?.imageUrl.isNotEmpty == true ? firstMed!.imageUrl : dashboardData?.upcomingMedication?.imageUrl,
-                  onTakenPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Marked as taken!'),
-                        backgroundColor: AppColors.primary,
-                      ),
-                    );
-                  },
-                  onDetailsPressed: () {
-                    context.go('/medication');
-                  },
-                ),
-
-                const SizedBox(height: 24),
-
-                // Section title: "For Caregiver"
-                Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: ResponsiveUtils.horizontalPadding(context),
                   ),
-                  child: Text(
-                    'For Caregiver',
-                    style: AppTextStyles.headline1.copyWith(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Quick Actions Grid (responsive columns)
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: ResponsiveUtils.horizontalPadding(context),
-                  ),
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 162 / 171,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ActionCard(
-                        title: 'Health\nCheck',
-                        iconAsset: 'assets/images/icon_heart_beat.png',
-                        icon: Icons.health_and_safety,
-                        iconColor: AppColors.primary,
-                        onTap: () {},
-                      ),
-                      ActionCard(
-                        title: 'Medication\nReminder',
-                        iconAsset: 'assets/images/icon_medicine_file.png',
-                        icon: Icons.medication,
-                        iconColor: AppColors.primary,
-                        onTap: () => context.go('/medication'),
-                      ),
-                      ActionCard(
-                        title: 'Family\nChat',
-                        iconAsset: 'assets/images/icon_calls.png',
-                        icon: Icons.chat_bubble,
-                        iconColor: AppColors.primary,
-                        onTap: () {},
-                      ),
-                      ActionCard(
-                        title: 'Health\nRecord',
-                        iconAsset: 'assets/images/icon_health_check.png',
-                        icon: Icons.book,
-                        iconColor: AppColors.primary,
-                        onTap: () => context.push(AppRoutes.caretakerHealthReport),
-                      ),
+                      heroSection,
+                      const SizedBox(height: 24),
+                      medicationSection,
+                      const SizedBox(height: 24),
+                      titleSection,
+                      const SizedBox(height: 16),
+                      actionsGrid,
+                      const SizedBox(height: 24),
+                      SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 24),
-
-                // Health Summary Card
-                HealthSummaryCard(
-                  heartRate: dashboardData?.healthVitals?.heartRate ?? '72',
-                  bloodPressure:
-                      dashboardData?.healthVitals?.bloodPressure ?? '120/80',
-                  steps: dashboardData?.healthVitals?.steps ?? '0',
-                  statusLabel: 'Very Good',
-                ),
-
-                // Bottom padding for navigation bar
-                SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
-              ],
+              ),
             ),
           ),
         ),

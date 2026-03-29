@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/network/api_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/responsive_utils.dart';
 
 /// Card displaying upcoming medication with details (Figma design)
 class UpcomingMedicationCard extends StatelessWidget {
@@ -26,9 +27,15 @@ class UpcomingMedicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final cardHeight = isTablet ? 280.0 : 234.0;
+    final imageSize = isTablet ? 160.0 : 120.0;
+    final clockIconSize = isTablet ? 18.0 : 12.0;
+    final checkIconSize = isTablet ? 28.0 : 20.0;
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 14),
-      height: 234,
+      height: cardHeight,
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(27),
@@ -44,7 +51,7 @@ class UpcomingMedicationCard extends StatelessWidget {
         children: [
           // Content
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(isTablet ? 32 : 20),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -57,8 +64,8 @@ class UpcomingMedicationCard extends StatelessWidget {
                       Row(
                         children: [
                           Container(
-                            width: 19,
-                            height: 19,
+                            width: clockIconSize * 1.6,
+                            height: clockIconSize * 1.6,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
@@ -66,9 +73,9 @@ class UpcomingMedicationCard extends StatelessWidget {
                                 width: 1.5,
                               ),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.access_time,
-                              size: 12,
+                              size: clockIconSize,
                               color: AppColors.textPrimary,
                             ),
                           ),
@@ -76,61 +83,70 @@ class UpcomingMedicationCard extends StatelessWidget {
                           Text(
                             time,
                             style: AppTextStyles.bodyLarge.copyWith(
-                              fontSize: 18,
+                              fontSize: 18 * textScale,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      // Section title (Caregiver: "Nhắc ông/bà uống thuốc")
+                      SizedBox(height: isTablet ? 8 : 12),
+                      // Section title
                       Text(
                         title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.sectionHeading.copyWith(
-                          fontSize: 20,
+                          fontSize: 20 * textScale,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: isTablet ? 4 : 8),
                       // Dosage description
                       Text(
                         dosage,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.lightDescription.copyWith(
-                          fontSize: 12,
+                          fontSize: 12 * textScale,
                           fontWeight: FontWeight.w300,
                         ),
                       ),
                       const Spacer(),
                       // "Taken" button
-                      GestureDetector(
-                        onTap: onTakenPressed ?? onDetailsPressed,
-                        child: Container(
-                          width: 153,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE4F0EE),
-                            borderRadius: BorderRadius.circular(7),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                isTaken
-                                    ? Icons.check_circle
-                                    : Icons.check_circle_outline,
-                                color: AppColors.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Taken',
-                                style: AppTextStyles.headline3.copyWith(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: onTakenPressed ?? onDetailsPressed,
+                          borderRadius: BorderRadius.circular(7),
+                          child: Container(
+                            width: isTablet ? 200 : 153,
+                            height: isTablet ? 56 : 44,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE4F0EE),
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  isTaken
+                                      ? Icons.check_circle
+                                      : Icons.check_circle_outline,
                                   color: AppColors.primary,
+                                  size: checkIconSize,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Taken',
+                                  style: AppTextStyles.headline3.copyWith(
+                                    fontSize: 18 * textScale,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -139,8 +155,8 @@ class UpcomingMedicationCard extends StatelessWidget {
                 ),
                 // Right side - Medication image
                 Container(
-                  width: 120,
-                  height: 120,
+                  width: imageSize,
+                  height: imageSize,
                   decoration: BoxDecoration(
                     color: const Color(0xFFF7F7F7),
                     borderRadius: BorderRadius.circular(27),
@@ -150,19 +166,19 @@ class UpcomingMedicationCard extends StatelessWidget {
                     child: imageUrl != null
                         ? Image.network(
                             '${ApiConstants.baseUrl}$imageUrl',
-                            width: 120,
-                            height: 120,
+                            width: imageSize,
+                            height: imageSize,
                             fit: BoxFit.cover,
                           )
                         : Image.asset(
                             'assets/images/medication/medication_pills.png',
-                            width: 120,
-                            height: 120,
+                            width: imageSize,
+                            height: imageSize,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
+                              return Icon(
                                 Icons.medication,
-                                size: 50,
+                                size: isTablet ? 80 : 50,
                                 color: AppColors.tealGreen,
                               );
                             },

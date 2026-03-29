@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../data/nutrition_repository.dart';
 import '../models/nutrition_task.dart';
 
@@ -10,6 +11,8 @@ final nutritionRepositoryProvider = Provider<NutritionRepository>((ref) {
 
 /// Provider for the list of all nutrition tasks
 final nutritionTasksProvider = FutureProvider<List<NutritionTask>>((ref) async {
+  final authState = ref.watch(authProvider);
+  if (authState.status != AuthStatus.authenticated) return [];
   debugPrint('┌─────────────────────────────────────────────────────────────');
   debugPrint('│ 🍽️ NUTRITION PROVIDER: Fetching all tasks');
   debugPrint('└─────────────────────────────────────────────────────────────');

@@ -37,11 +37,6 @@ class MedicationVerticalCard extends StatelessWidget {
       MedicationStatus.pending => AppColors.primary,
     };
 
-    final statusLabel = switch (medication.status) {
-      MedicationStatus.taken => 'Taken',
-      MedicationStatus.missed => 'Missed',
-      MedicationStatus.pending => 'Upcoming',
-    };
 
     return Container(
       decoration: BoxDecoration(
@@ -70,57 +65,30 @@ class MedicationVerticalCard extends StatelessWidget {
                   // Background tint
                   Container(color: AppColors.primary.withOpacity(0.06)),
                   // Medication image
-                  Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: fullImageUrl != null
-                        ? Image.network(
-                            fullImageUrl,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, _, _) => Image.asset(
-                              pillImages[imageIndex],
-                              fit: BoxFit.contain,
-                            ),
-                            loadingBuilder: (_, child, progress) {
-                              if (progress == null) return child;
-                              return const Center(
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2),
-                              );
-                            },
-                          )
-                        : Image.asset(
+                  fullImageUrl != null
+                      ? Image.network(
+                          fullImageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Image.asset(
                             pillImages[imageIndex],
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, _, _) => Icon(
-                              Icons.medication,
-                              size: 80,
-                              color: AppColors.primary.withOpacity(0.4),
-                            ),
+                            fit: BoxFit.cover,
                           ),
-                  ),
-                  // Status badge
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                            color: statusColor.withOpacity(0.4), width: 1),
-                      ),
-                      child: Text(
-                        statusLabel,
-                        style: GoogleFonts.lexend(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: statusColor,
+                          loadingBuilder: (_, child, progress) {
+                            if (progress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          pillImages[imageIndex],
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Icon(
+                            Icons.medication,
+                            size: 80,
+                            color: AppColors.primary.withOpacity(0.4),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -130,7 +98,7 @@ class MedicationVerticalCard extends StatelessWidget {
           Expanded(
             flex: 4,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -159,7 +127,7 @@ class MedicationVerticalCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 6),
                   // Medication name
                   Text(
                     medication.name,
@@ -172,7 +140,7 @@ class MedicationVerticalCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   // Dosage
                   Text(
                     medication.dosage,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../models/workout_model.dart';
 
 class WorkoutTaskCard extends StatelessWidget {
@@ -15,6 +16,8 @@ class WorkoutTaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -63,10 +66,10 @@ class WorkoutTaskCard extends StatelessWidget {
                             workout.imageAsset!,
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) {
-                              return _buildIconPlaceholder();
+                              return _buildIconPlaceholder(textScale);
                             },
                           )
-                        : _buildIconPlaceholder(),
+                        : _buildIconPlaceholder(textScale),
                   ),
                 ),
               ),
@@ -83,7 +86,7 @@ class WorkoutTaskCard extends StatelessWidget {
                   Text(
                     workout.title,
                     style: GoogleFonts.lexend(
-                      fontSize: 16,
+                      fontSize: 16 * textScale,
                       fontWeight: FontWeight.w700,
                       color: Colors.black,
                       letterSpacing: -0.3,
@@ -97,7 +100,7 @@ class WorkoutTaskCard extends StatelessWidget {
                     Text(
                       workout.description!,
                       style: GoogleFonts.lexend(
-                        fontSize: 11,
+                        fontSize: 11 * textScale,
                         fontWeight: FontWeight.w300,
                         color: Colors.black,
                         letterSpacing: -0.3,
@@ -117,7 +120,7 @@ class WorkoutTaskCard extends StatelessWidget {
               child: Text(
                 workout.time,
                 style: GoogleFonts.lexend(
-                  fontSize: 12,
+                  fontSize: 12 * textScale,
                   fontWeight: FontWeight.w500,
                   color: Colors.black,
                   letterSpacing: -0.3,
@@ -130,7 +133,7 @@ class WorkoutTaskCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIconPlaceholder() {
+  Widget _buildIconPlaceholder(double textScale) {
     return Container(
       decoration: BoxDecoration(
         color: _getColorForType(workout.type).withOpacity(0.1),
@@ -138,7 +141,7 @@ class WorkoutTaskCard extends StatelessWidget {
       ),
       child: Icon(
         _getIconForType(workout.type),
-        size: 40,
+        size: 40 * textScale,
         color: _getColorForType(workout.type),
       ),
     );

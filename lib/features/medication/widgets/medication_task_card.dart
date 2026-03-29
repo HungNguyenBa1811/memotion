@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/network/api_constants.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../models/medication.dart';
 
 class MedicationTaskCard extends StatelessWidget {
@@ -11,6 +12,7 @@ class MedicationTaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
     final pillImages = [
       'assets/images/medication/pill_1.png',
       'assets/images/medication/pill_2.png',
@@ -73,7 +75,7 @@ class MedicationTaskCard extends StatelessWidget {
                               pillImages[imageIndex],
                               fit: BoxFit.contain,
                               errorBuilder: (ctx, err, st) {
-                                return _buildIconPlaceholder();
+                                return _buildIconPlaceholder(textScale);
                               },
                             );
                           },
@@ -89,7 +91,7 @@ class MedicationTaskCard extends StatelessWidget {
                           pillImages[imageIndex],
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) {
-                            return _buildIconPlaceholder();
+                            return _buildIconPlaceholder(textScale);
                           },
                         ),
                 ),
@@ -108,7 +110,7 @@ class MedicationTaskCard extends StatelessWidget {
                 Text(
                   medication.name,
                   style: GoogleFonts.lexend(
-                    fontSize: 16,
+                    fontSize: 16 * textScale,
                     fontWeight: FontWeight.w700,
                     color: Colors.black,
                     letterSpacing: -0.3,
@@ -120,7 +122,7 @@ class MedicationTaskCard extends StatelessWidget {
                 Text(
                   medication.dosage,
                   style: GoogleFonts.lexend(
-                    fontSize: 11,
+                    fontSize: 11 * textScale,
                     fontWeight: FontWeight.w300,
                     color: Colors.black,
                     letterSpacing: -0.3,
@@ -139,7 +141,7 @@ class MedicationTaskCard extends StatelessWidget {
             child: Text(
               medication.time,
               style: GoogleFonts.lexend(
-                fontSize: 12,
+                fontSize: 12 * textScale,
                 fontWeight: FontWeight.w500,
                 color: Colors.black,
                 letterSpacing: -0.3,
@@ -151,15 +153,15 @@ class MedicationTaskCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIconPlaceholder() {
+  Widget _buildIconPlaceholder(double textScale) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Icon(
+      child: Icon(
         Icons.medication,
-        size: 40,
+        size: 40 * textScale,
         color: AppColors.primary,
       ),
     );

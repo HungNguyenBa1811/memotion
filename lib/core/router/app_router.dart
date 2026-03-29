@@ -21,6 +21,7 @@ import '../../features/workout/screens/pose_detection_screen.dart';
 import '../../features/workout/screens/pose_training_screen.dart';
 import '../../features/workout/screens/qr_scan_screen.dart';
 import '../../features/workout/screens/pc_standby_screen.dart';
+import '../network/api_constants.dart';
 import '../../features/medication/screens/medication_screen.dart';
 import '../../features/medication/screens/medication_reminder_screen.dart';
 import '../../features/medication/screens/medication_scan_screen.dart';
@@ -229,9 +230,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.pcQrScan,
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
+          final videoPath = extra?['videoPath'] as String?;
+          final videoUrl = (videoPath != null && videoPath.isNotEmpty)
+              ? '${ApiConstants.baseUrl}$videoPath'
+              : null;
           return QrScanScreen(
             workoutId: extra?['workoutId'] ?? '',
             exerciseType: extra?['exerciseType'] ?? 'arm_raise',
+            videoUrl: videoUrl,
           );
         },
       ),

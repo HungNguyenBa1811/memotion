@@ -10,6 +10,8 @@ import '../providers/medication_provider.dart';
 import '../models/medication.dart';
 import '../widgets/medication_task_card.dart';
 import '../data/medication_scheduler.dart';
+import '../../workout/widgets/calendar_day_picker.dart';
+import '../../workout/models/workout_model.dart';
 
 /// Original screen with bottom nav - kept for backwards compatibility
 class MedicationMainScreen extends ConsumerStatefulWidget {
@@ -39,6 +41,38 @@ class MedicationMainScreenContent extends ConsumerStatefulWidget {
 
 class _MedicationMainScreenContentState
     extends ConsumerState<MedicationMainScreenContent> {
+  int _selectedIndex = 0;
+  late int _selectedDayIndex;
+  late List<CalendarDay> _calendarDays;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _rebuildCalendarDays();
+  }
+
+  void _rebuildCalendarDays() {
+    final dayCount = ResponsiveUtils.dateSelectorDays(context);
+    final offset = dayCount ~/ 2;
+    final now = DateTime.now();
+    _calendarDays = List.generate(dayCount, (i) {
+      final date = now.add(Duration(days: i - offset));
+      return CalendarDay(
+        date: date,
+        dayOfWeek: '',
+        month: '',
+        isSelected: i == offset,
+      );
+    });
+    _selectedDayIndex = offset;
+  }
+
+  void _resetSelection() {
+    setState(() {
+      _selectedIndex = 0;
+    });
+  }
+
   // TEST: tap chuông → nhập số phút → schedule alarm. Xóa method này khi xong test.
   Future<void> _scheduleTestAlarm(BuildContext context) async {
     final controller = TextEditingController(text: '2');
@@ -97,6 +131,7 @@ class _MedicationMainScreenContentState
     );
     final selectedDate = ref.watch(selectedDateProvider);
     final isOffline = ref.watch(isOfflineProvider).valueOrNull ?? false;
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -104,35 +139,9 @@ class _MedicationMainScreenContentState
         children: [
           SafeArea(
             bottom: false,
-            child: Column(
-              children: [
-                // Header
-                _buildHeader(context),
-
-                // Offline indicator — visible only when network is absent
-                if (isOffline) _buildOfflineBanner(),
-
-                // Date selector
-                _buildDateSelector(selectedDate),
-
-                const SizedBox(height: 16),
-
-                // Filter tabs
-                _buildFilterTabs(selectedFilter),
-
-                const SizedBox(height: 16),
-
-                // Medication list
-                Expanded(
-                  child: medicationsAsync.when(
-                    data: (medications) => _buildMedicationList(medications),
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, _) => _buildErrorWidget(error),
-                  ),
-                ),
-              ],
-            ),
+            child: isTablet
+              ? _buildTabletLayout(medicationsAsync, selectedDate, selectedFilter, isOffline)
+              : _buildMobileLayout(medicationsAsync, selectedDate, selectedFilter, isOffline),
           ),
           // Floating QR button - positioned bottom right, above navbar
           Positioned(
@@ -150,9 +159,103 @@ class _MedicationMainScreenContentState
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildMobileLayout(
+    AsyncValue<List<Medication>> medicationsAsync,
+    DateTime selectedDate,
+    MedicationFilter selectedFilter,
+    bool isOffline
+  ) {
+    return SingleChildScrollView(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: ResponsiveUtils.contentMaxWidth(context),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: ResponsiveUtils.horizontalPadding(context),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context),
+                if (isOffline) _buildOfflineBanner(),
+                CalendarDayPicker(
+                  days: _calendarDays,
+                  selectedIndex: _selectedDayIndex,
+                  onDaySelected: (index) {
+                    setState(() => _selectedDayIndex = index);
+                    ref.read(selectedDateProvider.notifier).state =
+                        _calendarDays[index].date;
+                    _resetSelection();
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildFilterTabs(selectedFilter),
+                const SizedBox(height: 16),
+                medicationsAsync.when(
+                  data: (medications) => _buildMedicationList(medications),
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (error, _) => _buildErrorWidget(error),
+                ),
+                SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabletLayout(
+    AsyncValue<List<Medication>> medicationsAsync,
+    DateTime selectedDate,
+    MedicationFilter selectedFilter,
+    bool isOffline
+  ) {
+    final hPad = ResponsiveUtils.horizontalPadding(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: hPad),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildHeader(context),
+          if (isOffline) _buildOfflineBanner(),
+          CalendarDayPicker(
+            days: _calendarDays,
+            selectedIndex: _selectedDayIndex,
+            onDaySelected: (index) {
+              setState(() => _selectedDayIndex = index);
+              ref.read(selectedDateProvider.notifier).state =
+                  _calendarDays[index].date;
+              _resetSelection();
+            },
+          ),
+          const SizedBox(height: 16),
+          _buildFilterTabs(selectedFilter),
+          const SizedBox(height: 16),
+          Expanded(
+            child: medicationsAsync.when(
+              data: (medications) => _buildMedicationList(medications, isTablet: true),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => _buildErrorWidget(error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final iconSize = isTablet ? 32.0 : 24.0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -161,11 +264,11 @@ class _MedicationMainScreenContentState
             child: Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFF00695C),
+              decoration: const BoxDecoration(
+                color: Color(0xFF00695C),
                 shape: BoxShape.circle,
               ),
-              child: Center(
+              child: const Center(
                 child: Icon(
                   Icons.arrow_back_ios_new,
                   color: Colors.white,
@@ -174,17 +277,25 @@ class _MedicationMainScreenContentState
               ),
             ),
           ),
+          Text(
+            'Medications Schedule',
+            style: GoogleFonts.lexend(
+              fontSize: 18 * textScale,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF1A1A2E),
+            ),
+          ),
           GestureDetector(
             onTap: () => _scheduleTestAlarm(context),
             child: SizedBox(
-              width: 24,
-              height: 24,
+              width: iconSize,
+              height: iconSize,
               child: Stack(
                 children: [
                   Icon(
                     Icons.notifications,
                     color: AppColors.textPrimary,
-                    size: 24,
+                    size: iconSize,
                   ),
                   Positioned(
                     right: 0,
@@ -192,7 +303,7 @@ class _MedicationMainScreenContentState
                     child: Container(
                       width: 8,
                       height: 8,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: AppColors.secondary,
                         shape: BoxShape.circle,
                       ),
@@ -207,133 +318,77 @@ class _MedicationMainScreenContentState
     );
   }
 
-  Widget _buildDateSelector(DateTime selectedDate) {
-    final now = DateTime.now();
-    final dayCount = ResponsiveUtils.dateSelectorDays(context);
-    final offset = dayCount ~/ 2;
-    final dates = List.generate(dayCount, (i) => now.add(Duration(days: i - offset)));
-
-    return SizedBox(
-      height: 84,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: dates.map((date) {
-          final isSelected =
-              date.day == selectedDate.day &&
-              date.month == selectedDate.month &&
-              date.year == selectedDate.year;
-
-          return GestureDetector(
-            onTap: () {
-              ref.read(selectedDateProvider.notifier).state = date;
-            },
-            child: Container(
-              width: 64,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: isSelected
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 32,
-                        ),
-                      ],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _getMonthName(date.month),
-                    style: GoogleFonts.lexend(
-                      fontSize: 11,
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF24252C),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    date.day.toString(),
-                    style: GoogleFonts.lexend(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF24252C),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _getDayName(date.weekday),
-                    style: GoogleFonts.lexend(
-                      fontSize: 11,
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF24252C),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
 
   Widget _buildFilterTabs(MedicationFilter selectedFilter) {
     final medicationsAsync = ref.watch(medicationsProvider);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: MedicationFilter.values.map((filter) {
-            final isSelected = filter == selectedFilter;
-            final count =
-                medicationsAsync.whenOrNull(
-                  data: (meds) {
-                    switch (filter) {
-                      case MedicationFilter.all:
-                        return meds.length;
-                      case MedicationFilter.taken:
-                        return meds
-                            .where((m) => m.status == MedicationStatus.taken)
-                            .length;
-                      case MedicationFilter.missed:
-                        return meds
-                            .where((m) => m.status == MedicationStatus.missed)
-                            .length;
-                    }
-                  },
-                ) ??
-                0;
-
-            return Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  ref.read(selectedFilterProvider.notifier).state = filter;
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: MedicationFilter.values.map((filter) {
+          final isSelected = filter == selectedFilter;
+          final count =
+              medicationsAsync.whenOrNull(
+                data: (meds) {
+                  switch (filter) {
+                    case MedicationFilter.all:
+                      return meds.length;
+                    case MedicationFilter.taken:
+                      return meds
+                          .where((m) => m.status == MedicationStatus.taken)
+                          .length;
+                    case MedicationFilter.missed:
+                      return meds
+                          .where((m) => m.status == MedicationStatus.missed)
+                          .length;
+                  }
                 },
-                child: Container(
-                  margin: const EdgeInsets.all(8),
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        filter.displayText,
+              ) ??
+              0;
+
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                ref.read(selectedFilterProvider.notifier).state = filter;
+                _resetSelection();
+              },
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      filter.displayText,
+                      style: GoogleFonts.lexend(
+                        fontSize: 14,
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF353535),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0xFF0B2455)
+                            : const Color(0xFFF7F7F7),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        count.toString(),
                         style: GoogleFonts.lexend(
                           fontSize: 14,
                           color: isSelected
@@ -341,35 +396,13 @@ class _MedicationMainScreenContentState
                               : const Color(0xFF353535),
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFF0B2455)
-                              : const Color(0xFFF7F7F7),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          count.toString(),
-                          style: GoogleFonts.lexend(
-                            fontSize: 14,
-                            color: isSelected
-                                ? Colors.white
-                                : const Color(0xFF353535),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          }).toList(),
-        ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -425,7 +458,7 @@ class _MedicationMainScreenContentState
     );
   }
 
-  Widget _buildMedicationList(List<Medication> medications) {
+  Widget _buildMedicationList(List<Medication> medications, {bool isTablet = false}) {
     if (medications.isEmpty) {
       return Center(
         child: Column(
@@ -442,56 +475,43 @@ class _MedicationMainScreenContentState
       );
     }
 
-    final hPad = ResponsiveUtils.horizontalPadding(context);
-    final cols = ResponsiveUtils.listColumns(context);
-    if (cols > 1) {
-      return GridView.builder(
-        padding: EdgeInsets.fromLTRB(hPad, 0, hPad, ResponsiveUtils.bottomNavPadding(context) + 40),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 2.8,
-        ),
+    if (isTablet) {
+      return ListView.builder(
+        padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 40),       
         itemCount: medications.length,
-        itemBuilder: (context, index) =>
-            MedicationTaskCard(medication: medications[index]),
+        itemBuilder: (context, index) {
+          final isSelected = index == _selectedIndex;
+          return GestureDetector(
+            onTap: () {
+              setState(() => _selectedIndex = index);
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(27),
+                border: isSelected ? Border.all(color: AppColors.primary, width: 2) : Border.all(color: Colors.transparent, width: 2),
+              ),
+              child: MedicationTaskCard(medication: medications[index]),
+            ),
+          );
+        },
+      );
+    } else {
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        itemCount: medications.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: MedicationTaskCard(medication: medications[index]),
+          );
+        },
       );
     }
-    return ListView.builder(
-      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, ResponsiveUtils.bottomNavPadding(context) + 40),
-      itemCount: medications.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: MedicationTaskCard(medication: medications[index]),
-        );
-      },
-    );
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return months[month - 1];
-  }
-
-  String _getDayName(int weekday) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[weekday - 1];
-  }
 
   Widget _buildOfflineBanner() {
     final pendingCount =

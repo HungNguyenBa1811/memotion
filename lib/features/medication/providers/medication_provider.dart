@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/connectivity_service.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alarm_schedule_engine.dart';
 import '../data/medication_cache_store.dart';
 import '../data/medication_repository.dart';
@@ -72,6 +73,8 @@ final medicationRepositoryProvider = Provider<MedicationRepository>((ref) {
 
 /// Provider for the list of all medications (uses selected date)
 final medicationsProvider = FutureProvider<List<Medication>>((ref) async {
+  final authState = ref.watch(authProvider);
+  if (authState.status != AuthStatus.authenticated) return [];
   final repository = ref.watch(medicationRepositoryProvider);
   final selectedDate = ref.watch(selectedDateProvider);
   return repository.getMedicationsForDate(selectedDate);

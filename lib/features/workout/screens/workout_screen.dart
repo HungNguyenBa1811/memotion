@@ -77,46 +77,91 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
   @override
   Widget build(BuildContext context) {
     final workoutState = ref.watch(workoutListProvider);
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
-        child: Column(
-          children: [
-            // Header
-            _buildHeader(context),
+        child: isTablet
+            ? _buildTabletLayout(workoutState)
+            : _buildMobileLayout(workoutState),
+      ),
+    );
+  }
 
-            // Title section
-            _buildTitleSection(),
-
-            const SizedBox(height: 16),
-
-            // Date selector
-            CalendarDayPicker(
-              days: _calendarDays,
-              selectedIndex: _selectedDayIndex,
-              onDaySelected: (index) {
-                setState(() => _selectedDayIndex = index);
-                ref
-                    .read(workoutListProvider.notifier)
-                    .selectDate(_calendarDays[index].date);
-              },
+  Widget _buildMobileLayout(WorkoutListState workoutState) {
+    return SingleChildScrollView(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: ResponsiveUtils.contentMaxWidth(context),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: ResponsiveUtils.horizontalPadding(context),
             ),
-
-            const SizedBox(height: 30),
-
-            // Task list fills remaining space
-            Expanded(child: _buildContent(context, workoutState)),
-          ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context),
+                _buildTitleSection(),
+                const SizedBox(height: 16),
+                CalendarDayPicker(
+                  days: _calendarDays,
+                  selectedIndex: _selectedDayIndex,
+                  onDaySelected: (index) {
+                    setState(() => _selectedDayIndex = index);
+                    ref
+                        .read(workoutListProvider.notifier)
+                        .selectDate(_calendarDays[index].date);
+                  },
+                ),
+                const SizedBox(height: 30),
+                _buildContent(context, workoutState, isTablet: false),
+                SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildTabletLayout(WorkoutListState workoutState) {
+    final hPad = ResponsiveUtils.horizontalPadding(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: hPad),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildHeader(context, isTablet: true),
+          _buildTitleSection(isTablet: true),
+          const SizedBox(height: 16),
+          CalendarDayPicker(
+            days: _calendarDays,
+            selectedIndex: _selectedDayIndex,
+            onDaySelected: (index) {
+              setState(() => _selectedDayIndex = index);
+              ref
+                  .read(workoutListProvider.notifier)
+                  .selectDate(_calendarDays[index].date);
+            },
+          ),
+          const SizedBox(height: 20),
+          Expanded(child: _buildContent(context, workoutState, isTablet: true)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, {bool isTablet = false}) {
+    final isTabletMode = ResponsiveUtils.isTabletOrLarger(context);
+    final iconSize = isTabletMode ? 32.0 : 24.0;
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -139,14 +184,14 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
             ),
           ),
           SizedBox(
-            width: 24,
-            height: 24,
+            width: iconSize,
+            height: iconSize,
             child: Stack(
               children: [
                 Icon(
                   Icons.notifications,
                   color: AppColors.textPrimary,
-                  size: 24,
+                  size: iconSize,
                 ),
                 Positioned(
                   top: 0,
@@ -154,7 +199,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                   child: Container(
                     width: 8,
                     height: 8,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.secondary,
                       shape: BoxShape.circle,
                     ),
@@ -168,44 +213,43 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
     );
   }
 
-  Widget _buildTitleSection() {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: ResponsiveUtils.horizontalPadding(context),
-      ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Daily Tasks',
-              style: GoogleFonts.lexend(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF070707),
-                letterSpacing: -0.3,
-              ),
+  Widget _buildTitleSection({bool isTablet = false}) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Daily Tasks',
+            style: GoogleFonts.lexend(
+              fontSize: 24 * textScale,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF070707),
+              letterSpacing: -0.3,
             ),
-            const SizedBox(height: 2),
-            Text(
-              'Patient Name',
-              style: GoogleFonts.lexend(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF070707).withOpacity(0.7),
-              ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Patient Name',
+            style: GoogleFonts.lexend(
+              fontSize: 14 * textScale,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF070707).withOpacity(0.7),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, WorkoutListState workoutState) {
+  Widget _buildContent(BuildContext context, WorkoutListState workoutState, {required bool isTablet}) {  
     if (workoutState.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+      return const Padding(
+        padding: EdgeInsets.all(32.0),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
@@ -303,19 +347,19 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
       );
     }
 
-    return _buildTaskList(context, workoutState.workouts);
+    return _buildTaskList(context, workoutState.workouts, isTablet: isTablet);
   }
 
-  Widget _buildTaskList(BuildContext context, List<WorkoutTask> workouts) {
-    final hPad = ResponsiveUtils.horizontalPadding(context);
-    final bottomPad = ResponsiveUtils.bottomNavPadding(context) + 16;
+  Widget _buildTaskList(BuildContext context, List<WorkoutTask> workouts, {required bool isTablet}) {    
     final cols = ResponsiveUtils.listColumns(context);
 
-    if (cols > 1) {
+    if (!isTablet && cols > 1) {
       return GridView.builder(
-        padding: EdgeInsets.fromLTRB(hPad, 0, hPad, bottomPad),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: cols,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
           childAspectRatio: 2.6,
@@ -331,22 +375,46 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
       );
     }
 
+    if (isTablet) {
+      return ListView.builder(
+        padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 16),
+        itemCount: workouts.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 17),
+            child: WorkoutTaskCard(
+              workout: workouts[index],
+              onTap: () => context.push(
+                '/workout-detail',
+                extra: {'workoutId': workouts[index].id},
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     return ListView.builder(
-      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, bottomPad),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
       itemCount: workouts.length,
-      itemBuilder: (context, index) => Padding(
-        padding: const EdgeInsets.only(bottom: 17),
-        child: WorkoutTaskCard(
-          workout: workouts[index],
-          onTap: () => context.push(
-            '/workout-detail',
-            extra: {'workoutId': workouts[index].id},
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 17),
+          child: WorkoutTaskCard(
+            workout: workouts[index],
+            onTap: () {
+              context.push(
+                '/workout-detail',
+                extra: {'workoutId': workouts[index].id},
+              );
+            },
           ),
-        ),
-      ),
+        );
+      },
     );
   }
-
   String _getMonthName(int month) {
     const months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',

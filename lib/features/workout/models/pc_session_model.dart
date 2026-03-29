@@ -76,6 +76,7 @@ class PcMessage {
     required String jwt,
     required String workoutId,
     required String exerciseType,
+    String? videoUrl,
   }) {
     return jsonEncode({
       'type': 'pair_request',
@@ -83,6 +84,7 @@ class PcMessage {
       'session_config': {
         'workout_id': workoutId,
         'exercise_type': exerciseType,
+        if (videoUrl != null && videoUrl.isNotEmpty) 'video_url': videoUrl,
       },
     });
   }

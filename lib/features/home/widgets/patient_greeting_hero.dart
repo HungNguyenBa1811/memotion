@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/responsive_utils.dart';
 
 /// Hero section with greeting, mood card, avatar, and SOS button (Patient/Elderly version)
 /// Based on Figma design node 535:1851 - Homepage Elderly
@@ -79,132 +80,163 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header row: Avatar + Greeting + Date + Notification
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Avatar with elderly image
-              Container(
-                width: 59,
-                height: 58,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.tealGreen.withOpacity(0.2),
-                  image: widget.avatarUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(widget.avatarUrl!),
-                          fit: BoxFit.cover,
-                        )
-                      : const DecorationImage(
-                          image: AssetImage(
-                            'assets/images/caregiver_avatar.png',
-                          ),
-                          fit: BoxFit.cover,
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final avatarSize = isTablet ? 80.0 : 59.0;
+    final notifIconSize = isTablet ? 36.0 : 24.0;
+    final notifBoxSize = isTablet ? 56.0 : 48.0; // Min 48 touch target
+    final phoneIconSize = isTablet ? 36.0 : 28.0;
+
+    // No outer Padding here — the parent screen owns horizontal padding.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header row: Avatar + Greeting + Date + Notification
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Avatar with elderly image
+            Container(
+              width: avatarSize,
+              height: avatarSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.tealGreen.withOpacity(0.2),
+                image: widget.avatarUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(widget.avatarUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : const DecorationImage(
+                        image: AssetImage(
+                          'assets/images/caregiver_avatar.png',
                         ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Greeting and date
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${widget.greeting}, ${widget.userName}',
-                      style: AppTextStyles.headline2.copyWith(
-                        fontSize: 18,
-                        color: AppColors.primary,
+                        fit: BoxFit.cover,
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _getFormattedDate(),
-                      style: AppTextStyles.bodySmall.copyWith(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
               ),
-              // Notification icon
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
+            ),
+            const SizedBox(width: 12),
+            // Greeting and date
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${widget.greeting}, ${widget.userName}',
+                    style: AppTextStyles.headline2.copyWith(
+                      fontSize: 18 * textScale,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _getFormattedDate(),
+                    style: AppTextStyles.bodySmall.copyWith(
+                      fontSize: 13 * textScale,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Notification icon with touch target
+            InkWell(
+              onTap: () {},
+              borderRadius: BorderRadius.circular(notifBoxSize / 2),
+              child: Container(
+                width: notifBoxSize,
+                height: notifBoxSize,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.tealGreen,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.notifications,
                   color: Colors.white,
-                  size: 24,
+                  size: notifIconSize,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
 
-          const SizedBox(height: 32),
+        const SizedBox(height: 32),
 
-          // Mood Card with elderly illustration
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // Green mood card
-              Container(
-                width: 240,
-                height: 160,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(26),
-                    topRight: Radius.circular(26),
+        // Mood section: Row fills full available width.
+        // Left = fixed-width green card, Right = Expanded image area.
+        // Mood section: Stack so the image layer sits ON TOP of the card.
+        LayoutBuilder(
+          builder: (_, constraints) {
+            final useWide = constraints.maxWidth >= 480;
+            final cardWidth = useWide ? 300.0 : 240.0;
+            final cardHeight = useWide ? 180.0 : 160.0;
+            final imageHeight = cardHeight + (useWide ? 40.0 : 20.0);
+
+            return SizedBox(
+              width: double.infinity,
+              height: imageHeight,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Layer 1 — green mood card, bottom-left
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Container(
+                      width: cardWidth,
+                      height: cardHeight,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(26),
+                          topRight: Radius.circular(26),
+                        ),
+                        border: Border.all(color: AppColors.primary),
+                      ),
+                      padding:
+                          const EdgeInsets.only(left: 24, top: 20, right: 20),
+                      child: Text(
+                        widget.moodMessage ??
+                            "You don't seem to be in a good mood today",
+                        style: AppTextStyles.headline3.copyWith(
+                          fontSize: 16 * textScale,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
                   ),
-                  border: Border.all(color: AppColors.primary),
-                ),
-                padding: const EdgeInsets.only(left: 24, top: 20, right: 70),
-                child: Text(
-                  widget.moodMessage ??
-                      "You don't seem to be in a good mood today",
-                  style: AppTextStyles.headline3.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    height: 1.3,
+                  // Layer 2 — grandparent illustration, bottom-right, ON TOP of card
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Image.asset(
+                      'assets/images/caregiver_elderly.png',
+                      height: imageHeight,
+                      fit: BoxFit.contain,
+                      alignment: Alignment.bottomRight,
+                      errorBuilder: (context, error, stack) =>
+                          SizedBox(height: imageHeight),
+                    ),
                   ),
-                ),
+                ],
               ),
-              // Elderly illustration positioned at right
-              Positioned(
-                right: -130,
-                top: -20,
-                child: Image.asset(
-                  'assets/images/caregiver_elderly.png',
-                  width: 200,
-                  height: 200,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox(width: 200, height: 200);
-                  },
-                ),
-              ),
-            ],
-          ),
+            );
+          },
+        ),
 
-          // SOS Button (Patient version - Orange/Red color)
-          Transform.translate(
-            offset: const Offset(0, -10),
-            child: GestureDetector(
+        // SOS Button (Patient version - Orange/Red color)
+        Transform.translate(
+          offset: const Offset(0, -10),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
               onTap: widget.onActionPressed,
+              borderRadius: BorderRadius.circular(13),
               child: Container(
                 width: double.infinity,
-                height: 75,
+                height: isTablet ? 90 : 75,
                 decoration: BoxDecoration(
                   color: AppColors.sosButton,
                   borderRadius: BorderRadius.circular(13),
@@ -225,13 +257,11 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
                         );
                       },
                       child: Container(
-                        width: 34,
-                        height: 34,
                         margin: const EdgeInsets.only(right: 16),
-                        child: const Icon(
+                        child: Icon(
                           Icons.phone,
                           color: Colors.white,
-                          size: 28,
+                          size: phoneIconSize,
                         ),
                       ),
                     ),
@@ -239,7 +269,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
                     Text(
                       widget.actionButtonText,
                       style: AppTextStyles.headline2.copyWith(
-                        fontSize: 20,
+                        fontSize: 20 * textScale,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
@@ -249,8 +279,8 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
