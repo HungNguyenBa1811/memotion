@@ -72,36 +72,7 @@ class PatientHomeScreen extends ConsumerWidget {
       ),
     );
 
-    final actionsGrid = GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 162 / 171,
-      children: [
-        ActionCard(
-          title: 'Health\nCheck',
-          iconAsset: 'assets/images/icon_heart_beat.png',
-          onTap: () {},
-        ),
-        ActionCard(
-          title: 'Medication\nReminder',
-          iconAsset: 'assets/images/icon_medicine_file.png',
-          onTap: () => context.go('/medication'),
-        ),
-        ActionCard(
-          title: 'Family\nChat',
-          iconAsset: 'assets/images/icon_calls.png',
-          onTap: () {},
-        ),
-        ActionCard(
-          title: 'Health\nRecord',
-          iconAsset: 'assets/images/icon_health_check.png',
-          onTap: () => context.push('/profile/health-report'),
-        ),
-      ],
-    );
+
 
     return Scaffold(
       backgroundColor: AppColors.lightGreen,
@@ -128,17 +99,18 @@ class PatientHomeScreen extends ConsumerWidget {
                       medicationSection,
                       const SizedBox(height: 24),
                       titleSection,
-                      const SizedBox(height: 16),
-                      actionsGrid,
-                      const SizedBox(height: 32),
+                      SizedBox(height: 80 * (ResponsiveUtils.isTabletOrLarger(context) ? 1.5 : 1.0)),
                       Center(
-                        child: VoiceRecordButton(
-                          size: VoiceRecordButtonSize.large,
-                          onPressed: () {},
-                          label: 'Ask AI',
+                        child: Transform.scale(
+                          scale: ResponsiveUtils.isTabletOrLarger(context) ? 1.5 : 1.1,
+                          child: VoiceRecordButton(
+                            size: VoiceRecordButtonSize.large,
+                            onPressed: () {},
+                            label: 'Ask AI',
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 80),
                       SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
                       const SizedBox(height: 200)
                     ],

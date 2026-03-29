@@ -82,15 +82,24 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
   Widget build(BuildContext context) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final textScale = ResponsiveUtils.textScaleFactor(context);
-    final avatarSize = isTablet ? 100.0 : 59.0;
-    final notifIconSize = isTablet ? 40.0 : 24.0;
-    final notifBoxSize = isTablet ? 64.0 : 48.0; // Min 48 touch target
-    final phoneIconSize = isTablet ? 40.0 : 28.0;
+    final avatarSize = ResponsiveUtils.isLargeTablet(context) ? 170.0
+        : ResponsiveUtils.isTablet(context) ? 150.0
+        : 59.0;
+    final notifIconSize = ResponsiveUtils.isLargeTablet(context) ? 64.0
+        : ResponsiveUtils.isTablet(context) ? 56.0
+        : 24.0;
+    final notifBoxSize = ResponsiveUtils.isLargeTablet(context) ? 96.0
+        : ResponsiveUtils.isTablet(context) ? 84.0
+        : 48.0;
+    final phoneIconSize = ResponsiveUtils.isLargeTablet(context) ? 68.0
+        : ResponsiveUtils.isTablet(context) ? 56.0
+        : 28.0;
 
     // No outer Padding here — the parent screen owns horizontal padding.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 16),
         // Header row: Avatar + Greeting + Date + Notification
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -124,7 +133,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
                   Text(
                     '${widget.greeting}, ${widget.userName}',
                     style: AppTextStyles.headline2.copyWith(
-                      fontSize: 18 * textScale,
+                      fontSize: 20 * textScale,
                       color: AppColors.primary,
                     ),
                   ),
@@ -132,7 +141,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
                   Text(
                     _getFormattedDate(),
                     style: AppTextStyles.bodySmall.copyWith(
-                      fontSize: 13 * textScale,
+                      fontSize: 14 * textScale,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primary,
                     ),
@@ -162,16 +171,13 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
           ],
         ),
 
-        const SizedBox(height: 32),
-
         // Mood section: Row fills full available width.
         // Left = fixed-width green card, Right = Expanded image area.
-        // Mood section: Stack so the image layer sits ON TOP of the card.
         LayoutBuilder(
           builder: (_, constraints) {
             final useWide = constraints.maxWidth >= 480;
-            final cardWidth = useWide ? 300.0 : 240.0;
-            final cardHeight = useWide ? 180.0 : 160.0;
+            final cardWidth = useWide ? 380.0 : 240.0;
+            final cardHeight = useWide ? 220.0 : 160.0;
             final imageHeight = cardHeight + (useWide ? 40.0 : 20.0);
 
             return SizedBox(
@@ -180,44 +186,56 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Layer 1 — green mood card, bottom-left
+                  // Layer 1 — Panel Left (transparent outer, primary bg pushed down 20px)
                   Align(
                     alignment: Alignment.bottomLeft,
-                    child: Container(
+                    child: SizedBox(
                       width: cardWidth,
                       height: cardHeight,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(26),
-                          topRight: Radius.circular(26),
-                        ),
-                        border: Border.all(color: AppColors.primary),
-                      ),
-                      padding:
-                          const EdgeInsets.only(left: 24, top: 20, right: 20),
-                      child: Text(
-                        widget.moodMessage ??
-                            "You don't seem to be in a good mood today",
-                        style: AppTextStyles.headline3.copyWith(
-                          fontSize: 16 * textScale,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          height: 1.3,
-                        ),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(26),
+                                  topRight: Radius.circular(26),
+                                ),
+                                border: Border.all(color: AppColors.primary),
+                              ),
+                              padding: EdgeInsets.only(
+                                  left: 24, top: 16, right: (isTablet ? 0 : 24)),
+                              child: Text(
+                                widget.moodMessage ??
+                                    "You don't seem to be in a good mood today",
+                                style: AppTextStyles.headline3.copyWith(
+                                  fontSize: (isTablet ? 20 : 16) * textScale,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   // Layer 2 — grandparent illustration, bottom-right, ON TOP of card
                   Align(
                     alignment: Alignment.bottomRight,
-                    child: Image.asset(
-                      'assets/images/caregiver_elderly.png',
-                      height: imageHeight,
-                      fit: BoxFit.contain,
-                      alignment: Alignment.bottomRight,
-                      errorBuilder: (context, error, stack) =>
-                          SizedBox(height: imageHeight),
+                    child: Transform.translate(
+                      offset: const Offset(0, 10),
+                      child: Image.asset(
+                        'assets/images/caregiver_elderly.png',
+                        height: imageHeight,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomRight,
+                        errorBuilder: (context, error, stack) =>
+                            SizedBox(height: imageHeight),
+                      ),
                     ),
                   ),
                 ],
@@ -236,7 +254,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
               borderRadius: BorderRadius.circular(13),
               child: Container(
                 width: double.infinity,
-                height: isTablet ? 90 : 75,
+                height: ResponsiveUtils.isLargeTablet(context) ? 128 : isTablet ? 114 : 75,
                 decoration: BoxDecoration(
                   color: AppColors.sosButton,
                   borderRadius: BorderRadius.circular(13),
@@ -266,12 +284,15 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
                       ),
                     ),
                     // SOS text
-                    Text(
-                      widget.actionButtonText,
-                      style: AppTextStyles.headline2.copyWith(
-                        fontSize: 20 * textScale,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                    Flexible(
+                      child: Text(
+                        widget.actionButtonText,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.headline2.copyWith(
+                          fontSize: (isTablet ? 24 : 18) * textScale,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
