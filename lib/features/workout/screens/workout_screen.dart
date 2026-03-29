@@ -351,39 +351,19 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
   }
 
   Widget _buildTaskList(BuildContext context, List<WorkoutTask> workouts, {required bool isTablet}) {    
-    final cols = ResponsiveUtils.listColumns(context);
-
-    if (!isTablet && cols > 1) {
-      return GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.zero,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: cols,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 2.6,
-        ),
-        itemCount: workouts.length,
-        itemBuilder: (context, index) => WorkoutTaskCard(
-          workout: workouts[index],
-          onTap: () => context.push(
-            '/workout-detail',
-            extra: {'workoutId': workouts[index].id},
-          ),
-        ),
-      );
-    }
-
     if (isTablet) {
+      final isLarge = ResponsiveUtils.isLargeTablet(context);
+      final scale = isLarge ? 2.3 : 2.0;
+
       return ListView.builder(
         padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 16),
         itemCount: workouts.length,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.only(bottom: 17),
+            padding: EdgeInsets.only(bottom: 17 * scale),
             child: WorkoutTaskCard(
               workout: workouts[index],
+              scale: scale,
               onTap: () => context.push(
                 '/workout-detail',
                 extra: {'workoutId': workouts[index].id},

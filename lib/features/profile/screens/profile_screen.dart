@@ -63,16 +63,18 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
     final hrState = ref.watch(heartRateProvider);
     final bpmText = hrState.bpm > 0 ? '${hrState.bpm} bpm' : '-- bpm';
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
-    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final scale = isLarge ? 1.5 : isTablet ? 1.3 : 1.0;
+    final textScale = ResponsiveUtils.textScaleFactor(context) * scale;
 
     // Left Section
     final userProfileSection = Column(
       children: [
-        const SizedBox(height: 20),
+        SizedBox(height: 20 * scale),
         // Profile avatar
         Container(
-          width: ResponsiveUtils.avatarSize(context),
-          height: ResponsiveUtils.avatarSize(context),
+          width: ResponsiveUtils.avatarSize(context) * scale * 1.4,
+          height: ResponsiveUtils.avatarSize(context) * scale * 1.4,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: Colors.grey.shade300, width: 2),
@@ -91,27 +93,27 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
                   ),
                 ),
         ),
-        const SizedBox(height: 18),
+        SizedBox(height: 18 * scale),
 
         // User name
         Text(
           vm.displayName,
           style: AppTextStyles.headline2.copyWith(
             fontWeight: FontWeight.w600,
-            fontSize: 24 * textScale,
+            fontSize: 24 * textScale * 0.8,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8 * scale),
 
         // User email
         Text(
           vm.displayEmail,
           style: AppTextStyles.bodyMedium.copyWith(
             color: AppColors.textSecondary,
-            fontSize: 14 * textScale,
+            fontSize: 14 * textScale * 0.8,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16 * scale),
 
         // Health stats row (Heart Rate / Energy / Weight)
         Center(
@@ -132,7 +134,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
                     label: 'Heart Rate',
                     value: bpmText,
                     textScale: textScale,
-                    iconSize: isTablet ? 40 : 32,
+                    iconSize: 32 * scale,
                   ),
                   Container(
                     width: 1,
@@ -145,7 +147,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
                     label: 'Energy',
                     value: '756cal',
                     textScale: textScale,
-                    iconSize: isTablet ? 40 : 32,
+                    iconSize: 32 * scale,
                   ),
                   Container(
                     width: 1,
@@ -158,7 +160,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
                     label: 'Weight',
                     value: '103lbs',
                     textScale: textScale,
-                    iconSize: isTablet ? 40 : 32,
+                    iconSize: 32 * scale,
                   ),
                 ],
               ),
@@ -178,7 +180,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
           padding: EdgeInsets.symmetric(
             horizontal: ResponsiveUtils.horizontalPadding(context),
           ),
-          child: _buildFigmaMenu(context, ref, isTablet, textScale),
+          child: _buildFigmaMenu(context, ref, isTablet, textScale, scale),
         ),
       ),
     );
@@ -206,7 +208,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
           child: Column(
             children: [
               userProfileSection,
-              const SizedBox(height: 32),
+              SizedBox(height: 32 * scale),
               menuSection,
               SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
             ],
@@ -354,7 +356,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
     );
   }
 
-  Widget _buildFigmaMenu(BuildContext context, WidgetRef ref, bool isTablet, double textScale) {
+  Widget _buildFigmaMenu(BuildContext context, WidgetRef ref, bool isTablet, double textScale, double scale) {
     final vm = ref.watch(profileViewModelProvider);
     // Items: Edit Profile, Patient Information, Help, Log out
     final items = [
@@ -421,8 +423,8 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
       },
     ];
 
-    final iconBoxSize = isTablet ? 60.0 : 43.0;
-    final iconImageSize = isTablet ? 32.0 : 20.0;
+    final iconBoxSize = 72.0 * scale;
+    final iconImageSize = 42.0 * scale;
 
     return Column(
       children: items.asMap().entries.map((entry) {
@@ -432,57 +434,66 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
 
         return Column(
           children: [
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
-              leading: Container(
-                width: iconBoxSize,
-                height: iconBoxSize,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4DB6AC),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: it.containsKey('iconAsset')
-                      ? Image.asset(
-                          it['iconAsset'] as String,
-                          width: iconImageSize,
-                          height: iconImageSize,
-                          color: Colors.white,
-                        )
-                      : it.containsKey('iconAssetSvgPrimary')
-                      ? SvgAssetWithFallback(
-                          primary: it['iconAssetSvgPrimary'] as String,
-                          fallback: it['iconAssetSvgFallback'] as String?,
-                          width: iconImageSize,
-                          height: iconImageSize,
-                          color: Colors.white,
-                        )
-                      : it.containsKey('iconAssetSvg')
-                      ? SvgPicture.asset(
-                          it['iconAssetSvg'] as String,
-                          width: iconImageSize,
-                          height: iconImageSize,
-                          color: Colors.white,
-                        )
-                      : Icon(it['icon'] as IconData, color: Colors.white, size: iconImageSize),
-                ),
-              ),
-              title: Text(
-                it['title'] as String,
-                style: AppTextStyles.bodyLarge.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16 * textScale,
-                ),
-              ),
-              trailing: Icon(
-                Icons.chevron_right,
-                color: AppColors.textSecondary,
-                size: isTablet ? 36 : 24,
-              ),
+            InkWell(
               onTap: it['action'] as void Function(),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8 * scale,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: iconBoxSize,
+                      height: iconBoxSize,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF4DB6AC),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: it.containsKey('iconAsset')
+                            ? Image.asset(
+                                it['iconAsset'] as String,
+                                width: iconImageSize,
+                                height: iconImageSize,
+                                color: Colors.white,
+                              )
+                            : it.containsKey('iconAssetSvgPrimary')
+                            ? SvgAssetWithFallback(
+                                primary: it['iconAssetSvgPrimary'] as String,
+                                fallback: it['iconAssetSvgFallback'] as String?,
+                                width: iconImageSize,
+                                height: iconImageSize,
+                                color: Colors.white,
+                              )
+                            : it.containsKey('iconAssetSvg')
+                            ? SvgPicture.asset(
+                                it['iconAssetSvg'] as String,
+                                width: iconImageSize,
+                                height: iconImageSize,
+                                color: Colors.white,
+                              )
+                            : Icon(it['icon'] as IconData, color: Colors.white, size: iconImageSize),
+                      ),
+                    ),
+                    SizedBox(width: 24 * scale),
+                    Expanded(
+                      child: Text(
+                        it['title'] as String,
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16 * textScale,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textSecondary,
+                      size: 40 * scale,
+                    ),
+                  ],
+                ),
+              ),
             ),
             if (!isLast)
               Padding(

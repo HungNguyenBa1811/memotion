@@ -31,7 +31,7 @@ class UpcomingMedicationCard extends StatelessWidget {
     final textScale = ResponsiveUtils.textScaleFactor(context);
     final cardHeight = ResponsiveUtils.isLargeTablet(context) ? 440.0
         : ResponsiveUtils.isTablet(context) ? 370.0
-        : 234.0;
+        : 250.0;
     final imageSize = ResponsiveUtils.isLargeTablet(context) ? 290.0
         : ResponsiveUtils.isTablet(context) ? 240.0
         : 120.0;

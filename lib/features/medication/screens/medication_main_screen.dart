@@ -135,26 +135,11 @@ class _MedicationMainScreenContentState
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          SafeArea(
-            bottom: false,
-            child: isTablet
-              ? _buildTabletLayout(medicationsAsync, selectedDate, selectedFilter, isOffline)
-              : _buildMobileLayout(medicationsAsync, selectedDate, selectedFilter, isOffline),
-          ),
-          // Floating QR button - positioned bottom right, above navbar
-          Positioned(
-            right: 30,
-            bottom: ResponsiveUtils.bottomNavPadding(context),
-            child: FloatingActionButton(
-              onPressed: () => context.push(AppRoutes.medicationScan),
-              backgroundColor: AppColors.primary,
-              elevation: 4,
-              child: const Icon(Icons.qr_code_scanner, color: Colors.white),
-            ),
-          ),
-        ],
+      body: SafeArea(
+        bottom: false,
+        child: isTablet
+          ? _buildTabletLayout(medicationsAsync, selectedDate, selectedFilter, isOffline)
+          : _buildMobileLayout(medicationsAsync, selectedDate, selectedFilter, isOffline),
       ),
     );
   }
@@ -217,6 +202,9 @@ class _MedicationMainScreenContentState
     bool isOffline
   ) {
     final hPad = ResponsiveUtils.horizontalPadding(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final scale = isLarge ? 2.3 : 2.0;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: hPad),
       child: Column(
@@ -226,6 +214,7 @@ class _MedicationMainScreenContentState
           if (isOffline) _buildOfflineBanner(),
           CalendarDayPicker(
             days: _calendarDays,
+            scale: scale,
             selectedIndex: _selectedDayIndex,
             onDaySelected: (index) {
               setState(() => _selectedDayIndex = index);
@@ -252,7 +241,10 @@ class _MedicationMainScreenContentState
   Widget _buildHeader(BuildContext context) {
     final textScale = ResponsiveUtils.textScaleFactor(context);
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
-    final iconSize = isTablet ? 32.0 : 24.0;
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final qrBoxSize = isLarge ? 92.0 : isTablet ? 80.0 : 40.0;
+    final qrIconSize = isLarge ? 46.0 : isTablet ? 40.0 : 20.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -277,39 +269,34 @@ class _MedicationMainScreenContentState
               ),
             ),
           ),
-          Text(
-            'Medications Schedule',
-            style: GoogleFonts.lexend(
-              fontSize: 18 * textScale,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF1A1A2E),
+          Expanded(
+            child: Center(
+              child: Text(
+                'Medications Schedule',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.lexend(
+                  fontSize: 18 * textScale * fontScale * 0.7,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1A1A2E),
+                ),
+              ),
             ),
           ),
           GestureDetector(
-            onTap: () => _scheduleTestAlarm(context),
-            child: SizedBox(
-              width: iconSize,
-              height: iconSize,
-              child: Stack(
-                children: [
-                  Icon(
-                    Icons.notifications,
-                    color: AppColors.textPrimary,
-                    size: iconSize,
-                  ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.secondary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ],
+            onTap: () => context.push(AppRoutes.medicationScan),
+            child: Container(
+              width: qrBoxSize,
+              height: qrBoxSize,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.qr_code_scanner,
+                  color: AppColors.primary,
+                  size: qrIconSize,
+                ),
               ),
             ),
           ),
@@ -321,34 +308,32 @@ class _MedicationMainScreenContentState
 
   Widget _buildFilterTabs(MedicationFilter selectedFilter) {
     final medicationsAsync = ref.watch(medicationsProvider);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final tabHeight = isLarge ? 128.0 : isTablet ? 112.0 : 56.0;
+    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
 
     return Container(
-      height: 56,
+      height: tabHeight,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16 * fontScale),
       ),
       child: Row(
         children: MedicationFilter.values.map((filter) {
           final isSelected = filter == selectedFilter;
-          final count =
-              medicationsAsync.whenOrNull(
-                data: (meds) {
-                  switch (filter) {
-                    case MedicationFilter.all:
-                      return meds.length;
-                    case MedicationFilter.taken:
-                      return meds
-                          .where((m) => m.status == MedicationStatus.taken)
-                          .length;
-                    case MedicationFilter.missed:
-                      return meds
-                          .where((m) => m.status == MedicationStatus.missed)
-                          .length;
-                  }
-                },
-              ) ??
-              0;
+          final count = medicationsAsync.whenOrNull(
+            data: (meds) {
+              switch (filter) {
+                case MedicationFilter.all:
+                  return meds.length;
+                case MedicationFilter.taken:
+                  return meds.where((m) => m.status == MedicationStatus.taken).length;
+                case MedicationFilter.missed:
+                  return meds.where((m) => m.status == MedicationStatus.missed).length;
+              }
+            },
+          ) ?? 0;
 
           return Expanded(
             child: GestureDetector(
@@ -357,11 +342,11 @@ class _MedicationMainScreenContentState
                 _resetSelection();
               },
               child: Container(
-                margin: const EdgeInsets.all(8),
-                padding: const EdgeInsets.symmetric(vertical: 4),
+                margin: EdgeInsets.all(8 * fontScale),
+                padding: EdgeInsets.symmetric(vertical: 4 * fontScale),
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12 * fontScale),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -369,31 +354,25 @@ class _MedicationMainScreenContentState
                     Text(
                       filter.displayText,
                       style: GoogleFonts.lexend(
-                        fontSize: 14,
-                        color: isSelected
-                            ? Colors.white
-                            : const Color(0xFF353535),
+                        fontSize: 14 * fontScale,
+                        color: isSelected ? Colors.white : const Color(0xFF353535),
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4 * fontScale),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 4 * fontScale,
                         vertical: 0,
                       ),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0xFF0B2455)
-                            : const Color(0xFFF7F7F7),
-                        borderRadius: BorderRadius.circular(8),
+                        color: isSelected ? const Color(0xFF0B2455) : const Color(0xFFF7F7F7),
+                        borderRadius: BorderRadius.circular(8 * fontScale),
                       ),
                       child: Text(
                         count.toString(),
                         style: GoogleFonts.lexend(
-                          fontSize: 14,
-                          color: isSelected
-                              ? Colors.white
-                              : const Color(0xFF353535),
+                          fontSize: 14 * fontScale,
+                          color: isSelected ? Colors.white : const Color(0xFF353535),
                         ),
                       ),
                     ),
@@ -476,6 +455,9 @@ class _MedicationMainScreenContentState
     }
 
     if (isTablet) {
+      final isLarge = ResponsiveUtils.isLargeTablet(context);
+      final scale = isLarge ? 2.3 : 2.0;
+
       return ListView.builder(
         padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 40),       
         itemCount: medications.length,
@@ -486,12 +468,12 @@ class _MedicationMainScreenContentState
               setState(() => _selectedIndex = index);
             },
             child: Container(
-              margin: const EdgeInsets.only(bottom: 12),
+              margin: EdgeInsets.only(bottom: 12 * scale),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(27),
-                border: isSelected ? Border.all(color: AppColors.primary, width: 2) : Border.all(color: Colors.transparent, width: 2),
+                borderRadius: BorderRadius.circular(27 * scale),
+                border: isSelected ? Border.all(color: AppColors.primary, width: 2 * scale) : Border.all(color: Colors.transparent, width: 2 * scale),
               ),
-              child: MedicationTaskCard(medication: medications[index]),
+              child: MedicationTaskCard(medication: medications[index], scale: scale),
             ),
           );
         },

@@ -8,12 +8,14 @@ class CalendarDayPicker extends StatelessWidget {
   final List<CalendarDay> days;
   final int selectedIndex;
   final Function(int) onDaySelected;
+  final double scale;
 
   const CalendarDayPicker({
     super.key,
     required this.days,
     required this.selectedIndex,
     required this.onDaySelected,
+    this.scale = 1.0,
   });
 
   String _getMonthName(DateTime date) {
@@ -27,9 +29,11 @@ class CalendarDayPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 90,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      height: 90 * scale,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(days.length, (index) {
           final day = days[index];
           final isSelected = index == selectedIndex;
@@ -39,12 +43,12 @@ class CalendarDayPicker extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
-              width: 64,
-              height: 84,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: 64 * scale,
+              height: 84 * scale,
+              margin: EdgeInsets.symmetric(horizontal: 4 * scale),
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.primary : Colors.white,
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(15 * scale),
                 boxShadow: isSelected
                     ? []
                     : [
@@ -62,7 +66,7 @@ class CalendarDayPicker extends StatelessWidget {
                   Text(
                     _getMonthName(day.date),
                     style: GoogleFonts.lexend(
-                      fontSize: 11,
+                      fontSize: 11 * scale,
                       fontWeight: FontWeight.w400,
                       color: isSelected
                           ? Colors.white
@@ -74,7 +78,7 @@ class CalendarDayPicker extends StatelessWidget {
                   Text(
                     day.date.day.toString(),
                     style: GoogleFonts.lexend(
-                      fontSize: 19,
+                      fontSize: 19 * scale,
                       fontWeight: FontWeight.w600,
                       color: isSelected
                           ? Colors.white
@@ -86,7 +90,7 @@ class CalendarDayPicker extends StatelessWidget {
                   Text(
                     _getDayOfWeekShort(day.date),
                     style: GoogleFonts.lexend(
-                      fontSize: 11,
+                      fontSize: 11 * scale,
                       fontWeight: FontWeight.w400,
                       color: isSelected
                           ? Colors.white
@@ -98,6 +102,7 @@ class CalendarDayPicker extends StatelessWidget {
             ),
           );
         }),
+        ),
       ),
     );
   }

@@ -98,6 +98,7 @@ class _GreetingHeroState extends State<GreetingHero>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 16),
         // Header row: Avatar + Greeting + Date + Notification
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -169,16 +170,14 @@ class _GreetingHeroState extends State<GreetingHero>
           ],
         ),
 
-        const SizedBox(height: 32),
-
         // Mood section: Row fills full available width.
         // Left = fixed-width green card, Right = Expanded image area.
         // No Stack/Positioned — the image scales naturally with the remaining space.
         LayoutBuilder(
           builder: (_, constraints) {
             final useWide = constraints.maxWidth >= 480;
-            final cardWidth = useWide ? 360.0 : 240.0;
-            final cardHeight = useWide ? 180.0 : 160.0;
+            final cardWidth = useWide ? 380.0 : 240.0;
+            final cardHeight = useWide ? 220.0 : 160.0;
             // Image is taller than the card so it peeks above the card top.
             final imageHeight = cardHeight + (useWide ? 40.0 : 20.0);
 
@@ -191,44 +190,58 @@ class _GreetingHeroState extends State<GreetingHero>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Layer 1 — green mood card, bottom-left
+                  // Layer 1 — Panel Left (transparent outer, primary bg pushed down 20px)
                   Align(
                     alignment: Alignment.bottomLeft,
-                    child: Container(
+                    child: SizedBox(
                       width: cardWidth,
                       height: cardHeight,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(26),
-                          topRight: Radius.circular(26),
-                        ),
-                        border: Border.all(color: AppColors.primary),
-                      ),
-                      padding:
-                          const EdgeInsets.only(left: 24, top: 20, right: 20),
-                      child: Text(
-                        widget.moodMessage ??
-                            "Please pay attention to the patient's mood today",
-                        style: AppTextStyles.headline3.copyWith(
-                          fontSize: 18 * textScale,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          height: 1.3,
-                        ),
+                      child: Column(
+                        children: [
+                          // 20px transparent gap — image peeks through here
+                          const SizedBox(height: 20),
+                          // Primary bg colored Panel (fills remaining space)
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(26),
+                                  topRight: Radius.circular(26),
+                                ),
+                                border: Border.all(color: AppColors.primary),
+                              ),
+                              padding: EdgeInsets.only(
+                                  left: 24, top: 16, right: (isTablet ? 0 : 24)),
+                              child: Text(
+                                widget.moodMessage ??
+                                    "Please pay attention to the patient's mood today",
+                                style: AppTextStyles.headline3.copyWith(
+                                  fontSize: (isTablet ? 20 : 16) * textScale,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   // Layer 2 — couple illustration, bottom-right, ON TOP of card
                   Align(
                     alignment: Alignment.bottomRight,
-                    child: Image.asset(
-                      'assets/images/caregiver_elderly.png',
-                      height: imageHeight,
-                      fit: BoxFit.contain,
-                      alignment: Alignment.bottomRight,
-                      errorBuilder: (context, error, stack) =>
-                          SizedBox(height: imageHeight),
+                    child: Transform.translate(
+                      offset: const Offset(0, 10),
+                      child: Image.asset(
+                        'assets/images/caregiver_elderly.png',
+                        height: imageHeight,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomRight,
+                        errorBuilder: (context, error, stack) =>
+                            SizedBox(height: imageHeight),
+                      ),
                     ),
                   ),
                 ],
@@ -280,7 +293,7 @@ class _GreetingHeroState extends State<GreetingHero>
                         widget.actionButtonText,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.headline2.copyWith(
-                          fontSize: 22 * textScale,
+                          fontSize: (isTablet ? 24 : 18) * textScale,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),

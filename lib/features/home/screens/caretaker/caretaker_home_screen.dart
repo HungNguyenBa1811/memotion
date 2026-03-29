@@ -141,6 +141,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
                       actionsGrid,
                       const SizedBox(height: 24),
                       SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
+                      const SizedBox(height: 200)
                     ],
                   ),
                 ),

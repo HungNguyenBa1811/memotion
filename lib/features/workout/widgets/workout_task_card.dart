@@ -7,11 +7,13 @@ import '../models/workout_model.dart';
 class WorkoutTaskCard extends StatelessWidget {
   final WorkoutTask workout;
   final VoidCallback onTap;
+  final double scale;
 
   const WorkoutTaskCard({
     super.key,
     required this.workout,
     required this.onTap,
+    this.scale = 1.0,
   });
 
   @override
@@ -22,10 +24,10 @@ class WorkoutTaskCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: 110,
+        height: 110 * scale,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(27),
+          borderRadius: BorderRadius.circular(27 * scale),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.25),
@@ -38,11 +40,11 @@ class WorkoutTaskCard extends StatelessWidget {
           children: [
             // Teal dot indicator - top right
             Positioned(
-              top: 10,
-              right: 15,
+              top: 10 * scale,
+              right: 15 * scale,
               child: Container(
-                width: 10,
-                height: 10,
+                width: 10 * scale,
+                height: 10 * scale,
                 decoration: BoxDecoration(
                   color: AppColors.secondary,
                   shape: BoxShape.circle,
@@ -52,24 +54,24 @@ class WorkoutTaskCard extends StatelessWidget {
 
             // Image on left side
             Positioned(
-              left: 20,
+              left: 20 * scale,
               top: 0,
               bottom: 0,
               child: Center(
                 child: SizedBox(
-                  width: 86,
-                  height: 86,
+                  width: 86 * scale,
+                  height: 86 * scale,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12 * scale),
                     child: workout.imageAsset != null
                         ? Image.asset(
                             workout.imageAsset!,
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) {
-                              return _buildIconPlaceholder(textScale);
+                              return _buildIconPlaceholder(textScale * scale);
                             },
                           )
-                        : _buildIconPlaceholder(textScale),
+                        : _buildIconPlaceholder(textScale * scale),
                   ),
                 ),
               ),
@@ -77,16 +79,16 @@ class WorkoutTaskCard extends StatelessWidget {
 
             // Title and Description
             Positioned(
-              left: 120,
-              top: 15,
-              right: 80,
+              left: 120 * scale,
+              top: 15 * scale,
+              right: 80 * scale,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     workout.title,
                     style: GoogleFonts.lexend(
-                      fontSize: 16 * textScale,
+                      fontSize: 16 * textScale * scale * 0.85,
                       fontWeight: FontWeight.w700,
                       color: Colors.black,
                       letterSpacing: -0.3,
@@ -100,7 +102,7 @@ class WorkoutTaskCard extends StatelessWidget {
                     Text(
                       workout.description!,
                       style: GoogleFonts.lexend(
-                        fontSize: 11 * textScale,
+                        fontSize: 11 * textScale * scale * 0.85,
                         fontWeight: FontWeight.w300,
                         color: Colors.black,
                         letterSpacing: -0.3,
@@ -115,12 +117,12 @@ class WorkoutTaskCard extends StatelessWidget {
 
             // Time at bottom right
             Positioned(
-              bottom: 15,
-              right: 20,
+              bottom: 15 * scale,
+              right: 20 * scale,
               child: Text(
                 workout.time,
                 style: GoogleFonts.lexend(
-                  fontSize: 12 * textScale,
+                  fontSize: 12 * textScale * scale * 0.8,
                   fontWeight: FontWeight.w500,
                   color: Colors.black,
                   letterSpacing: -0.3,
@@ -133,15 +135,15 @@ class WorkoutTaskCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIconPlaceholder(double textScale) {
+  Widget _buildIconPlaceholder(double scaleFactor) {
     return Container(
       decoration: BoxDecoration(
         color: _getColorForType(workout.type).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12 * scale),
       ),
       child: Icon(
         _getIconForType(workout.type),
-        size: 40 * textScale,
+        size: 40 * scaleFactor,
         color: _getColorForType(workout.type),
       ),
     );

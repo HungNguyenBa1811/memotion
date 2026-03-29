@@ -140,6 +140,7 @@ class PatientHomeScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 24),
                       SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
+                      const SizedBox(height: 200)
                     ],
                   ),
                 ),
