@@ -38,7 +38,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
       userName: 'Sir/Madam',
       greeting: _getGreeting(),
       avatarUrl: dashboardData?.avatarUrl,
-      moodMessage: "Please pay attention to the patient's mood today",
+      moodMessage: "Please pay attention to patient's mood",
       actionButtonText: 'SITUATION HANDLING',
       onActionPressed: () {
         homeNotifier.triggerSOS();
@@ -74,11 +74,11 @@ class CaretakerHomeScreen extends ConsumerWidget {
     );
 
     final actionsGrid = GridView.count(
-      crossAxisCount: ResponsiveUtils.cardColumns(context),
+      crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
       childAspectRatio: 162 / 171,
       children: [
         ActionCard(

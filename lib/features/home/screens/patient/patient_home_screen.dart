@@ -8,6 +8,7 @@ import '../../../../features/medication/providers/medication_provider.dart';
 import '../../providers/home_provider.dart';
 import '../../widgets/patient_greeting_hero.dart';
 import '../../widgets/upcoming_medication_card.dart';
+import '../../widgets/action_card.dart';
 import '../../../../shared/widgets/widgets.dart';
 
 /// Homepage screen for PATIENT (Elderly) role (Figma design - node 535:1851)
@@ -71,6 +72,37 @@ class PatientHomeScreen extends ConsumerWidget {
       ),
     );
 
+    final actionsGrid = GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 162 / 171,
+      children: [
+        ActionCard(
+          title: 'Health\nCheck',
+          iconAsset: 'assets/images/icon_heart_beat.png',
+          onTap: () {},
+        ),
+        ActionCard(
+          title: 'Medication\nReminder',
+          iconAsset: 'assets/images/icon_medicine_file.png',
+          onTap: () => context.go('/medication'),
+        ),
+        ActionCard(
+          title: 'Family\nChat',
+          iconAsset: 'assets/images/icon_calls.png',
+          onTap: () {},
+        ),
+        ActionCard(
+          title: 'Health\nRecord',
+          iconAsset: 'assets/images/icon_health_check.png',
+          onTap: () => context.push('/profile/health-report'),
+        ),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: AppColors.lightGreen,
       body: SafeArea(
@@ -96,6 +128,8 @@ class PatientHomeScreen extends ConsumerWidget {
                       medicationSection,
                       const SizedBox(height: 24),
                       titleSection,
+                      const SizedBox(height: 16),
+                      actionsGrid,
                       const SizedBox(height: 32),
                       Center(
                         child: VoiceRecordButton(

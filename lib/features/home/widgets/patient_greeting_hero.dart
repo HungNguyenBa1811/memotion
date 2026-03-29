@@ -82,10 +82,10 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
   Widget build(BuildContext context) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final textScale = ResponsiveUtils.textScaleFactor(context);
-    final avatarSize = isTablet ? 80.0 : 59.0;
-    final notifIconSize = isTablet ? 36.0 : 24.0;
-    final notifBoxSize = isTablet ? 56.0 : 48.0; // Min 48 touch target
-    final phoneIconSize = isTablet ? 36.0 : 28.0;
+    final avatarSize = isTablet ? 100.0 : 59.0;
+    final notifIconSize = isTablet ? 40.0 : 24.0;
+    final notifBoxSize = isTablet ? 64.0 : 48.0; // Min 48 touch target
+    final phoneIconSize = isTablet ? 40.0 : 28.0;
 
     // No outer Padding here — the parent screen owns horizontal padding.
     return Column(

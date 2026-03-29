@@ -81,10 +81,18 @@ class _GreetingHeroState extends State<GreetingHero>
   Widget build(BuildContext context) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final textScale = ResponsiveUtils.textScaleFactor(context);
-    final avatarSize = isTablet ? 80.0 : 59.0;
-    final notifIconSize = isTablet ? 36.0 : 24.0;
-    final notifBoxSize = isTablet ? 56.0 : 48.0; // Min 48 touch target
-    final phoneIconSize = isTablet ? 36.0 : 28.0;
+    final avatarSize = ResponsiveUtils.isLargeTablet(context) ? 170.0
+        : ResponsiveUtils.isTablet(context) ? 150.0
+        : 59.0;
+    final notifIconSize = ResponsiveUtils.isLargeTablet(context) ? 64.0
+        : ResponsiveUtils.isTablet(context) ? 56.0
+        : 24.0;
+    final notifBoxSize = ResponsiveUtils.isLargeTablet(context) ? 96.0
+        : ResponsiveUtils.isTablet(context) ? 84.0
+        : 48.0;
+    final phoneIconSize = ResponsiveUtils.isLargeTablet(context) ? 68.0
+        : ResponsiveUtils.isTablet(context) ? 56.0
+        : 28.0;
 
     // No outer Padding here — the parent screen owns horizontal padding.
     return Column(
@@ -123,7 +131,7 @@ class _GreetingHeroState extends State<GreetingHero>
                   Text(
                     '${widget.greeting}, ${widget.userName}',
                     style: AppTextStyles.headline2.copyWith(
-                      fontSize: 18 * textScale,
+                      fontSize: 20 * textScale,
                       color: AppColors.primary,
                     ),
                   ),
@@ -131,7 +139,7 @@ class _GreetingHeroState extends State<GreetingHero>
                   Text(
                     _getFormattedDate(),
                     style: AppTextStyles.bodySmall.copyWith(
-                      fontSize: 13 * textScale,
+                      fontSize: 14 * textScale,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primary,
                     ),
@@ -169,7 +177,7 @@ class _GreetingHeroState extends State<GreetingHero>
         LayoutBuilder(
           builder: (_, constraints) {
             final useWide = constraints.maxWidth >= 480;
-            final cardWidth = useWide ? 300.0 : 240.0;
+            final cardWidth = useWide ? 360.0 : 240.0;
             final cardHeight = useWide ? 180.0 : 160.0;
             // Image is taller than the card so it peeks above the card top.
             final imageHeight = cardHeight + (useWide ? 40.0 : 20.0);
@@ -203,7 +211,7 @@ class _GreetingHeroState extends State<GreetingHero>
                         widget.moodMessage ??
                             "Please pay attention to the patient's mood today",
                         style: AppTextStyles.headline3.copyWith(
-                          fontSize: 16 * textScale,
+                          fontSize: 18 * textScale,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                           height: 1.3,
@@ -239,7 +247,7 @@ class _GreetingHeroState extends State<GreetingHero>
               borderRadius: BorderRadius.circular(13),
               child: Container(
                 width: double.infinity,
-                height: isTablet ? 90 : 75,
+                height: ResponsiveUtils.isLargeTablet(context) ? 128 : isTablet ? 114 : 75,
                 decoration: BoxDecoration(
                   color: AppColors.sosButton,
                   borderRadius: BorderRadius.circular(13),
@@ -272,7 +280,7 @@ class _GreetingHeroState extends State<GreetingHero>
                         widget.actionButtonText,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.headline2.copyWith(
-                          fontSize: 20 * textScale,
+                          fontSize: 22 * textScale,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),

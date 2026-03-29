@@ -108,10 +108,10 @@ abstract final class ResponsiveUtils {
 
   // ─── Typography scale ─────────────────────────────────────────────────────
 
-  /// Scale factor for headline text: 1.0 / 1.15 / 1.25
+  /// Scale factor for headline text: 1.0 / 1.45 / 1.65
   static double textScaleFactor(BuildContext context) {
-    if (isLargeTablet(context)) return 1.25;
-    if (isTablet(context)) return 1.15;
+    if (isLargeTablet(context)) return 1.65;
+    if (isTablet(context)) return 1.45;
     return 1.0;
   }
 }

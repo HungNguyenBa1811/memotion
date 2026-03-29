@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/responsive_utils.dart';
 
 enum VoiceRecordButtonSize { small, medium, large, custom }
 
@@ -57,26 +58,30 @@ class VoiceRecordButton extends StatelessWidget {
   })  : size = VoiceRecordButtonSize.large,
         customDiameter = null;
 
-  double get _diameter {
+  double _getDiameter(BuildContext context) {
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final scale = isTablet ? 1.25 : 1.0;
+
     switch (size) {
       case VoiceRecordButtonSize.small:
-        return 56;
+        return 56 * scale;
       case VoiceRecordButtonSize.medium:
-        return 80;
+        return 80 * scale;
       case VoiceRecordButtonSize.large:
-        return 110;
+        return 110 * scale;
       case VoiceRecordButtonSize.custom:
         assert(customDiameter != null,
             'customDiameter must be provided when size is custom');
-        return customDiameter ?? 80;
+        return (customDiameter ?? 80) * scale;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final diameter = _diameter;
+    final diameter = _getDiameter(context);
     final bg = color ?? AppColors.primary;
     final fg = iconColor ?? Colors.white;
+    final textScale = ResponsiveUtils.textScaleFactor(context);
 
     return GestureDetector(
       onTap: onPressed,
@@ -108,7 +113,7 @@ class VoiceRecordButton extends StatelessWidget {
             Text(
               label!,
               style: AppTextStyles.cardTitle.copyWith(
-                fontSize: diameter * 0.14,
+                fontSize: (diameter * 0.14) * textScale,
                 fontWeight: FontWeight.w700,
               ),
             ),

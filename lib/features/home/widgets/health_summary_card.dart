@@ -31,7 +31,7 @@ class HealthSummaryCard extends StatelessWidget {
 
     return Container(
       margin: margin ?? EdgeInsets.symmetric(horizontal: horizontalPadding),
-      height: isTablet ? 120 : 99,
+      height: isTablet ? 140 : 99,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         boxShadow: [

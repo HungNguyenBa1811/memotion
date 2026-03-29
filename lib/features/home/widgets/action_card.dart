@@ -34,7 +34,10 @@ class ActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (circular) return _buildCircular(context);
 
-    final iconSize = ResponsiveUtils.isTabletOrLarger(context) ? 90.0 : 80.0;
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final iconSize = ResponsiveUtils.isLargeTablet(context) ? 210.0
+        : ResponsiveUtils.isTablet(context) ? 170.0
+        : 80.0;
     return GestureDetector(
       onTap: onTap,
       child: AspectRatio(
@@ -83,7 +86,7 @@ class ActionCard extends StatelessWidget {
                       Text(
                         title,
                         style: AppTextStyles.cardTitle.copyWith(
-                          fontSize: ResponsiveUtils.isTabletOrLarger(context) ? 16 : 18,
+                          fontSize: (ResponsiveUtils.isTabletOrLarger(context) ? 20 : 16) * textScale,
                           fontWeight: FontWeight.w700,
                         ),
                         textAlign: TextAlign.center,
@@ -102,9 +105,11 @@ class ActionCard extends StatelessWidget {
   }
 
   Widget _buildCircular(BuildContext context) {
-    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
-    final iconSize = isTablet ? 36.0 : 32.0;
-    final fontSize = isTablet ? 13.0 : 12.0;
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final iconSize = ResponsiveUtils.isLargeTablet(context) ? 76.0
+        : ResponsiveUtils.isTablet(context) ? 60.0
+        : 32.0;
+    final fontSize = (ResponsiveUtils.isTabletOrLarger(context) ? 14.0 : 12.0) * textScale;
 
     return GestureDetector(
       onTap: onTap,

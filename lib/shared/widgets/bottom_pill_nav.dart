@@ -1,23 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/theme/theme.dart';
+import '../../core/utils/responsive_utils.dart';
 
-class BottomPillNav extends StatefulWidget {
+class BottomPillNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int>? onTap;
 
   const BottomPillNav({super.key, this.currentIndex = 0, this.onTap});
 
-  @override
-  State<BottomPillNav> createState() => _BottomPillNavState();
-}
-
-class _BottomPillNavState extends State<BottomPillNav>
-    with SingleTickerProviderStateMixin {
-  static const _animationDuration = Duration(milliseconds: 250);
-  static const _animationCurve = Curves.easeOutCubic;
-
-  final List<Map<String, String>> _items = const [
+  static const _items = [
     {'asset': 'assets/images/BottomNavHomeIcon.svg', 'label': 'Home'},
     {'asset': 'assets/images/HeartbeatIcon.svg', 'label': 'Med'},
     {'asset': 'assets/images/BottomNavDocumentIcon.svg', 'label': 'Nutri'},
@@ -27,12 +19,20 @@ class _BottomPillNavState extends State<BottomPillNav>
 
   @override
   Widget build(BuildContext context) {
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final navHeight = isLarge ? 200.0 : isTablet ? 172.0 : 86.0;
+    final bubbleSize = isLarge ? 88.0 : isTablet ? 80.0 : 40.0;
+    final iconSize = isLarge ? 52.0 : isTablet ? 44.0 : 22.0;
+    final labelSize = isLarge ? 23.0 : isTablet ? 20.0 : 10.0;
+    final vPad = isLarge ? 28.0 : isTablet ? 24.0 : 12.0;
+
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 12.0),
+        padding: EdgeInsets.only(left: 12.0, right: 12.0, bottom: vPad),
         child: Container(
-          height: 86,
+          height: navHeight,
           width: double.infinity,
           margin: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
@@ -46,46 +46,19 @@ class _BottomPillNavState extends State<BottomPillNav>
               ),
             ],
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final itemWidth = constraints.maxWidth / _items.length;
-              return Stack(
-                children: [
-                  // Animated focus indicator
-                  AnimatedPositioned(
-                    duration: _animationDuration,
-                    curve: _animationCurve,
-                    left: (itemWidth * widget.currentIndex) +
-                        (itemWidth - 40) / 2,
-                    top: (86 - 40 - 6 - 14) / 2, // Centered vertically
-                    child: AnimatedContainer(
-                      duration: _animationDuration,
-                      curve: _animationCurve,
-                      width: 40,
-                      height: 40,
-                      decoration: const BoxDecoration(
-                        color: AppColors.secondary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                  // Nav items
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: List.generate(_items.length, (i) {
-                      final item = _items[i];
-                      final isActive = i == widget.currentIndex;
-                      return _NavItem(
-                        asset: item['asset']!,
-                        label: item['label']!,
-                        isActive: isActive,
-                        onTap: () => widget.onTap?.call(i),
-                      );
-                    }),
-                  ),
-                ],
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(_items.length, (i) {
+              return _NavItem(
+                asset: _items[i]['asset']!,
+                label: _items[i]['label']!,
+                isActive: i == currentIndex,
+                iconSize: iconSize,
+                bubbleSize: bubbleSize,
+                labelFontSize: labelSize,
+                onTap: () => onTap?.call(i),
               );
-            },
+            }),
           ),
         ),
       ),
@@ -97,58 +70,81 @@ class _NavItem extends StatelessWidget {
   final String asset;
   final String label;
   final bool isActive;
+  final double iconSize;
+  final double bubbleSize;
+  final double labelFontSize;
   final VoidCallback onTap;
 
   const _NavItem({
     required this.asset,
     required this.label,
     required this.isActive,
+    required this.iconSize,
+    required this.bubbleSize,
+    required this.labelFontSize,
     required this.onTap,
   });
 
-  static const _animationDuration = Duration(milliseconds: 250);
-  static const _animationCurve = Curves.easeOutCubic;
+  static const _duration = Duration(milliseconds: 250);
+  static const _curve = Curves.easeOutCubic;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: SizedBox(
-        width: 60,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 60,
-              height: 60,
-              child: Center(
-                child: AnimatedSwitcher(
-                  duration: _animationDuration,
-                  switchInCurve: _animationCurve,
-                  switchOutCurve: _animationCurve,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Bubble + icon in the same Stack → Flutter aligns them perfectly,
+          // no manual math needed regardless of size.
+          SizedBox(
+            width: bubbleSize,
+            height: bubbleSize,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Bubble layer
+                AnimatedContainer(
+                  duration: _duration,
+                  curve: _curve,
+                  width: isActive ? bubbleSize : 0,
+                  height: isActive ? bubbleSize : 0,
+                  decoration: const BoxDecoration(
+                    color: AppColors.secondary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                // Icon layer — always centered inside the same SizedBox
+                AnimatedSwitcher(
+                  duration: _duration,
+                  switchInCurve: _curve,
+                  switchOutCurve: _curve,
                   child: SvgPicture.asset(
                     asset,
                     key: ValueKey('${asset}_$isActive'),
-                    width: 22,
-                    height: 22,
+                    width: iconSize,
+                    height: iconSize,
                     // ignore: deprecated_member_use
                     color: isActive ? Colors.white : AppColors.primary,
                   ),
                 ),
-              ),
+              ],
             ),
-            AnimatedDefaultTextStyle(
-              duration: _animationDuration,
-              curve: _animationCurve,
-              style: AppTextStyles.caption.copyWith(
-                color: isActive ? AppColors.primary : AppColors.textSecondary,
-              ),
-              child: Text(label),
+          ),
+          const SizedBox(height: 2),
+          // Label
+          AnimatedDefaultTextStyle(
+            duration: _duration,
+            curve: _curve,
+            style: AppTextStyles.caption.copyWith(
+              fontSize: labelFontSize,
+              color: isActive ? AppColors.primary : AppColors.textSecondary,
             ),
-          ],
-        ),
+            child: Text(label),
+          ),
+        ],
       ),
     );
   }

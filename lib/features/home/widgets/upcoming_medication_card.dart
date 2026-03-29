@@ -29,10 +29,18 @@ class UpcomingMedicationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final textScale = ResponsiveUtils.textScaleFactor(context);
-    final cardHeight = isTablet ? 280.0 : 234.0;
-    final imageSize = isTablet ? 160.0 : 120.0;
-    final clockIconSize = isTablet ? 18.0 : 12.0;
-    final checkIconSize = isTablet ? 28.0 : 20.0;
+    final cardHeight = ResponsiveUtils.isLargeTablet(context) ? 440.0
+        : ResponsiveUtils.isTablet(context) ? 370.0
+        : 234.0;
+    final imageSize = ResponsiveUtils.isLargeTablet(context) ? 290.0
+        : ResponsiveUtils.isTablet(context) ? 240.0
+        : 120.0;
+    final clockIconSize = ResponsiveUtils.isLargeTablet(context) ? 34.0
+        : ResponsiveUtils.isTablet(context) ? 28.0
+        : 12.0;
+    final checkIconSize = ResponsiveUtils.isLargeTablet(context) ? 50.0
+        : ResponsiveUtils.isTablet(context) ? 40.0
+        : 20.0;
 
     return Container(
       height: cardHeight,
@@ -83,7 +91,7 @@ class UpcomingMedicationCard extends StatelessWidget {
                           Text(
                             time,
                             style: AppTextStyles.bodyLarge.copyWith(
-                              fontSize: 18 * textScale,
+                              fontSize: 20 * textScale,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -96,7 +104,7 @@ class UpcomingMedicationCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.sectionHeading.copyWith(
-                          fontSize: 20 * textScale,
+                          fontSize: 22 * textScale,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -107,7 +115,7 @@ class UpcomingMedicationCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.lightDescription.copyWith(
-                          fontSize: 12 * textScale,
+                          fontSize: 14 * textScale,
                           fontWeight: FontWeight.w300,
                         ),
                       ),
@@ -140,7 +148,7 @@ class UpcomingMedicationCard extends StatelessWidget {
                                 Text(
                                   'Taken',
                                   style: AppTextStyles.headline3.copyWith(
-                                    fontSize: 18 * textScale,
+                                    fontSize: 20 * textScale,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.primary,
                                   ),
