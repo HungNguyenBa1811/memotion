@@ -10,12 +10,14 @@ class MedicationVerticalCard extends StatelessWidget {
   final Medication medication;
   final VoidCallback? onTaken;
   final VoidCallback? onSkip;
+  final double scale;
 
   const MedicationVerticalCard({
     super.key,
     required this.medication,
     this.onTaken,
     this.onSkip,
+    this.scale = 1.0,
   });
 
   @override
@@ -41,7 +43,7 @@ class MedicationVerticalCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(32 * scale),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.12),
@@ -55,10 +57,10 @@ class MedicationVerticalCard extends StatelessWidget {
         children: [
           // ── Image area ──────────────────────────────────────────────────
           Expanded(
-            flex: 5,
+            flex: 8,
             child: ClipRRect(
               borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(32)),
+                  BorderRadius.vertical(top: Radius.circular(32 * scale)),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -85,7 +87,7 @@ class MedicationVerticalCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           errorBuilder: (_, _, _) => Icon(
                             Icons.medication,
-                            size: 80,
+                            size: 80 * scale,
                             color: AppColors.primary.withOpacity(0.4),
                           ),
                         ),
@@ -96,30 +98,31 @@ class MedicationVerticalCard extends StatelessWidget {
 
           // ── Detail area ─────────────────────────────────────────────────
           Expanded(
-            flex: 4,
+            flex: 5,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+              padding: EdgeInsets.fromLTRB(24 * scale, 10 * scale, 24 * scale, 12 * scale),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Time chip
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 4),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 12 * scale, vertical: 4 * scale),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10 * scale),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.access_time_rounded,
-                            size: 14, color: AppColors.primary),
-                        const SizedBox(width: 4),
+                            size: 14 * scale, color: AppColors.primary),
+                        SizedBox(width: 4 * scale),
                         Text(
                           medication.time,
                           style: GoogleFonts.lexend(
-                            fontSize: 13,
+                            fontSize: 13 * scale,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
                           ),
@@ -127,12 +130,12 @@ class MedicationVerticalCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6 * scale),
                   // Medication name
                   Text(
                     medication.name,
                     style: GoogleFonts.lexend(
-                      fontSize: 22,
+                      fontSize: 22 * scale,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF1A1A2E),
                       height: 1.2,
@@ -140,12 +143,12 @@ class MedicationVerticalCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4 * scale),
                   // Dosage
                   Text(
                     medication.dosage,
                     style: GoogleFonts.lexend(
-                      fontSize: 14,
+                      fontSize: 14 * scale,
                       fontWeight: FontWeight.w300,
                       color: const Color(0xFF6B7280),
                       height: 1.4,
@@ -153,7 +156,7 @@ class MedicationVerticalCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const Spacer(),
+                  SizedBox(height: 8 * scale),
                   // Action buttons (only shown for pending)
                   if (medication.status == MedicationStatus.pending)
                     Row(
@@ -165,21 +168,21 @@ class MedicationVerticalCard extends StatelessWidget {
                               side: BorderSide(
                                   color: Colors.grey.shade300, width: 1.5),
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14)),
+                                  borderRadius: BorderRadius.circular(14 * scale)),
                               padding:
-                                  const EdgeInsets.symmetric(vertical: 14),
+                                  EdgeInsets.symmetric(vertical: 14 * scale),
                             ),
                             child: Text(
                               'Skip',
                               style: GoogleFonts.lexend(
-                                fontSize: 15,
+                                fontSize: 15 * scale,
                                 fontWeight: FontWeight.w500,
                                 color: const Color(0xFF6B7280),
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12 * scale),
                         Expanded(
                           flex: 2,
                           child: ElevatedButton(
@@ -189,14 +192,14 @@ class MedicationVerticalCard extends StatelessWidget {
                               foregroundColor: Colors.white,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14)),
+                                  borderRadius: BorderRadius.circular(14 * scale)),
                               padding:
-                                  const EdgeInsets.symmetric(vertical: 14),
+                                  EdgeInsets.symmetric(vertical: 14 * scale),
                             ),
                             child: Text(
                               'Mark as Taken',
                               style: GoogleFonts.lexend(
-                                fontSize: 15,
+                                fontSize: 15 * scale,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -213,15 +216,15 @@ class MedicationVerticalCard extends StatelessWidget {
                               ? Icons.check_circle_rounded
                               : Icons.cancel_rounded,
                           color: statusColor,
-                          size: 20,
+                          size: 20 * scale,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8 * scale),
                         Text(
                           medication.status == MedicationStatus.taken
                               ? 'You have taken this medication'
                               : 'This dose was missed',
                           style: GoogleFonts.lexend(
-                            fontSize: 13,
+                            fontSize: 13 * scale,
                             color: statusColor,
                             fontWeight: FontWeight.w500,
                           ),

@@ -8,13 +8,11 @@ import '../../../../core/utils/responsive_utils.dart';
 import '../../models/medication.dart';
 import '../../providers/medication_provider.dart';
 import '../../widgets/medication_vertical_card.dart';
-import '../../widgets/medication_task_card.dart';
 import '../../../workout/widgets/calendar_day_picker.dart';
 import '../../../workout/models/workout_model.dart';
 
 /// Medication screen for PATIENT (Elderly) role.
-/// Displays one large vertical card per medication in a PageView (Mobile)
-/// or a Split-Pane Master-Detail layout (Tablet).
+/// No filter tabs. Uses vertical card in a horizontal PageView (slideshow).
 class PatientMedicationScreenContent extends ConsumerStatefulWidget {
   const PatientMedicationScreenContent({super.key});
 
@@ -42,7 +40,12 @@ class _PatientMedicationScreenContentState
     final now = DateTime.now();
     _calendarDays = List.generate(dayCount, (i) {
       final date = now.add(Duration(days: i - offset));
-      return CalendarDay(date: date, dayOfWeek: '', month: '', isSelected: i == offset);
+      return CalendarDay(
+        date: date,
+        dayOfWeek: '',
+        month: '',
+        isSelected: i == offset,
+      );
     });
     _selectedDayIndex = offset;
   }
@@ -64,191 +67,79 @@ class _PatientMedicationScreenContentState
 
   @override
   Widget build(BuildContext context) {
-    final selectedFilter = ref.watch(selectedFilterProvider);
     final medicationsAsync = ref.watch(
-      filteredMedicationsProvider(selectedFilter),
+      filteredMedicationsProvider(MedicationFilter.all),
     );
     final selectedDate = ref.watch(selectedDateProvider);
     final isOffline = ref.watch(isOfflineProvider).valueOrNull ?? false;
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final calendarScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final cardScale = isLarge ? 1.5 : isTablet ? 1.3 : 1.0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
-        child: isTablet
-            ? _buildTabletLayout(medicationsAsync, selectedDate, selectedFilter, isOffline)
-            : _buildMobileLayout(medicationsAsync, selectedDate, selectedFilter, isOffline),
-      ),
-    );
-  }
-
-  Widget _buildMobileLayout(
-    AsyncValue<List<Medication>> medicationsAsync, 
-    DateTime selectedDate, 
-    MedicationFilter selectedFilter, 
-    bool isOffline
-  ) {
-    return Column(
-      children: [
-        _buildHeader(context),
-        if (isOffline) _buildOfflineBanner(),
-        CalendarDayPicker(
-          days: _calendarDays,
-          selectedIndex: _selectedDayIndex,
-          onDaySelected: (index) {
-            setState(() => _selectedDayIndex = index);
-            ref.read(selectedDateProvider.notifier).state =
-                _calendarDays[index].date;
-            _resetSelection();
-          },
-        ),
-        const SizedBox(height: 16),
-        _buildFilterTabs(selectedFilter),
-        const SizedBox(height: 16),
-        Expanded(
-          child: medicationsAsync.when(
-            data: (medications) => _buildPagedCards(medications),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => _buildErrorWidget(error),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTabletLayout(
-    AsyncValue<List<Medication>> medicationsAsync, 
-    DateTime selectedDate, 
-    MedicationFilter selectedFilter, 
-    bool isOffline
-  ) {
-    final hPad = ResponsiveUtils.horizontalPadding(context);
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: hPad),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Left Pane: Master List
-          Expanded(
-            flex: 4,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(context, isTablet: true),
-                if (isOffline) _buildOfflineBanner(),
-                CalendarDayPicker(
-          days: _calendarDays,
-          selectedIndex: _selectedDayIndex,
-          onDaySelected: (index) {
-            setState(() => _selectedDayIndex = index);
-            ref.read(selectedDateProvider.notifier).state =
-                _calendarDays[index].date;
-            _resetSelection();
-          },
-        ),
-                const SizedBox(height: 16),
-                _buildFilterTabs(selectedFilter),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: medicationsAsync.when(
-                    data: (medications) => _buildTabletList(medications),
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (error, _) => _buildErrorWidget(error),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 24),
-          // Right Pane: Detail View
-          Expanded(
-            flex: 6,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: 16 + (isOffline ? 40 : 0)),
-                Expanded(
-                  child: medicationsAsync.when(
-                    data: (medications) {
-                      if (medications.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-                      final validIndex = _selectedIndex < medications.length ? _selectedIndex : 0;
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 16),
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 560),
-                          child: MedicationVerticalCard(
-                            medication: medications[validIndex],
-                            onTaken: () => ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Marked as taken!'),
-                                backgroundColor: AppColors.primary,
-                              ),
-                            ),
-                            onSkip: () => ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Dose skipped.'),
-                                backgroundColor: Color(0xFF6B7280),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, _) => const SizedBox.shrink(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabletList(List<Medication> medications) {
-    if (medications.isEmpty) {
-      return Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(Icons.medication_outlined, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'No medications found',
-              style: GoogleFonts.lexend(fontSize: 16, color: Colors.grey[600]),
+            // Header + Calendar (constrained width on tablet)
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isTablet
+                    ? ResponsiveUtils.horizontalPadding(context)
+                    : 0,
+              ),
+              child: Column(
+                children: [
+                  _buildHeader(context),
+                  if (isOffline) _buildOfflineBanner(),
+                  CalendarDayPicker(
+                    days: _calendarDays,
+                    scale: calendarScale,
+                    selectedIndex: _selectedDayIndex,
+                    onDaySelected: (index) {
+                      setState(() => _selectedDayIndex = index);
+                      ref.read(selectedDateProvider.notifier).state =
+                          _calendarDays[index].date;
+                      _resetSelection();
+                    },
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: isTablet ? 40 * calendarScale : 4),
+            // PageView slideshow — same on both mobile and tablet
+            Expanded(
+              child: medicationsAsync.when(
+                data: (medications) =>
+                    _buildPagedCards(medications, cardScale: cardScale),
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
+                error: (error, _) => _buildErrorWidget(error),
+              ),
             ),
           ],
         ),
-      );
-    }
-    
-    return ListView.builder(
-      padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 16),
-      itemCount: medications.length,
-      itemBuilder: (context, index) {
-        final isSelected = index == _selectedIndex;
-        return GestureDetector(
-          onTap: () => setState(() => _selectedIndex = index),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(27),
-              border: isSelected ? Border.all(color: AppColors.primary, width: 2) : Border.all(color: Colors.transparent, width: 2),
-            ),
-            child: MedicationTaskCard(medication: medications[index]),
-          ),
-        );
-      },
+      ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, {bool isTablet = false}) {
+  // ─── Header (synced with medication_main_screen.dart) ─────────────────────
+  Widget _buildHeader(BuildContext context) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final qrBoxSize = isLarge ? 92.0 : isTablet ? 80.0 : 40.0;
+    final qrIconSize = isLarge ? 46.0 : isTablet ? 40.0 : 20.0;
+
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isTablet ? 0 : 20, vertical: 16),
+      padding: EdgeInsets.symmetric(
+        vertical: 16,
+        horizontal: isTablet ? 0 : 20,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -270,28 +161,33 @@ class _PatientMedicationScreenContentState
               ),
             ),
           ),
-          Text(
-            'My Medications',
-            style: GoogleFonts.lexend(
-              fontSize: 18 * ResponsiveUtils.textScaleFactor(context),
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF1A1A2E),
+          Expanded(
+            child: Center(
+              child: Text(
+                'My Medications',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.lexend(
+                  fontSize: 18 * textScale * fontScale * 0.7,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1A1A2E),
+                ),
+              ),
             ),
           ),
           GestureDetector(
             onTap: () => context.push(AppRoutes.medicationScan),
             child: Container(
-              width: 40,
-              height: 40,
+              width: qrBoxSize,
+              height: qrBoxSize,
               decoration: BoxDecoration(
                 color: AppColors.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Center(
+              child: Center(
                 child: Icon(
                   Icons.qr_code_scanner,
                   color: AppColors.primary,
-                  size: 20,
+                  size: qrIconSize,
                 ),
               ),
             ),
@@ -301,113 +197,11 @@ class _PatientMedicationScreenContentState
     );
   }
 
-
-  Widget _buildFilterTabs(MedicationFilter selectedFilter) {
-    final medicationsAsync = ref.watch(medicationsProvider);
-    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isTablet ? 0 : 20),
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: MedicationFilter.values.map((filter) {
-            final isSelected = filter == selectedFilter;
-            final count =
-                medicationsAsync.whenOrNull(
-                  data: (meds) {
-                    switch (filter) {
-                      case MedicationFilter.all:
-                        return meds.length;
-                      case MedicationFilter.taken:
-                        return meds
-                            .where((m) => m.status == MedicationStatus.taken)
-                            .length;
-                      case MedicationFilter.missed:
-                        return meds
-                            .where((m) => m.status == MedicationStatus.missed)
-                            .length;
-                    }
-                  },
-                ) ??
-                0;
-
-            return Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  ref.read(selectedFilterProvider.notifier).state = filter;
-                  _resetSelection();
-                },
-                child: Container(
-                  margin: const EdgeInsets.all(8),
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        filter.displayText,
-                        style: GoogleFonts.lexend(
-                          fontSize: 14,
-                          color: isSelected
-                              ? Colors.white
-                              : const Color(0xFF353535),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 4, vertical: 0),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFF0B2455)
-                              : const Color(0xFFF7F7F7),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          count.toString(),
-                          style: GoogleFonts.lexend(
-                            fontSize: 14,
-                            color: isSelected
-                                ? Colors.white
-                                : const Color(0xFF353535),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPagedCards(List<Medication> medications) {
+  // ─── PageView Slideshow (shared for mobile & tablet) ──────────────────────
+  Widget _buildPagedCards(List<Medication> medications,
+      {double cardScale = 1.0}) {
     if (medications.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.medication_outlined, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'No medications found',
-              style: GoogleFonts.lexend(
-                  fontSize: 16, color: Colors.grey[600]),
-            ),
-          ],
-        ),
-      );
+      return _buildEmptyState();
     }
 
     return PageView.builder(
@@ -423,20 +217,27 @@ class _PatientMedicationScreenContentState
             20,
             0,
             20,
-            ResponsiveUtils.bottomNavPadding(context) + 16,
+            ResponsiveUtils.bottomNavPadding(context) + 20,
           ),
-          child: MedicationVerticalCard(
-            medication: medication,
-            onTaken: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Marked as taken!'),
-                backgroundColor: AppColors.primary,
-              ),
-            ),
-            onSkip: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Dose skipped.'),
-                backgroundColor: Color(0xFF6B7280),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 650 * cardScale),
+              child: MedicationVerticalCard(
+                medication: medication,
+                scale: cardScale,
+                onTaken: () => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Marked as taken!'),
+                    backgroundColor: AppColors.primary,
+                  ),
+                ),
+                onSkip: () => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Dose skipped.'),
+                    backgroundColor: Color(0xFF6B7280),
+                  ),
+                ),
               ),
             ),
           ),
@@ -445,6 +246,24 @@ class _PatientMedicationScreenContentState
     );
   }
 
+  // ─── Empty State ──────────────────────────────────────────────────────────
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.medication_outlined, size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            'No medications found',
+            style: GoogleFonts.lexend(fontSize: 16, color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Error Widget ─────────────────────────────────────────────────────────
   Widget _buildErrorWidget(Object error) {
     return Center(
       child: Padding(
@@ -452,13 +271,14 @@ class _PatientMedicationScreenContentState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline,
-                size: 64, color: Colors.red.shade300),
+            Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
             const SizedBox(height: 16),
             Text(
               'Unable to load medication data',
               style: GoogleFonts.lexend(
-                  fontSize: 18, fontWeight: FontWeight.w600),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -482,6 +302,7 @@ class _PatientMedicationScreenContentState
     );
   }
 
+  // ─── Offline Banner ───────────────────────────────────────────────────────
   Widget _buildOfflineBanner() {
     final pendingCount =
         ref.watch(pendingActionsCountProvider).valueOrNull ?? 0;
@@ -507,8 +328,7 @@ class _PatientMedicationScreenContentState
           ),
           if (pendingCount > 0)
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: const Color(0xFFE65100),
                 borderRadius: BorderRadius.circular(10),
@@ -526,5 +346,4 @@ class _PatientMedicationScreenContentState
       ),
     );
   }
-
 }
