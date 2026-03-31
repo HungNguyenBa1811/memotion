@@ -30,79 +30,86 @@ class CalendarDayPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 90 * scale,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(days.length, (index) {
-          final day = days[index];
-          final isSelected = index == selectedIndex;
-
-          return GestureDetector(
-            onTap: () => onDaySelected(index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              width: 64 * scale,
-              height: 84 * scale,
-              margin: EdgeInsets.symmetric(horizontal: 4 * scale),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : Colors.white,
-                borderRadius: BorderRadius.circular(15 * scale),
-                boxShadow: isSelected
-                    ? []
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 32,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-              ),
-              child: Column(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Month name (e.g., "May")
-                  Text(
-                    _getMonthName(day.date),
-                    style: GoogleFonts.lexend(
-                      fontSize: 11 * scale,
-                      fontWeight: FontWeight.w400,
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF24252C),
+                children: List.generate(days.length, (index) {
+                  final day = days[index];
+                  final isSelected = index == selectedIndex;
+
+                  return GestureDetector(
+                    onTap: () => onDaySelected(index),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,
+                      width: 64 * scale,
+                      height: 84 * scale,
+                      margin: EdgeInsets.symmetric(horizontal: 4 * scale),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.primary : Colors.white,
+                        borderRadius: BorderRadius.circular(15 * scale),
+                        boxShadow: isSelected
+                            ? []
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 32,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Month name (e.g., "May")
+                          Text(
+                            _getMonthName(day.date),
+                            style: GoogleFonts.lexend(
+                              fontSize: 11 * scale,
+                              fontWeight: FontWeight.w400,
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF24252C),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Day number
+                          Text(
+                            day.date.day.toString(),
+                            style: GoogleFonts.lexend(
+                              fontSize: 19 * scale,
+                              fontWeight: FontWeight.w600,
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF24252C),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Day of week (e.g., "Sun", "Mon")
+                          Text(
+                            _getDayOfWeekShort(day.date),
+                            style: GoogleFonts.lexend(
+                              fontSize: 11 * scale,
+                              fontWeight: FontWeight.w400,
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF24252C),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Day number
-                  Text(
-                    day.date.day.toString(),
-                    style: GoogleFonts.lexend(
-                      fontSize: 19 * scale,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF24252C),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Day of week (e.g., "Sun", "Mon")
-                  Text(
-                    _getDayOfWeekShort(day.date),
-                    style: GoogleFonts.lexend(
-                      fontSize: 11 * scale,
-                      fontWeight: FontWeight.w400,
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF24252C),
-                    ),
-                  ),
-                ],
+                  );
+                }),
               ),
             ),
           );
-        }),
-        ),
+        },
       ),
     );
   }

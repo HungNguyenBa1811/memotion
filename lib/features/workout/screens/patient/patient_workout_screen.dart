@@ -108,7 +108,7 @@ class _PatientWorkoutScreenContentState
                 ],
               ),
             ),
-            SizedBox(height: isTablet ? 40 * calendarScale : 4),
+            SizedBox(height: isTablet ? 40 * calendarScale : 20),
             // PageView slideshow — same on both mobile and tablet
             Expanded(
               child: _buildContent(

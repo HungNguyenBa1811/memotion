@@ -138,83 +138,90 @@ class PatientHomeScreen extends ConsumerWidget {
   void _showSOSDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFFD77658),
-                shape: BoxShape.circle,
+      builder: (context) {
+        final scale = ResponsiveUtils.textScaleFactor(context);
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20 * scale)),
+          title: Row(
+            children: [
+              Container(
+                width: 40 * scale,
+                height: 40 * scale,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFD77658),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.phone, color: Colors.white, size: 24 * scale),
               ),
-              child: const Icon(Icons.phone, color: Colors.white, size: 24),
+              SizedBox(width: 12 * scale),
+              Expanded(
+                child: Text(
+                  'EMERGENCY CALL',
+                  style: TextStyle(
+                    fontSize: 16 * scale,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFD77658),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Do you want to make an emergency call to family or emergency services?',
+            style: TextStyle(fontSize: 16 * scale),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14 * scale),
+              ),
             ),
-            const SizedBox(width: 12),
-            const Text(
-              'EMERGENCY CALL',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFFD77658),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // TODO: Implement emergency call to family
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Calling family...'),
+                    backgroundColor: AppColors.tealGreen,
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.tealGreen,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10 * scale),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 16 * scale, vertical: 8 * scale),
               ),
+              child: Text('Call Family', style: TextStyle(fontSize: 14 * scale)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // TODO: Implement 115 emergency call
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Calling 115...'),
+                    backgroundColor: Color(0xFFD77658),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD77658),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10 * scale),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 16 * scale, vertical: 8 * scale),
+              ),
+              child: Text('Call 115', style: TextStyle(fontSize: 14 * scale)),
             ),
           ],
-        ),
-        content: const Text(
-          'Do you want to make an emergency call to family or emergency services?',
-          style: TextStyle(fontSize: 16),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement emergency call to family
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Calling family...'),
-                  backgroundColor: AppColors.tealGreen,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.tealGreen,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Text('Call Family'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement 115 emergency call
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Calling 115...'),
-                  backgroundColor: Color(0xFFD77658),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFD77658),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Text('Call 115'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

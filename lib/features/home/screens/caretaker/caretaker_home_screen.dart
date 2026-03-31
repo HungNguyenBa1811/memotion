@@ -167,24 +167,30 @@ class CaretakerHomeScreen extends ConsumerWidget {
   void _showSituationHandlingDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Situation Handling'),
-        content: const Text('Do you want to make an emergency call or contact family?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'), // TODO: REVIEW_LAYOUT_RISK
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement emergency call
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Emergency Call'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final scale = ResponsiveUtils.textScaleFactor(context);
+        return AlertDialog(
+          title: Text('Situation Handling', style: TextStyle(fontSize: 20 * scale)),
+          content: Text('Do you want to make an emergency call or contact family?', style: TextStyle(fontSize: 16 * scale)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: TextStyle(fontSize: 14 * scale)), // TODO: REVIEW_LAYOUT_RISK
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // TODO: Implement emergency call
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: EdgeInsets.symmetric(horizontal: 16 * scale, vertical: 8 * scale),
+              ),
+              child: Text('Emergency Call', style: TextStyle(fontSize: 14 * scale)),
+            ),
+          ],
+        );
+      },
     );
   }
 }

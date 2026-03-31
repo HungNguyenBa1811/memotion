@@ -130,6 +130,9 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
 
   Widget _buildTabletLayout(WorkoutListState workoutState) {
     final hPad = ResponsiveUtils.horizontalPadding(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final scale = isLarge ? 2.3 : 2.0;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: hPad),
       child: Column(
@@ -140,6 +143,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
           const SizedBox(height: 16),
           CalendarDayPicker(
             days: _calendarDays,
+            scale: scale,
             selectedIndex: _selectedDayIndex,
             onDaySelected: (index) {
               setState(() => _selectedDayIndex = index);

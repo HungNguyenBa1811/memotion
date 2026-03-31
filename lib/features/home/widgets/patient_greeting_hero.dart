@@ -81,6 +81,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
   @override
   Widget build(BuildContext context) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isPhone = ResponsiveUtils.isPhone(context);
     final textScale = ResponsiveUtils.textScaleFactor(context);
     final avatarSize = ResponsiveUtils.isLargeTablet(context) ? 170.0
         : ResponsiveUtils.isTablet(context) ? 150.0
@@ -133,7 +134,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
                   Text(
                     '${widget.greeting}, ${widget.userName}',
                     style: AppTextStyles.headline2.copyWith(
-                      fontSize: 20 * textScale,
+                      fontSize: (isPhone ? 16 : 20) * textScale,
                       color: AppColors.primary,
                     ),
                   ),
@@ -141,7 +142,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
                   Text(
                     _getFormattedDate(),
                     style: AppTextStyles.bodySmall.copyWith(
-                      fontSize: 14 * textScale,
+                      fontSize: (isPhone ? 11 : 14) * textScale,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primary,
                     ),

@@ -471,20 +471,23 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
         'action': () async {
           final confirmed = await showDialog<bool>(
             context: context,
-            builder: (c) => AlertDialog(
-              title: const Text('Log out'),
-              content: const Text('Are you sure you want to log out?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(c, false),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(c, true),
-                  child: const Text('Log out'),
-                ),
-              ],
-            ),
+            builder: (c) {
+              final scale = ResponsiveUtils.textScaleFactor(c);
+              return AlertDialog(
+                title: Text('Log out', style: TextStyle(fontSize: 20 * scale)),
+                content: Text('Are you sure you want to log out?', style: TextStyle(fontSize: 16 * scale)),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(c, false),
+                    child: Text('Cancel', style: TextStyle(fontSize: 14 * scale)),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(c, true),
+                    child: Text('Log out', style: TextStyle(fontSize: 14 * scale)),
+                  ),
+                ],
+              );
+            },
           );
 
           if (confirmed == true) {
