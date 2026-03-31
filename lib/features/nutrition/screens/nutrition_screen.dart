@@ -49,6 +49,10 @@ class NutritionScreenContent extends ConsumerWidget {
     final nutritionTasksAsync = ref.watch(
       filteredNutritionTasksProvider(selectedFilter),
     );
+    final scale = ResponsiveUtils.textScaleFactor(context);
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -133,7 +137,7 @@ class NutritionScreenContent extends ConsumerWidget {
               child: Text(
                 'Nutrition Plan',
                 style: GoogleFonts.lexend(
-                  fontSize: 32,
+                  fontSize: 32 * scale * (isTablet ? fontScale * 0.7 : 1.0),
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -147,7 +151,7 @@ class NutritionScreenContent extends ConsumerWidget {
               child: Text(
                 'Your daily meal tasks',
                 style: GoogleFonts.lexend(
-                  fontSize: 20,
+                  fontSize: 20 * scale * (isTablet ? fontScale * 0.7 : 1.0),
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFFD87659),
                 ),

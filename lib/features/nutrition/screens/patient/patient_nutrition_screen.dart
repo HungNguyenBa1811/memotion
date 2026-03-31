@@ -46,8 +46,6 @@ class _PatientNutritionScreenContentState
         child: Column(
           children: [
             _buildHeader(context, ref),
-            const SizedBox(height: 8),
-            _buildFilterPills(selectedFilter),
             const SizedBox(height: 20),
             Expanded(
               child: _buildPagedCards(
@@ -66,6 +64,12 @@ class _PatientNutritionScreenContentState
   }
 
   Widget _buildHeader(BuildContext context, WidgetRef ref) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    // Mimic the font scale from medication screen
+    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: ResponsiveUtils.horizontalPadding(context),
@@ -94,7 +98,8 @@ class _PatientNutritionScreenContentState
               Text(
                 'Nutrition Plan',
                 style: GoogleFonts.lexend(
-                  fontSize: 18,
+                  // Match Medication screen size on tablet, but keep mobile original size
+                  fontSize: 18 * textScale * (isTablet ? fontScale * 0.7 : 1.0),
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                 ),
@@ -102,7 +107,7 @@ class _PatientNutritionScreenContentState
               Text(
                 'Your daily meals',
                 style: GoogleFonts.lexend(
-                  fontSize: 12,
+                  fontSize: 12 * textScale * (isTablet ? fontScale * 0.7 : 1.0),
                   color: const Color(0xFFD87659),
                   fontWeight: FontWeight.w500,
                 ),
@@ -115,68 +120,7 @@ class _PatientNutritionScreenContentState
     );
   }
 
-  Widget _buildFilterPills(NutritionFilter selectedFilter) {
-    const filters = [
-      (NutritionFilter.all, 'All', Icons.restaurant_menu),
-      (NutritionFilter.breakfast, 'Breakfast', Icons.free_breakfast),
-      (NutritionFilter.lunch, 'Lunch', Icons.lunch_dining),
-      (NutritionFilter.dinner, 'Dinner', Icons.dinner_dining),
-    ];
 
-    return SizedBox(
-      height: 44,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        children: filters.map((entry) {
-          final (filter, label, icon) = entry;
-          final isActive = selectedFilter == filter;
-          return Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: GestureDetector(
-              onTap: () {
-                ref.read(nutritionFilterProvider.notifier).state = filter;
-                _pageController.jumpToPage(0);
-              },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isActive ? AppColors.secondary : Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: isActive
-                      ? null
-                      : [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 6,
-                          ),
-                        ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(icon,
-                        size: 18,
-                        color: isActive ? Colors.white : Colors.black54),
-                    const SizedBox(width: 6),
-                    Text(
-                      label,
-                      style: GoogleFonts.glory(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: isActive ? Colors.white : Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
 
   Widget _buildPagedCards(
     BuildContext context,
@@ -184,6 +128,8 @@ class _PatientNutritionScreenContentState
     bool isLoading = false,
     Object? apiError,
   }) {
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    
     return Column(
       children: [
         // Inline API state: loading spinner or error banner
@@ -238,18 +184,20 @@ class _PatientNutritionScreenContentState
             controller: _pageController,
             itemCount: tasks.length,
             onPageChanged: (_) {},
-            itemBuilder: (context, index) => Padding(
-              padding: EdgeInsets.fromLTRB(
-                20,
-                0,
-                20,
-                ResponsiveUtils.bottomNavPadding(context) + 16,
-              ),
-              child: _PatientNutritionCard(
-                task: tasks[index],
-                onTap: () => context.push(
-                  AppRoutes.nutritionDetail,
-                  extra: {'taskId': tasks[index].id},
+            itemBuilder: (context, index) => Center(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  0,
+                  20,
+                  ResponsiveUtils.bottomNavPadding(context) + (isTablet ? 180 : 16),
+                ),
+                child: _PatientNutritionCard(
+                  task: tasks[index],
+                  onTap: () => context.push(
+                    AppRoutes.nutritionDetail,
+                    extra: {'taskId': tasks[index].id},
+                  ),
                 ),
               ),
             ),
@@ -276,6 +224,7 @@ class _PatientNutritionCard extends StatelessWidget {
       onTap: onTap,
       child: LayoutBuilder(
         builder: (context, constraints) {
+          final scale = ResponsiveUtils.textScaleFactor(context);
           // Image fills ~86% of card width, same circle + border style as caretaker
           final imageSize = constraints.maxWidth * 0.86;
           // Image overlaps ~45% above the card top edge
@@ -284,33 +233,89 @@ class _PatientNutritionCard extends StatelessWidget {
           return Stack(
             clipBehavior: Clip.none,
             children: [
-              // White card bg — pill top, gentle bottom (same radius as caretaker)
-              Positioned(
-                top: imageOverlap,
-                left: 0,
-                right: 0,
-                bottom: 0,
+              // Non-positioned element defines Stack size
+              Padding(
+                padding: EdgeInsets.only(top: imageOverlap),
                 child: Container(
+                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(70),
-                      topRight: Radius.circular(70),
-                      bottomLeft: Radius.circular(27),
-                      bottomRight: Radius.circular(27),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(70 * scale),
+                      topRight: Radius.circular(70 * scale),
+                      bottomLeft: Radius.circular(27 * scale),
+                      bottomRight: Radius.circular(27 * scale),
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.25),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        blurRadius: 10 * scale,
+                        offset: Offset(0, 4 * scale),
+                      ),
+                    ],
+                  ),
+                  // Padding inside the white card
+                  padding: EdgeInsets.only(
+                    top: (imageSize - imageOverlap) + (24 * scale), // push text below image
+                    left: 28 * scale,
+                    right: 28 * scale,
+                    bottom: 32 * scale,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min, // Wrap content height
+                    children: [
+                      Text(
+                        task.name,
+                        style: GoogleFonts.lexend(
+                          fontSize: 28 * scale,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1B4332),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 4 * scale),
+                      if (task.description != null &&
+                          task.description!.isNotEmpty)
+                        Text(
+                          task.description!,
+                          style: GoogleFonts.lexend(
+                            fontSize: 18 * scale,
+                            fontWeight: FontWeight.w300,
+                            color: const Color(0xFF1B4332),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      SizedBox(height: 12 * scale),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            task.calories != null
+                                ? '${task.calories} Kcal'
+                                : '',
+                            style: GoogleFonts.lexend(
+                              fontSize: 20 * scale,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1B4332),
+                            ),
+                          ),
+                          Icon(
+                            Icons.favorite_outline,
+                            size: 28 * scale,
+                            color:
+                                const Color(0xFF4DB6AC).withOpacity(0.7),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
               ),
 
-              // Circular image — -11° tilt, white bg, 1px black border
+              // Circular image — positioned at top
               Positioned(
                 top: 0,
                 left: 0,
@@ -328,64 +333,6 @@ class _PatientNutritionCard extends StatelessWidget {
                       child: ClipOval(child: _buildImage(imageSize)),
                     ),
                   ),
-                ),
-              ),
-
-              // Text — scaled up font sizes for patient readability
-              Positioned(
-                bottom: 32,
-                left: 28,
-                right: 28,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      task.name,
-                      style: GoogleFonts.lexend(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1B4332),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    if (task.description != null &&
-                        task.description!.isNotEmpty)
-                      Text(
-                        task.description!,
-                        style: GoogleFonts.lexend(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
-                          color: const Color(0xFF1B4332),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          task.calories != null
-                              ? '${task.calories} Kcal'
-                              : '',
-                          style: GoogleFonts.lexend(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1B4332),
-                          ),
-                        ),
-                        Icon(
-                          Icons.favorite_outline,
-                          size: 28,
-                          color:
-                              const Color(0xFF4DB6AC).withOpacity(0.7),
-                        ),
-                      ],
-                    ),
-                  ],
                 ),
               ),
             ],

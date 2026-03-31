@@ -157,12 +157,8 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
             ),
           ),
 
-          // Notification icon
-          const Icon(
-            Icons.notifications_outlined,
-            color: Colors.black,
-            size: 24,
-          ),
+          // Empty space to maintain alignment
+          const SizedBox(width: 24),
         ],
       ),
     );

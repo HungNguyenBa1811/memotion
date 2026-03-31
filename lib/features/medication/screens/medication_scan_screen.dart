@@ -207,23 +207,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen>
               fontWeight: FontWeight.w600,
             ),
           ),
-          Stack(
-            children: [
-              const Icon(Icons.notifications_outlined, size: 24),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFD87659),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          const SizedBox(width: 24),
         ],
       ),
     );

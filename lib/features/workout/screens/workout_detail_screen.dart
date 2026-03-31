@@ -236,33 +236,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                     ),
                   ),
                 ),
-                // Notification icon
-                SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: Stack(
-                    children: [
-                      Icon(
-                        Icons.notifications,
-                        color: AppColors.textPrimary,
-                        size: 24,
-                      ),
-                      // Notification dot
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: AppColors.secondary,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                const SizedBox(width: 24),
               ],
             ),
           ),
