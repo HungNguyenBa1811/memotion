@@ -27,11 +27,15 @@ class ApiConstants {
       '/api/patient-profiles/physical-therapy';
 
   // Medication Library Endpoints
-  static const String scanMedicationImage = '/api/medication-library/scan-image';
+  static const String scanMedicationImage =
+      '/api/medication-library/scan-image';
 
   // Medical Record Scan Endpoints
   static const String scanMedicalRecord =
       '/api/patient-profiles/physical-therapy/scan-medical-record';
+
+  // Voice Command Endpoints
+  static const String voiceCommandProcess = '/api/voice-command/process';
 
   // Pose Detection Endpoints (Real-time WebSocket)
   static const String poseHealth = '/api/pose/health';

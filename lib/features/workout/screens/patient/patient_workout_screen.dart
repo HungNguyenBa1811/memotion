@@ -9,6 +9,7 @@ import '../../models/workout_model.dart';
 import '../../providers/workout_provider.dart';
 import '../../widgets/calendar_day_picker.dart';
 import '../../widgets/workout_vertical_card.dart';
+import '../../../voice_command/widgets/voice_command_fab.dart';
 
 /// Workout screen for PATIENT (Elderly) role.
 /// Displays one large vertical card per workout task in a horizontal PageView (slideshow).
@@ -120,6 +121,7 @@ class _PatientWorkoutScreenContentState
           ],
         ),
       ),
+      floatingActionButton: const VoiceCommandFAB(),
     );
   }
 

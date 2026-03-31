@@ -10,6 +10,7 @@ import '../../providers/medication_provider.dart';
 import '../../widgets/medication_vertical_card.dart';
 import '../../../workout/widgets/calendar_day_picker.dart';
 import '../../../workout/models/workout_model.dart';
+import '../../../voice_command/widgets/voice_command_fab.dart';
 
 /// Medication screen for PATIENT (Elderly) role.
 /// No filter tabs. Uses vertical card in a horizontal PageView (slideshow).
@@ -123,6 +124,7 @@ class _PatientMedicationScreenContentState
           ],
         ),
       ),
+      floatingActionButton: const VoiceCommandFAB(),
     );
   }
 

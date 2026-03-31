@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../features/medication/providers/medication_provider.dart';
+import '../../../voice_command/screens/voice_command_sheet.dart';
 import '../../providers/home_provider.dart';
 import '../../widgets/patient_greeting_hero.dart';
 import '../../widgets/upcoming_medication_card.dart';
-import '../../widgets/action_card.dart';
 import '../../../../shared/widgets/widgets.dart';
+import '../../../voice_command/providers/voice_audio_playing_provider.dart';
 
 /// Homepage screen for PATIENT (Elderly) role (Figma design - node 535:1851)
 /// Displays greeting, SOS button, medication schedule, quick actions, and health summary
@@ -47,9 +49,17 @@ class PatientHomeScreen extends ConsumerWidget {
 
     final medicationSection = UpcomingMedicationCard(
       title: firstMed?.name ?? 'Upcoming Schedule',
-      time: firstMed?.time ?? dashboardData?.upcomingMedication?.time ?? '10:00 AM',
-      dosage: firstMed?.dosage ?? dashboardData?.upcomingMedication?.dosage ?? 'Take 1 Vitamin C tablet after meal',
-      imageUrl: firstMed?.imageUrl.isNotEmpty == true ? firstMed!.imageUrl : dashboardData?.upcomingMedication?.imageUrl,
+      time:
+          firstMed?.time ??
+          dashboardData?.upcomingMedication?.time ??
+          '10:00 AM',
+      dosage:
+          firstMed?.dosage ??
+          dashboardData?.upcomingMedication?.dosage ??
+          'Take 1 Vitamin C tablet after meal',
+      imageUrl: firstMed?.imageUrl.isNotEmpty == true
+          ? firstMed!.imageUrl
+          : dashboardData?.upcomingMedication?.imageUrl,
       onTakenPressed: () {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -71,8 +81,6 @@ class PatientHomeScreen extends ConsumerWidget {
         color: AppColors.primary,
       ),
     );
-
-
 
     return Scaffold(
       backgroundColor: AppColors.lightGreen,
@@ -99,20 +107,28 @@ class PatientHomeScreen extends ConsumerWidget {
                       medicationSection,
                       const SizedBox(height: 24),
                       titleSection,
-                      SizedBox(height: 80 * (ResponsiveUtils.isTabletOrLarger(context) ? 1.5 : 1.0)),
+                      SizedBox(
+                        height:
+                            80 *
+                            (ResponsiveUtils.isTabletOrLarger(context)
+                                ? 1.5
+                                : 1.0),
+                      ),
                       Center(
-                        child: Transform.scale(
-                          scale: ResponsiveUtils.isTabletOrLarger(context) ? 1.5 : 1.1,
-                          child: VoiceRecordButton(
-                            size: VoiceRecordButtonSize.large,
-                            onPressed: () {},
-                            label: 'Ask AI',
-                          ),
+                        child: VoiceRecordButton(
+                          isEnabled: !ref.watch(voiceAudioPlayingProvider),
+                          size: VoiceRecordButtonSize.custom,
+                          customDiameter:
+                              ResponsiveUtils.isTabletOrLarger(context)
+                                  ? 160
+                                  : 120,
+                          onPressed: () => _onAskAiPressed(context),
+                          label: 'Ask AI',
                         ),
                       ),
-                      const SizedBox(height: 80),
-                      SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
-                      const SizedBox(height: 200)
+                      SizedBox(
+                        height: ResponsiveUtils.bottomNavPadding(context),
+                      ),
                     ],
                   ),
                 ),
@@ -135,6 +151,71 @@ class PatientHomeScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _onAskAiPressed(BuildContext context) async {
+    final permissionStatus = await Permission.microphone.request();
+
+    if (permissionStatus.isGranted) {
+      if (!context.mounted) {
+        return;
+      }
+      _showVoiceCommandSheet(context);
+      return;
+    }
+
+    if (!context.mounted) {
+      return;
+    }
+
+    if (permissionStatus.isPermanentlyDenied || permissionStatus.isRestricted) {
+      _showMicrophonePermissionDialog(context);
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Microphone permission is required to use Ask AI.'),
+        backgroundColor: AppColors.warning,
+      ),
+    );
+  }
+
+  void _showVoiceCommandSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const VoiceCommandSheet(),
+    );
+  }
+
+  void _showMicrophonePermissionDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Enable microphone access'),
+          content: const Text(
+            'Please allow microphone permission in Settings so Ask AI can hear your command.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                openAppSettings();
+              },
+              child: const Text('Open Settings'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _showSOSDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -142,7 +223,9 @@ class PatientHomeScreen extends ConsumerWidget {
         final scale = ResponsiveUtils.textScaleFactor(context);
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20 * scale)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20 * scale),
+          ),
           title: Row(
             children: [
               Container(
@@ -176,7 +259,10 @@ class PatientHomeScreen extends ConsumerWidget {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 'Cancel',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14 * scale),
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14 * scale,
+                ),
               ),
             ),
             ElevatedButton(
@@ -195,9 +281,15 @@ class PatientHomeScreen extends ConsumerWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10 * scale),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 16 * scale, vertical: 8 * scale),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16 * scale,
+                  vertical: 8 * scale,
+                ),
               ),
-              child: Text('Call Family', style: TextStyle(fontSize: 14 * scale)),
+              child: Text(
+                'Call Family',
+                style: TextStyle(fontSize: 14 * scale),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -215,7 +307,10 @@ class PatientHomeScreen extends ConsumerWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10 * scale),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 16 * scale, vertical: 8 * scale),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16 * scale,
+                  vertical: 8 * scale,
+                ),
               ),
               child: Text('Call 115', style: TextStyle(fontSize: 14 * scale)),
             ),

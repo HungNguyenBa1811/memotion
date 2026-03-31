@@ -1,229 +1,247 @@
-# Pose Detection System — Architecture & Implementation Plan
+# Ask AI - Voice Command Feature Implementation Plan
 
 ## Overview
 
-Current system: Flutter Android app communicates with a backend server via
-WebSocket for elderly pose detection.
-
-New system: Add a Flutter Desktop PC app. PC generates a QR code, Android
-scans it, and after pairing over LAN, the PC takes over the WebSocket
-connection to the backend using the PC camera. After the session ends, PC
-returns data to Android.
+Tích hợp Voice Command vào nút **Ask AI** trên Patient Home Screen. Luồng: Nhấn Ask AI → Xin quyền mic → Ghi âm với waveform animation → Dừng → Gọi API → Nhận key → Điều hướng tự động.
 
 ---
 
-## Confirmed Requirements
+## API Spec (POST `/api/voice-command/process`)
 
-| # | Requirement | Decision |
-|---|-------------|----------|
-| 1 | PC App framework | Flutter Desktop |
-| 2 | Network topology | Same LAN (same WiFi required) |
-| 3 | User authentication | Mandatory account system |
-| 4 | Data returned to Android | TBD |
-| 5 | Android role during session | Sends session info to PC, acts as lifecycle anchor — if Android closes, PC disconnects; if PC closes, Android exits session |
-| 6 | QR token expiry | 10 minutes |
-| 7 | Multi-user | 1-to-1 only |
-| 8 | Connection drop handling | Same as requirement 5 |
-
----
-
-## Key Design Decisions
-
-**PC as Local WebSocket Server**
-PC opens a local WebSocket server on a random port. The QR code contains the
-PC's LAN IP and port. Android connects directly to PC over LAN without
-routing through the internet.
-
-**Flutter Monorepo**
-Use `melos` to manage a monorepo. Shared logic (models, auth, WebSocket,
-session management) lives in a `packages/shared` package reused by both
-Android and Desktop apps.
-
-**JWT Not in QR**
-The QR code contains only the PC's LAN address and a short-lived HMAC pairing
-token. The user JWT is sent over the local WebSocket after pairing is
-established, preventing exposure if the QR is screenshot.
-
-**Keypoints Over Raw Frames**
-Run pose detection locally on PC via TFLite or MediaPipe (FFI). Send only
-keypoints arrays to the backend instead of raw frames, reducing bandwidth
-by approximately 95%.
-
----
-
-## System Flow
-
-### Phase 0 — Authentication
-
-Android logs in and receives a JWT. PC does not authenticate independently —
-it reuses the Android user's token, acting as an extension device.
-
----
-
-### Phase 1 — QR Pairing
-
-PC gets its local LAN IP, opens a local WebSocket server, generates a
-one-time HMAC pairing token valid for 10 minutes, and renders it as a QR
-code. Android scans the QR, connects to the PC's local WebSocket, and sends
-the user's JWT and session config. PC validates the pairing token and
-confirms the pairing. Both sides begin a heartbeat loop.
-
----
-
-### Phase 2 — Session Handoff
-
-PC connects to the backend WebSocket using the user's JWT. PC sends session
-start info to the backend and receives a session ID in return. PC forwards
-the session ID to Android over the local WebSocket. Android enters standby
-mode. The heartbeat continues between PC and Android throughout the session.
-
----
-
-### Phase 3 — Exercise Session
-
-PC captures camera frames, runs local pose detection, and sends keypoints to
-the backend via WebSocket. The backend returns real-time feedback including
-scores, rep counts, and form corrections. PC renders the exercise UI with
-skeleton overlay, rep counter, and alerts.
-
----
-
-### Phase 4 — Lifecycle Management
-
-A heartbeat ping runs every 5 seconds between PC and Android. The timeout
-threshold is 15 seconds (3 missed pings).
-
-- **Android closes or crashes:** PC detects the timeout, sends a session end
-  event to the backend, closes the backend WebSocket, cleans up the local
-  server, and shows a disconnection dialog.
-
-- **PC closes or crashes:** Android detects the timeout, shows a disconnection
-  dialog, and returns to the home screen. The backend WebSocket closes
-  automatically when the PC process dies.
-
-- **PC exercise failure (camera error, backend error):** PC sends a failure
-  event to Android via local WebSocket. Android shows an error and returns
-  to the home screen. PC releases the camera and shuts down the local server.
-
----
-
-### Phase 5 — Data Return to Android
-
-PC posts the exercise results to the backend REST API. Once saved, PC notifies
-Android via the local WebSocket that the session is complete. Android fetches
-the results from the backend and displays the summary screen.
-
----
-
-## Repository Structure
-
-```
-pose_detection_app/
-├── packages/
-│   └── shared/
-│       ├── lib/
-│       │   ├── models/
-│       │   ├── services/
-│       │   │   ├── auth_service.dart
-│       │   │   ├── websocket_service.dart
-│       │   │   └── session_service.dart
-│       │   └── utils/
-│       │       ├── token_validator.dart
-│       │       └── heartbeat_manager.dart
-│       └── pubspec.yaml
-│
-├── apps/
-│   ├── android/
-│   │   ├── lib/
-│   │   │   ├── screens/
-│   │   │   │   ├── home_screen.dart
-│   │   │   │   ├── qr_scan_screen.dart
-│   │   │   │   └── session_result_screen.dart
-│   │   │   └── main.dart
-│   │   └── pubspec.yaml
-│   │
-│   └── desktop/
-│       ├── lib/
-│       │   ├── screens/
-│       │   │   ├── qr_display_screen.dart
-│       │   │   ├── exercise_screen.dart
-│       │   │   └── result_screen.dart
-│       │   ├── services/
-│       │   │   ├── local_ws_server.dart
-│       │   │   ├── camera_service.dart
-│       │   │   └── lan_discovery.dart
-│       │   └── main.dart
-│       └── pubspec.yaml
-│
-├── melos.yaml
-└── pubspec.yaml
+- **Request:** `multipart/form-data` với field `voice_audio` (binary: wav/mp3/m4a)
+- **Response:**
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "data": {
+    "audio": "<base64 hoặc URL audio phản hồi TTS>",
+    "key": "HOME",
+    "transcript": "Đưa tôi về trang chủ"
+  }
+}
 ```
 
----
+## Navigation Key Enum
 
-## Key Dependencies
-
-| Package | Purpose | Platform |
-|---|---|---|
-| `shelf` + `shelf_web_socket` | PC local WebSocket server | Desktop |
-| `web_socket_channel` | WebSocket client | Both |
-| `mobile_scanner` | QR scanning | Android |
-| `qr_flutter` | QR generation | Desktop |
-| `camera` or `opencv_dart` | Camera capture on PC | Desktop |
-| `network_info_plus` | Get LAN IP | Desktop |
-| `flutter_secure_storage` | Store JWT securely | Both |
-| `melos` | Monorepo management | Dev tool |
+| Key từ API          | Route điều hướng                                                                 |
+|---------------------|----------------------------------------------------------------------------------|
+| `HOME`              | `/home`                                                                          |
+| `MEDICATION`        | `/medication`                                                                    |
+| `MEDICATION_DETAIL` | `/medication` (không có trang detail riêng → fallback medication main)            |
+| `PHYSICAL`          | `/workout`                                                                       |
+| `NUTRITION`         | `/nutrition`                                                                     |
+| `START_PHYSICAL`    | `/workout-detail` với workout = bài tập đầu tiên (ưu tiên bài chưa tập)         |
 
 ---
 
-## Implementation Plan
+## Kiến trúc & Files cần tạo/sửa
 
-**Sprint 1 — Foundation (1 week)**
-- Set up Flutter monorepo with `melos`
-- Create `shared` package with models, auth service, session model
-- Migrate existing Android app to use `shared` package
-- Backend: add session start, session end, and session complete events
+### Phase 1: Data Layer
 
-**Sprint 2 — PC App Core (1.5 weeks)**
-- LAN discovery service to get PC local IP
-- Local WebSocket server with pairing flow
-- QR display screen with 10-minute countdown and auto-refresh
-- Pairing token generation and HMAC validation
+#### 1.1 Model - `lib/features/voice_command/models/voice_command_response.dart`
+```dart
+class VoiceCommandResponse {
+  final String? audio;      // base64 hoặc URL audio TTS
+  final String key;          // navigation key enum
+  final String? transcript;  // text đã chuyển từ giọng nói
+}
+```
 
-**Sprint 3 — Lifecycle and Heartbeat (0.5 weeks)**
-- `HeartbeatManager` in shared package: ping every 5s, timeout at 15s
-- PC handler: detect Android disconnect, close session
-- Android handler: detect PC disconnect, exit session screen
-- Android QR scan screen and local WS connection flow
+#### 1.2 Enum - `lib/features/voice_command/models/voice_command_key.dart`
+```dart
+enum VoiceCommandKey {
+  home('HOME'),
+  medication('MEDICATION'),
+  medicationDetail('MEDICATION_DETAIL'),
+  physical('PHYSICAL'),
+  nutrition('NUTRITION'),
+  startPhysical('START_PHYSICAL'),
+  unknown('UNKNOWN');
+}
+```
+- Factory `fromString(String key)` để parse từ API response, fallback `unknown`.
 
-**Sprint 4 — Exercise Session (1.5 weeks)**
-- Camera service on Desktop
-- PC WebSocket client connecting to backend with user JWT
-- Local pose detection pipeline (keypoints only sent to backend)
-- Real-time UI: skeleton overlay, rep counter, form alerts
+#### 1.3 API Constant - sửa `lib/core/network/api_constants.dart`
+```dart
+// Voice Command Endpoints
+static const String voiceCommandProcess = '/api/voice-command/process';
+```
 
-**Sprint 5 — Integration and Edge Cases (1 week)**
-- End-to-end test of all 5 phases
-- Edge case testing: QR expired, network drop, app crash on both sides
-- Handle multiple LAN interfaces (WiFi + Ethernet on PC)
-- Security review: one-time-use tokens, WebSocket auth header validation
+#### 1.4 API Service - `lib/features/voice_command/data/voice_command_api_service.dart`
+- Extends `BaseApiService`
+- Method `processVoiceCommand(String filePath)`:
+  - Tạo `FormData` với `MultipartFile.fromFile(filePath, filename: 'voice_audio')`
+  - POST tới `ApiConstants.voiceCommandProcess`
+  - **Lưu ý:** Cần custom Dio call (không dùng `base post()`) vì cần set `contentType: 'multipart/form-data'` và có thể tăng timeout cho file lớn.
+  - Parse response → `VoiceCommandResponse`
+
+#### 1.5 Repository - `lib/features/voice_command/data/voice_command_repository.dart`
+- Nhận `VoiceCommandApiService`
+- Method `processVoice(String audioPath)` → `Future<VoiceCommandResponse>`
+- Wrap trong try-catch, throw custom exception nếu lỗi
+
+### Phase 2: Provider Layer
+
+#### 2.1 Providers - `lib/features/voice_command/providers/voice_command_provider.dart`
+
+```dart
+// API Service provider
+final voiceCommandApiServiceProvider = Provider((_) => VoiceCommandApiService());
+
+// Repository provider  
+final voiceCommandRepositoryProvider = Provider((ref) =>
+  VoiceCommandRepository(ref.watch(voiceCommandApiServiceProvider)));
+
+// StateNotifier cho toàn bộ flow voice command
+final voiceCommandProvider = StateNotifierProvider<VoiceCommandNotifier, VoiceCommandState>((ref) =>
+  VoiceCommandNotifier(ref.read(voiceCommandRepositoryProvider)));
+```
+
+#### 2.2 State - `lib/features/voice_command/providers/voice_command_state.dart`
+
+```dart
+enum VoiceCommandStatus {
+  idle,           // Chưa bắt đầu
+  recording,      // Đang ghi âm
+  processing,     // Đang gọi API
+  success,        // Có kết quả
+  error,          // Lỗi
+}
+
+class VoiceCommandState {
+  final VoiceCommandStatus status;
+  final VoiceCommandResponse? response;
+  final String? errorMessage;
+  final List<double> waveformData;  // amplitude samples cho visualizer
+}
+```
+
+#### 2.3 Notifier - `lib/features/voice_command/providers/voice_command_notifier.dart`
+- `startRecording()` → check permission → start `Record` plugin → listen amplitude stream → update waveformData
+- `stopRecording()` → stop recording → lấy file path
+- `processCommand(String filePath)` → set processing → call repo → set success/error
+- `reset()` → quay về idle
+
+### Phase 3: UI Layer
+
+#### 3.1 Voice Command Bottom Sheet - `lib/features/voice_command/screens/voice_command_sheet.dart`
+
+**Giao diện:** Modal Bottom Sheet (hoặc full-screen dialog) với các trạng thái:
+
+| Status       | UI                                                                                  |
+|-------------|--------------------------------------------------------------------------------------|
+| `recording` | Waveform visualizer (animated bars) + nút Stop (hình vuông đỏ) + "Đang nghe..."     |
+| `processing`| CircularProgressIndicator + "Đang xử lý..."                                         |
+| `success`   | Icon check + transcript text + auto-close sau 1s rồi navigate + phát audio đồng thời |
+| `error`     | Icon error + message + nút "Thử lại"                                                |
+
+**Waveform Visualizer:**
+- Widget custom `AudioWaveform` hiển thị ~30-40 bars animated
+- Nhận `List<double>` amplitude từ state
+- Mỗi bar height = normalized amplitude × maxHeight
+- Animation: bars update real-time khi nói, có idle animation nhẹ khi im lặng
+- Style tham khảo Google Assistant (bars tròn, gradient màu primary)
+
+#### 3.2 Navigation Handler - `lib/features/voice_command/utils/voice_command_navigator.dart`
+
+```dart
+class VoiceCommandNavigator {
+  static void navigate(BuildContext context, VoiceCommandKey key, WidgetRef ref) {
+    switch (key) {
+      case VoiceCommandKey.home:
+        context.go('/home');
+      case VoiceCommandKey.medication:
+      case VoiceCommandKey.medicationDetail:
+        context.go('/medication');
+      case VoiceCommandKey.physical:
+        context.go('/workout');
+      case VoiceCommandKey.nutrition:
+        context.go('/nutrition');
+      case VoiceCommandKey.startPhysical:
+        // Lấy danh sách workout từ provider, tìm bài chưa tập đầu tiên
+        // → context.push('/workout-detail', extra: firstWorkout)
+        _navigateToFirstWorkout(context, ref);
+      case VoiceCommandKey.unknown:
+        // Show snackbar "Không hiểu lệnh"
+        break;
+    }
+  }
+
+  /// Phát audio TTS đồng thời với navigate (fire-and-forget)
+  static Future<void> playResponseAudio(String? base64Audio) async {
+    if (base64Audio == null || base64Audio.isEmpty) return;
+    final bytes = base64Decode(base64Audio);
+    final player = AudioPlayer();
+    await player.play(BytesSource(bytes));
+    player.onPlayerComplete.listen((_) => player.dispose());
+  }
+}
+```
+
+### Phase 4: Kết nối vào Home Screen
+
+#### 4.1 Sửa `lib/features/home/screens/patient/patient_home_screen.dart`
+
+```dart
+VoiceRecordButton(
+  size: VoiceRecordButtonSize.large,
+  onPressed: () => _showVoiceCommandSheet(context),
+  label: 'Ask AI',
+)
+```
+
+- `_showVoiceCommandSheet(context)`: 
+  - Check & request `Permission.microphone`
+  - Nếu granted → `showModalBottomSheet(...)` hiện `VoiceCommandSheet`
+  - Nếu denied → show dialog hướng dẫn bật quyền trong Settings
+
+### Phase 5: Audio Recording Setup
+
+#### 5.1 Package cần thêm vào `pubspec.yaml`
+```yaml
+dependencies:
+  record: ^5.1.0          # Ghi âm (hỗ trợ amplitude stream)
+  audioplayers: ^6.0.0     # Phát audio TTS response (nếu cần)
+```
+
+#### 5.2 Android Permission - sửa `android/app/src/main/AndroidManifest.xml`
+```xml
+<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+```
+
+#### 5.3 Permission request trong flow
+- Dùng `permission_handler` (đã có trong project)
+- Request `Permission.microphone` khi user nhấn Ask AI lần đầu
+- Nếu permanently denied → `openAppSettings()`
 
 ---
 
-## Known Risks
+## Thứ tự triển khai (Task Order)
 
-- **Windows Firewall:** Opening a local WebSocket server port may be blocked
-  by Windows Firewall. Users may need to grant a network permission on first
-  run.
+1. **Thêm packages** (`record`, `audioplayers`) + Android permission
+2. **Model + Enum** (`VoiceCommandResponse`, `VoiceCommandKey`)
+3. **API constant + API Service** (endpoint + multipart upload)
+4. **Repository**
+5. **State + Notifier + Providers**
+6. **AudioWaveform widget** (custom animated bars)
+7. **VoiceCommandSheet** (bottom sheet với các trạng thái)
+8. **VoiceCommandNavigator** (điều hướng theo key)
+9. **Kết nối vào PatientHomeScreen** (onPressed + permission flow)
+10. **Test end-to-end** trên thiết bị thật (mic không hoạt động trên emulator)
 
-- **Flutter Desktop camera support:** The `camera` plugin on Desktop is
-  limited. Evaluate `opencv_dart` (FFI-based) early in Sprint 2 to avoid
-  a blocker.
+---
 
-- **LAN IP changes:** If the PC's IP changes during a session, the pairing
-  breaks. Monitor IP changes and prompt the user to re-generate the QR if
-  needed.
+## Lưu ý kỹ thuật
 
-- **Multiple LAN interfaces:** PC may have both WiFi and Ethernet active.
-  The LAN discovery service must select the correct interface, preferring
-  the one on the same subnet as the Android device.
+- **Audio format:** `record` package mặc định output `.m4a` (AAC) trên Android → API hỗ trợ.
+- **Amplitude stream:** `record` cung cấp `onAmplitudeChanged` stream → dùng cho waveform.
+- **File cleanup:** Xóa file audio tạm sau khi API trả kết quả.
+- **Timeout:** API voice processing có thể mất 5-10s (STT + LLM + TTS) → set timeout riêng ~30s.
+- **TTS audio response (phát song song navigate):**
+  - API trả `data.audio` (base64 string) → decode thành bytes → ghi ra temp file hoặc dùng `audioplayers` `BytesSource`.
+  - Khi nhận response thành công: **đồng thời** gọi `audioplayers.play()` **VÀ** `VoiceCommandNavigator.navigate()`.
+  - Audio phát nền, không block navigation. Nếu user thoát app hoặc chuyển màn thì audio vẫn phát hết (fire-and-forget).
+  - Dispose player sau khi phát xong (`onPlayerComplete` listener).
+- **START_PHYSICAL logic:** Cần read workout list từ `exerciseTasksProvider`, filter bài chưa complete, lấy bài đầu tiên → push `/workout-detail`.
+- **Patient only:** Chỉ hiện nút Ask AI trên `PatientHomeScreen`, không hiện trên Caretaker view (hiện tại đã đúng).

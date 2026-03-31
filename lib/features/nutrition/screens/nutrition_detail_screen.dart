@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/network/api_constants.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../models/nutrition_task.dart';
 import '../providers/nutrition_provider.dart';
 
@@ -179,20 +180,22 @@ class _NutritionDetailContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scale = ResponsiveUtils.textScaleFactor(context);
+    
     return SafeArea(
       bottom: false,
       child: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 120),
+            padding: EdgeInsets.only(bottom: 120 * scale),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with back and notification
+                // Header with back
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ResponsiveUtils.horizontalPadding(context),
+                    vertical: 16 * scale,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -200,86 +203,81 @@ class _NutritionDetailContent extends ConsumerWidget {
                       GestureDetector(
                         onTap: () => context.pop(),
                         child: Container(
-                          width: 40,
-                          height: 40,
+                          width: 40 * scale,
+                          height: 40 * scale,
                           decoration: BoxDecoration(
                             color: AppColors.primary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.25),
-                                blurRadius: 70,
-                                offset: const Offset(0, 4),
+                                blurRadius: 70 * scale,
+                                offset: Offset(0, 4 * scale),
                               ),
                             ],
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back_ios_new,
                             color: Colors.white,
-                            size: 17,
+                            size: 17 * scale,
                           ),
                         ),
                       ),
-                      Container(
-                        width: 24,
-                        height: 24,
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.notifications,
-                          color: _textDarkGreen,
-                          size: 24,
-                        ),
-                      ),
+                      SizedBox(width: 24 * scale),
                     ],
                   ),
                 ),
 
                 // Title - from API
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ResponsiveUtils.horizontalPadding(context),
+                  ),
                   child: Text(
                     task.name,
                     style: GoogleFonts.lexend(
-                      fontSize: 40,
+                      fontSize: 40 * scale,
                       fontWeight: FontWeight.w700,
                       color: _textDarkGreen,
                       height: 1.12,
                     ),
                   ),
                 ),
-                const SizedBox(height: 15),
+                SizedBox(height: 15 * scale),
 
                 // Subtitle - meal type from API
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ResponsiveUtils.horizontalPadding(context),
+                  ),
                   child: Text(
                     _getMealTypeLabel(task.mealType),
                     style: GoogleFonts.lexend(
-                      fontSize: 20,
+                      fontSize: 20 * scale,
                       fontWeight: FontWeight.w700,
                       color: _subtitleOrange,
                       height: 1.12,
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24 * scale),
 
                 // Hero image area with nutrition badges
                 SizedBox(
-                  height: 350,
+                  height: 350 * scale,
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
                       // Main image from API or fallback
                       Positioned(
-                        right: -140,
-                        top: -10,
-                        child: _buildMainImage(),
+                        right: -140 * scale,
+                        top: -10 * scale,
+                        child: _buildMainImage(scale: scale),
                       ),
 
                       // Nutrition section title and badges (left side)
                       Positioned(
-                        left: 25,
+                        left: 25 * scale,
                         top: 0,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,87 +285,96 @@ class _NutritionDetailContent extends ConsumerWidget {
                             Text(
                               'Nutrition',
                               style: GoogleFonts.lexend(
-                                fontSize: 26,
+                                fontSize: 26 * scale,
                                 fontWeight: FontWeight.w700,
                                 color: _textDarkGreen,
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            SizedBox(height: 20 * scale),
                             _buildNutritionBadge(
                               '${task.calories ?? 0}',
                               'Calories',
+                              scale: scale,
                             ),
-                            const SizedBox(height: 12),
-                            _buildNutritionBadge('--', 'Carbo'),
-                            const SizedBox(height: 12),
-                            _buildNutritionBadge('--', 'Protein'),
+                            SizedBox(height: 12 * scale),
+                            _buildNutritionBadge('--', 'Carbo', scale: scale),
+                            SizedBox(height: 12 * scale),
+                            _buildNutritionBadge('--', 'Protein', scale: scale),
                           ],
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 25),
+                SizedBox(height: 25 * scale),
 
                 // Description section (if available)
                 if (task.description != null &&
                     task.description!.isNotEmpty) ...[
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 22),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: ResponsiveUtils.horizontalPadding(context),
+                    ),
                     child: Text(
                       'Description',
                       style: GoogleFonts.lexend(
-                        fontSize: 30,
+                        fontSize: 30 * scale,
                         fontWeight: FontWeight.w700,
                         color: _textDarkGreen,
                         height: 1.25,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16 * scale),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: ResponsiveUtils.horizontalPadding(context),
+                    ),
                     child: Text(
                       task.description!,
                       style: GoogleFonts.lexend(
-                        fontSize: 20,
+                        fontSize: 20 * scale,
                         fontWeight: FontWeight.w300,
                         color: _textDarkGreen,
                         height: 1.25,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: 30 * scale),
                 ],
 
                 // Time info
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 22),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ResponsiveUtils.horizontalPadding(context),
+                  ),
                   child: Text(
                     'Time',
                     style: GoogleFonts.lexend(
-                      fontSize: 30,
+                      fontSize: 30 * scale,
                       fontWeight: FontWeight.w700,
                       color: _textDarkGreen,
                       height: 1.25,
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16 * scale),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ResponsiveUtils.horizontalPadding(context),
+                  ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.access_time,
-                        size: 24,
+                        size: 24 * scale,
                         color: _textDarkGreen,
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8 * scale),
                       Text(
                         task.time,
                         style: GoogleFonts.lexend(
-                          fontSize: 20,
+                          fontSize: 20 * scale,
                           fontWeight: FontWeight.w500,
                           color: _textDarkGreen,
                           height: 1.25,
@@ -376,39 +383,39 @@ class _NutritionDetailContent extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 80),
+                SizedBox(height: 80 * scale),
               ],
             ),
           ),
 
           // Status indicator at bottom (tap to complete)
           Positioned(
-            left: 37,
-            bottom: 60,
-            child: _buildStatusIndicator(ref),
+            left: 37 * scale,
+            bottom: 60 * scale,
+            child: _buildStatusIndicator(ref, scale: scale),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMainImage() {
+  Widget _buildMainImage({required double scale}) {
     if (task.imagePath != null && task.imagePath!.isNotEmpty) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(200),
+        borderRadius: BorderRadius.circular(200 * scale),
         child: Image.network(
           '${ApiConstants.baseUrl}${task.imagePath}',
-          width: 300,
-          height: 300,
+          width: 300 * scale,
+          height: 300 * scale,
           fit: BoxFit.cover,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return Container(
-              width: 300,
-              height: 300,
+              width: 300 * scale,
+              height: 300 * scale,
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20 * scale),
               ),
               child: Center(
                 child: CircularProgressIndicator(
@@ -421,32 +428,32 @@ class _NutritionDetailContent extends ConsumerWidget {
               ),
             );
           },
-          errorBuilder: (context, error, stack) => _buildFallbackImage(),
+          errorBuilder: (context, error, stack) => _buildFallbackImage(scale: scale),
         ),
       );
     }
-    return _buildFallbackImage();
+    return _buildFallbackImage(scale: scale);
   }
 
-  Widget _buildFallbackImage() {
+  Widget _buildFallbackImage({required double scale}) {
     return Container(
-      width: 300,
-      height: 300,
+      width: 300 * scale,
+      height: 300 * scale,
       decoration: BoxDecoration(
         color: task.mealColor.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20 * scale),
       ),
       child: Center(
         child: Icon(
           task.mealIcon,
-          size: 120,
+          size: 120 * scale,
           color: task.mealColor.withValues(alpha: 0.5),
         ),
       ),
     );
   }
 
-  Widget _buildStatusIndicator(WidgetRef ref) {
+  Widget _buildStatusIndicator(WidgetRef ref, {required double scale}) {
     final isCompleted = task.status == NutritionStatus.completed;
     debugPrint('┌─────────────────────────────────────────────────────────────');
     debugPrint('│ 🍽️ UI: Building status indicator');
@@ -466,30 +473,30 @@ class _NutritionDetailContent extends ConsumerWidget {
               ref.invalidate(nutritionTaskDetailProvider(task.id));
             },
       child: SizedBox(
-        height: 48,
-        width: isCompleted ? 140 : 180,
+        height: 48 * scale,
+        width: isCompleted ? 140 * scale : 180 * scale,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             // Label container (behind)
             Positioned(
-              left: 17,
+              left: 17 * scale,
               top: 0,
               child: Container(
-                padding: const EdgeInsets.only(
-                  left: 48,
-                  right: 20,
-                  top: 14,
-                  bottom: 14,
+                padding: EdgeInsets.only(
+                  left: 48 * scale,
+                  right: 20 * scale,
+                  top: 14 * scale,
+                  bottom: 14 * scale,
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(70),
+                  borderRadius: BorderRadius.circular(70 * scale),
                 ),
                 child: Text(
                   isCompleted ? 'Completed' : 'Mark as completed',
                   style: GoogleFonts.lexend(
-                    fontSize: 15,
+                    fontSize: 15 * scale,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textOnPrimary,
                     height: 1.12,
@@ -502,23 +509,23 @@ class _NutritionDetailContent extends ConsumerWidget {
               left: 0,
               top: 0,
               child: Container(
-                width: 48,
-                height: 48,
+                width: 48 * scale,
+                height: 48 * scale,
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.25),
-                      blurRadius: 50,
-                      offset: const Offset(0, 4),
+                      blurRadius: 50 * scale,
+                      offset: Offset(0, 4 * scale),
                     ),
                   ],
                 ),
                 child: Icon(
                   isCompleted ? Icons.check : Icons.check_circle_outline,
                   color: AppColors.textOnPrimary,
-                  size: 24,
+                  size: 24 * scale,
                 ),
               ),
             ),
@@ -543,44 +550,44 @@ class _NutritionDetailContent extends ConsumerWidget {
     }
   }
 
-  Widget _buildNutritionBadge(String value, String label) {
+  Widget _buildNutritionBadge(String value, String label, {required double scale}) {
     return SizedBox(
-      height: 62,
-      width: 160,
+      height: 62 * scale,
+      width: 160 * scale,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           // Label container (behind)
           Positioned(
-            left: 22,
-            top: 8,
+            left: 22 * scale,
+            top: 8 * scale,
             child: Container(
-              padding: const EdgeInsets.only(
-                left: 50,
-                right: 18,
-                top: 10,
-                bottom: 10,
+              padding: EdgeInsets.only(
+                left: 50 * scale,
+                right: 18 * scale,
+                top: 10 * scale,
+                bottom: 10 * scale,
               ),
               decoration: BoxDecoration(
                 color: AppColors.background,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(27),
-                  topRight: Radius.circular(27),
-                  bottomLeft: Radius.circular(27),
-                  bottomRight: Radius.circular(27),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(27 * scale),
+                  topRight: Radius.circular(27 * scale),
+                  bottomLeft: Radius.circular(27 * scale),
+                  bottomRight: Radius.circular(27 * scale),
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.25),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    blurRadius: 10 * scale,
+                    offset: Offset(0, 4 * scale),
                   ),
                 ],
               ),
               child: Text(
                 label,
                 style: GoogleFonts.lexend(
-                  fontSize: 15,
+                  fontSize: 15 * scale,
                   fontWeight: FontWeight.w700,
                   color: Colors.black,
                   height: 1.12,
@@ -593,16 +600,16 @@ class _NutritionDetailContent extends ConsumerWidget {
             left: 0,
             top: 0,
             child: Container(
-              width: 62,
-              height: 62,
+              width: 62 * scale,
+              height: 62 * scale,
               decoration: BoxDecoration(
                 color: AppColors.secondary,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.25),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    blurRadius: 10 * scale,
+                    offset: Offset(0, 4 * scale),
                   ),
                 ],
               ),
@@ -610,7 +617,7 @@ class _NutritionDetailContent extends ConsumerWidget {
                 child: Text(
                   value,
                   style: GoogleFonts.lexend(
-                    fontSize: 20,
+                    fontSize: 20 * scale,
                     fontWeight: FontWeight.w700,
                     color: Colors.black,
                     height: 1.12,

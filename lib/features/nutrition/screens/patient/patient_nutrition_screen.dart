@@ -9,6 +9,8 @@ import '../../../../core/theme/theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../models/nutrition_task.dart';
 import '../../providers/nutrition_provider.dart';
+import '../../../workout/widgets/calendar_day_picker.dart';
+import '../../../voice_command/widgets/voice_command_fab.dart';
 
 /// Nutrition screen for PATIENT (Elderly) role.
 /// Displays one large vertical card per meal task in a PageView.
@@ -60,6 +62,7 @@ class _PatientNutritionScreenContentState
           ],
         ),
       ),
+      floatingActionButton: const VoiceCommandFAB(),
     );
   }
 

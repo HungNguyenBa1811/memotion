@@ -8,9 +8,11 @@ import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../core/network/api_constants.dart';
 import '../providers/workout_provider.dart';
 import '../models/workout_model.dart';
+import '../../voice_command/widgets/voice_command_fab.dart';
 
 class WorkoutDetailScreen extends ConsumerStatefulWidget {
   final String workoutId;
@@ -161,6 +163,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             ? _buildDetailContent(detailState.workout!)
             : _buildErrorView('Task not found'),
       ),
+      floatingActionButton: const VoiceCommandFAB(),
     );
   }
 
@@ -206,174 +209,60 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
     );
   }
 
+  /// Back button – always pinned to top-left of the screen.
+  Widget _buildBackButton() {
+    final hPad = ResponsiveUtils.horizontalPadding(context);
+    return Padding(
+      padding: EdgeInsets.only(left: hPad, top: 8),
+      child: GestureDetector(
+        onTap: () => context.pop(),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: const BoxDecoration(
+            color: Color(0xFF00695C),
+            shape: BoxShape.circle,
+          ),
+          child: const Center(
+            child: Icon(
+              Icons.arrow_back_ios_new,
+              color: Colors.white,
+              size: 18,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildDetailContent(WorkoutTask workout) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final useTwoColumn = ResponsiveUtils.useTwoColumn(context);
+    final hPad = ResponsiveUtils.horizontalPadding(context);
+    final maxWidth = ResponsiveUtils.contentMaxWidth(context);
+
+    if (useTwoColumn) {
+      // Stack: back button always top-left, content centred.
+      return Stack(
         children: [
-          // Header with back button and notification
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Back button - circular with teal color (matching nutrition)
-                GestureDetector(
-                  onTap: () => context.pop(),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF00695C),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 24),
-              ],
-            ),
-          ),
-
-          // Image section with glassmorphism overlay card
-          _buildHeroImageSection(workout),
-          const SizedBox(height: 24),
-
-          // Title section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title - lexend ExtraBold 24px
-                Text(
-                  workout.title,
-                  style: GoogleFonts.lexend(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF1B4332),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Description - lexend Regular 15px, line-height 22px
-          if (workout.description != null) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: Text(
-                workout.description!,
-                style: GoogleFonts.lexend(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
-                  height: 22 / 15,
-                  color: const Color(0xFF1B4332),
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-          ],
-
-          // Steps
-          if (workout.steps != null && workout.steps!.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+          // Main two-column content
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Execution Steps',
-                    style: GoogleFonts.lexend(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ...workout.steps!.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final step = entry.value;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _buildStepItem(index + 1, step),
-                    );
-                  }),
-                ],
-              ),
-            ),
-          ],
-
-          const SizedBox(height: 40),
-
-          // Action buttons row
-          if (!workout.isCompleted)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  // "Lets Workout" — use phone camera (existing flow)
+                  const SizedBox(height: 56), // space for the back button row
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () => _startWorkoutExercise(workout),
-                      child: Container(
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(32),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Lets Workout',
-                            style: GoogleFonts.lexend(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFFFAFAF5),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  // "PC Mode" — connect to Desktop app via QR scan
-                  GestureDetector(
-                    onTap: () => _connectToPc(workout),
-                    child: Container(
-                      height: 44,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(32),
-                        border: Border.all(
-                          color: AppColors.primary,
-                          width: 1.5,
-                        ),
-                      ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: hPad),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.computer_rounded,
-                            size: 18,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'PC Mode',
-                            style: GoogleFonts.lexend(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
+                          Expanded(child: _buildHeroImageSection(workout)),
+                          SizedBox(width: ResponsiveUtils.sectionGap(context)),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: _buildScrollableBody(workout, inTwoColumn: true),
                             ),
                           ),
                         ],
@@ -382,39 +271,204 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                   ),
                 ],
               ),
-            )
-          else
-            // Completed state — single disabled button
-            Center(
-              child: Container(
-                width: 163,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.textSecondary.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(32),
+            ),
+          ),
+          // Back button – top-left, outside ConstrainedBox
+          Positioned(
+            top: 0,
+            left: 0,
+            child: _buildBackButton(),
+          ),
+        ],
+      );
+    }
+
+    // Single-column (phone) layout
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildBackButton(),
+              _buildHeroImageSection(workout),
+              SizedBox(height: ResponsiveUtils.sectionGap(context) * 2),
+              _buildScrollableBody(workout),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScrollableBody(WorkoutTask workout, {bool inTwoColumn = false}) {
+    // In two-column mode the parent Row already applies hPad,
+    // so inner widgets must NOT add it again.
+    final hPad = inTwoColumn ? 0.0 : ResponsiveUtils.horizontalPadding(context);
+
+    // Use a gentler scale in two-column mode to avoid word-splitting.
+    final scaleFactor = inTwoColumn ? 1.0 : ResponsiveUtils.textScaleFactor(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: hPad),
+          child: Text(
+            workout.title,
+            style: GoogleFonts.lexend(
+              fontSize: 24 * scaleFactor,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF1B4332),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Description
+        if (workout.description != null) ...[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: hPad),
+            child: Text(
+              workout.description!,
+              style: GoogleFonts.lexend(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+                height: 22 / 15,
+                color: const Color(0xFF1B4332),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+        ],
+
+        // Steps
+        if (workout.steps != null && workout.steps!.isNotEmpty) ...[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: hPad),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Execution Steps',
+                  style: GoogleFonts.lexend(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-                child: Center(
-                  child: Text(
-                    'Completed',
-                    style: GoogleFonts.lexend(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFFFAFAF5),
+                const SizedBox(height: 16),
+                ...workout.steps!.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final step = entry.value;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _buildStepItem(index + 1, step),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ],
+
+        const SizedBox(height: 40),
+
+        // Action buttons
+        if (!workout.isCompleted)
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: hPad),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _startWorkoutExercise(workout),
+                    child: Container(
+                      height: ResponsiveUtils.buttonHeight(context),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Lets Workout',
+                          style: GoogleFonts.lexend(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFFFAFAF5),
+                          ),
+                        ),
+                      ),
                     ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: () => _connectToPc(workout),
+                  child: Container(
+                    height: ResponsiveUtils.buttonHeight(context),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(color: AppColors.primary, width: 1.5),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.computer_rounded,
+                          size: 18,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'PC Mode',
+                          style: GoogleFonts.lexend(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          Center(
+            child: Container(
+              width: 163,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.textSecondary.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(32),
+              ),
+              child: Center(
+                child: Text(
+                  'Completed',
+                  style: GoogleFonts.lexend(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFFFAFAF5),
                   ),
                 ),
               ),
             ),
+          ),
 
-          const SizedBox(height: 140),
-        ],
-      ),
+        SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
+      ],
     );
   }
 
   Widget _buildStepItem(int stepNumber, String step) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(ResponsiveUtils.sectionGap(context) + 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -468,12 +522,17 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
   /// Builds the hero image section with glassmorphism overlay card
   /// Design pattern: Stack with positioned overlay for depth effect
   Widget _buildHeroImageSection(WorkoutTask workout) {
-    const double imageHeight = 207.0;
+    final useTwoColumn = ResponsiveUtils.useTwoColumn(context);
+    final double imageHeight = ResponsiveUtils.heroImageHeight(context);
     const double overlayCardHeight = 60.0;
-    const double overlapOffset = 30.0; // How much the card overlaps the image
+    const double overlapOffset = 30.0;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10),
+      margin: useTwoColumn
+          ? EdgeInsets.zero
+          : EdgeInsets.symmetric(
+              horizontal: ResponsiveUtils.horizontalPadding(context) - 6,
+            ),
       height: imageHeight + overlayCardHeight - overlapOffset,
       child: Stack(
         clipBehavior: Clip.none,
@@ -523,7 +582,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             ),
           ),
 
-          // Play/Pause button overlay (center of image) - 38x38px
+          // Play/Pause button overlay (center of image)
           Positioned(
             top: (imageHeight - 38) / 2,
             left: 0,

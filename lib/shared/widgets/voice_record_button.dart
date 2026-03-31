@@ -30,6 +30,8 @@ class VoiceRecordButton extends StatelessWidget {
   /// Pass [null] to hide the label.
   final String? label;
 
+  final bool isEnabled;
+
   const VoiceRecordButton({
     super.key,
     this.onPressed,
@@ -38,6 +40,7 @@ class VoiceRecordButton extends StatelessWidget {
     this.color,
     this.iconColor,
     this.label = 'Voice Record',
+    this.isEnabled = true,
   });
 
   const VoiceRecordButton.small({
@@ -46,6 +49,7 @@ class VoiceRecordButton extends StatelessWidget {
     this.color,
     this.iconColor,
     this.label = 'Ghi âm',
+    this.isEnabled = true,
   })  : size = VoiceRecordButtonSize.small,
         customDiameter = null;
 
@@ -55,6 +59,7 @@ class VoiceRecordButton extends StatelessWidget {
     this.color,
     this.iconColor,
     this.label = 'Ghi âm',
+    this.isEnabled = true,
   })  : size = VoiceRecordButtonSize.large,
         customDiameter = null;
 
@@ -79,46 +84,49 @@ class VoiceRecordButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final diameter = _getDiameter(context);
-    final bg = color ?? AppColors.primary;
+    final bg = isEnabled ? (color ?? AppColors.primary) : Colors.grey.shade400;
     final fg = iconColor ?? Colors.white;
     final textScale = ResponsiveUtils.textScaleFactor(context);
 
     return GestureDetector(
-      onTap: onPressed,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: diameter,
-            height: diameter,
-            decoration: BoxDecoration(
-              color: bg,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: bg.withOpacity(0.35),
-                  offset: const Offset(0, 6),
-                  blurRadius: 16,
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.mic,
-              color: fg,
-              size: diameter * 0.42,
-            ),
-          ),
-          if (label != null) ...[
-            SizedBox(height: diameter * 0.08),
-            Text(
-              label!,
-              style: AppTextStyles.cardTitle.copyWith(
-                fontSize: (diameter * 0.14) * textScale,
-                fontWeight: FontWeight.w700,
+      onTap: isEnabled ? onPressed : null,
+      child: Opacity(
+        opacity: isEnabled ? 1.0 : 0.6,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: diameter,
+              height: diameter,
+              decoration: BoxDecoration(
+                color: bg,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: bg.withOpacity(0.35),
+                    offset: const Offset(0, 6),
+                    blurRadius: 16,
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.mic,
+                color: fg,
+                size: diameter * 0.42,
               ),
             ),
+            if (label != null) ...[
+              SizedBox(height: diameter * 0.08),
+              Text(
+                label!,
+                style: AppTextStyles.cardTitle.copyWith(
+                  fontSize: (diameter * 0.14) * textScale,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

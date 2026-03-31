@@ -86,6 +86,13 @@ abstract final class ResponsiveUtils {
   static int listColumns(BuildContext context) =>
       isTabletOrLarger(context) ? 2 : 1;
 
+  // ─── Layout mode ──────────────────────────────────────────────────────────
+
+  /// True when tablet+ in landscape → use two-column detail layouts.
+  static bool useTwoColumn(BuildContext context) =>
+      isTabletOrLarger(context) &&
+      MediaQuery.orientationOf(context) == Orientation.landscape;
+
   // ─── Component sizes ─────────────────────────────────────────────────────
 
   /// Avatar / profile image diameter: 90 / 110 / 130
@@ -101,6 +108,17 @@ abstract final class ResponsiveUtils {
     if (isTablet(context)) return 200;
     return 160;
   }
+
+  /// Hero image height for detail screens: 207 / 260 / 320
+  static double heroImageHeight(BuildContext context) {
+    if (isLargeTablet(context)) return 320;
+    if (isTablet(context)) return 260;
+    return 207;
+  }
+
+  /// Action button height: 44 / 52 / 52
+  static double buttonHeight(BuildContext context) =>
+      isTabletOrLarger(context) ? 52 : 44;
 
   /// Number of days shown in date selector carousel: 5 / 7 / 7
   static int dateSelectorDays(BuildContext context) =>
