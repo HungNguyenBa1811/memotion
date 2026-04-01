@@ -64,8 +64,9 @@ class VoiceRecordButton extends StatelessWidget {
         customDiameter = null;
 
   double _getDiameter(BuildContext context) {
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
-    final scale = isTablet ? 1.25 : 1.0;
+    final scale = isLarge ? 1.8 : isTablet ? 1.6 : 1.0;
 
     switch (size) {
       case VoiceRecordButtonSize.small:
@@ -77,7 +78,7 @@ class VoiceRecordButton extends StatelessWidget {
       case VoiceRecordButtonSize.custom:
         assert(customDiameter != null,
             'customDiameter must be provided when size is custom');
-        return (customDiameter ?? 80) * scale;
+        return customDiameter ?? 80; // Caller handles responsive sizing
     }
   }
 

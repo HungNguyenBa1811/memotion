@@ -84,15 +84,15 @@ class _PatientNutritionScreenContentState
           GestureDetector(
             onTap: () => context.go(AppRoutes.home),
             child: Container(
-              width: 40,
-              height: 40,
+              width: isLarge ? 92.0 : isTablet ? 80.0 : 40.0,
+              height: isLarge ? 92.0 : isTablet ? 80.0 : 40.0,
               decoration: const BoxDecoration(
                 color: Color(0xFF00695C),
                 shape: BoxShape.circle,
               ),
-              child: const Center(
+              child: Center(
                 child: Icon(Icons.arrow_back_ios_new,
-                    color: Colors.white, size: 18),
+                    color: Colors.white, size: isLarge ? 36.0 : isTablet ? 32.0 : 18.0),
               ),
             ),
           ),
@@ -117,7 +117,7 @@ class _PatientNutritionScreenContentState
               ),
             ],
           ),
-          const SizedBox(width: 40),
+          SizedBox(width: isLarge ? 92.0 : isTablet ? 80.0 : 40.0),
         ],
       ),
     );
@@ -132,7 +132,9 @@ class _PatientNutritionScreenContentState
     Object? apiError,
   }) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
-    
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+
     return Column(
       children: [
         // Inline API state: loading spinner or error banner
@@ -149,33 +151,36 @@ class _PatientNutritionScreenContentState
           )
         else if (apiError != null)
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            padding: EdgeInsets.fromLTRB(
+              ResponsiveUtils.horizontalPadding(context), 0,
+              ResponsiveUtils.horizontalPadding(context), 8 * fontScale,
+            ),
             child: Row(
               children: [
                 Icon(
                   apiError is PatientProfileNotFoundException
                       ? Icons.person_off
                       : Icons.error_outline,
-                  size: 16,
+                  size: 16 * fontScale,
                   color: apiError is PatientProfileNotFoundException
                       ? AppColors.primary
                       : Colors.red.shade300,
                 ),
-                const SizedBox(width: 6),
+                SizedBox(width: 6 * fontScale),
                 Expanded(
                   child: Text(
                     apiError is PatientProfileNotFoundException
                         ? 'No patient profile — showing demo meal.'
                         : 'Could not load meals — showing demo.',
                     style: GoogleFonts.lexend(
-                        fontSize: 12, color: Colors.grey[600]),
+                        fontSize: 12 * fontScale, color: Colors.grey[600]),
                   ),
                 ),
                 if (apiError is! PatientProfileNotFoundException)
                   GestureDetector(
                     onTap: () => ref.invalidate(nutritionTasksProvider),
-                    child: const Icon(Icons.refresh,
-                        size: 16, color: AppColors.primary),
+                    child: Icon(Icons.refresh,
+                        size: 16 * fontScale, color: AppColors.primary),
                   ),
               ],
             ),
@@ -190,9 +195,9 @@ class _PatientNutritionScreenContentState
             itemBuilder: (context, index) => Center(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
-                  20,
+                  ResponsiveUtils.horizontalPadding(context),
                   0,
-                  20,
+                  ResponsiveUtils.horizontalPadding(context),
                   ResponsiveUtils.bottomNavPadding(context) + (isTablet ? 180 : 16),
                 ),
                 child: _PatientNutritionCard(

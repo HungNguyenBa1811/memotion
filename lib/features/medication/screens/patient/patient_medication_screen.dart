@@ -88,9 +88,7 @@ class _PatientMedicationScreenContentState
             // Header + Calendar (constrained width on tablet)
             Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: isTablet
-                    ? ResponsiveUtils.horizontalPadding(context)
-                    : 0,
+                horizontal: ResponsiveUtils.horizontalPadding(context),
               ),
               child: Column(
                 children: [
@@ -136,29 +134,28 @@ class _PatientMedicationScreenContentState
     final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
     final qrBoxSize = isLarge ? 92.0 : isTablet ? 80.0 : 40.0;
     final qrIconSize = isLarge ? 46.0 : isTablet ? 40.0 : 20.0;
+    final backBoxSize = isLarge ? 92.0 : isTablet ? 80.0 : 40.0;
+    final backIconSize = isLarge ? 36.0 : isTablet ? 32.0 : 18.0;
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: 16,
-        horizontal: isTablet ? 0 : 20,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
             onTap: () => context.go(AppRoutes.home),
             child: Container(
-              width: 40,
-              height: 40,
+              width: backBoxSize,
+              height: backBoxSize,
               decoration: const BoxDecoration(
                 color: Color(0xFF00695C),
                 shape: BoxShape.circle,
               ),
-              child: const Center(
+              child: Center(
                 child: Icon(
                   Icons.arrow_back_ios_new,
                   color: Colors.white,
-                  size: 18,
+                  size: backIconSize,
                 ),
               ),
             ),
@@ -216,9 +213,9 @@ class _PatientMedicationScreenContentState
         final medication = medications[index];
         return Padding(
           padding: EdgeInsets.fromLTRB(
-            20,
+            ResponsiveUtils.horizontalPadding(context),
             0,
-            20,
+            ResponsiveUtils.horizontalPadding(context),
             ResponsiveUtils.bottomNavPadding(context) + 20,
           ),
           child: Align(
@@ -250,15 +247,19 @@ class _PatientMedicationScreenContentState
 
   // ─── Empty State ──────────────────────────────────────────────────────────
   Widget _buildEmptyState() {
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final scale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.medication_outlined, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
+          Icon(Icons.medication_outlined, size: 64 * scale, color: Colors.grey[400]),
+          SizedBox(height: 16 * scale),
           Text(
             'No medications found',
-            style: GoogleFonts.lexend(fontSize: 16, color: Colors.grey[600]),
+            style: GoogleFonts.lexend(fontSize: 16 * scale, color: Colors.grey[600]),
           ),
         ],
       ),
@@ -267,28 +268,32 @@ class _PatientMedicationScreenContentState
 
   // ─── Error Widget ─────────────────────────────────────────────────────────
   Widget _buildErrorWidget(Object error) {
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final scale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20 * scale),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-            const SizedBox(height: 16),
+            Icon(Icons.error_outline, size: 64 * scale, color: Colors.red.shade300),
+            SizedBox(height: 16 * scale),
             Text(
               'Unable to load medication data',
               style: GoogleFonts.lexend(
-                fontSize: 18,
+                fontSize: 18 * scale,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8 * scale),
             Text(
               error.toString(),
               textAlign: TextAlign.center,
-              style: GoogleFonts.lexend(fontSize: 14, color: Colors.grey),
+              style: GoogleFonts.lexend(fontSize: 14 * scale, color: Colors.grey),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20 * scale),
             ElevatedButton.icon(
               onPressed: () => ref.invalidate(medicationsProvider),
               icon: const Icon(Icons.refresh),

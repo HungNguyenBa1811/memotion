@@ -49,6 +49,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final isLoading = authState.status == AuthStatus.loading;
+    final ts = ResponsiveUtils.textScaleFactor(context);
+    final textScale = ts * ts;
+    final layoutScale = ts;
 
     // Show error if any
     ref.listen<AuthState>(authProvider, (previous, next) {
@@ -68,14 +71,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        toolbarHeight: 84, // increased vertical space to match Figma padding
+        toolbarHeight: 84 * layoutScale,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.textPrimary,
+            size: (ResponsiveUtils.isTabletOrLarger(context) ? 32.0 : 24.0) * layoutScale,
+          ),
           onPressed: widget.onBackPressed,
         ),
         title: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: Text('Login', style: AppTextStyles.headline2),
+          padding: EdgeInsets.symmetric(vertical: 12.0 * layoutScale),
+          child: Text('Login', style: AppTextStyles.headline2.copyWith(fontSize: 19 * textScale)),
         ),
         centerTitle: true,
       ),
@@ -87,15 +94,15 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             ),
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(
-                horizontal: ResponsiveUtils.horizontalPadding(context),
-                vertical: 20,
+                horizontal: 16,
+                vertical: 20 * layoutScale,
               ),
               child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 20),
+                SizedBox(height: 20 * layoutScale),
 
                 // Email field
                 AppTextField(
@@ -115,7 +122,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16 * layoutScale),
 
                 // Password field
                 AppTextField(
@@ -133,7 +140,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12 * layoutScale),
 
                 // Forgot password
                 Align(
@@ -150,13 +157,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     child: Text(
                       'Forgot password?',
                       style: AppTextStyles.bodyMedium.copyWith(
+                        fontSize: 14 * textScale,
                         color: AppColors.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32 * layoutScale),
 
                 // Login button
                 PrimaryButton(
@@ -164,7 +172,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   onPressed: _handleLogin,
                   isLoading: isLoading,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24 * layoutScale),
 
                 // Register link
                 Center(
@@ -173,11 +181,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     child: Text.rich(
                       TextSpan(
                         text: "Don't have an account? ",
-                        style: AppTextStyles.bodyMedium,
+                        style: AppTextStyles.bodyMedium.copyWith(fontSize: 14 * textScale),
                         children: [
                           TextSpan(
                             text: 'Sign Up',
                             style: AppTextStyles.bodyMedium.copyWith(
+                              fontSize: 14 * textScale,
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,
                             ),
@@ -187,17 +196,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32 * layoutScale),
 
                 // Divider with text
                 Row(
                   children: [
                     const Expanded(child: Divider(color: AppColors.divider)),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: 16 * layoutScale),
                       child: Text(
                         'OR',
                         style: AppTextStyles.caption.copyWith(
+                          fontSize: 11 * textScale,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -205,17 +215,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     const Expanded(child: Divider(color: AppColors.divider)),
                   ],
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24 * layoutScale),
 
                 // Google login button
                 SocialButton(
                   text: 'Sign in with Google',
                   icon: Image.network(
                     'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-                    width: 24,
-                    height: 24,
+                    width: 24 * textScale,
+                    height: 24 * textScale,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.g_mobiledata, size: 24);
+                      return Icon(Icons.g_mobiledata, size: 24 * textScale);
                     },
                   ),
                   onPressed: () {

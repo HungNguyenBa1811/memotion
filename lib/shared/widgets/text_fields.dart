@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 
 class AppTextField extends StatefulWidget {
   final String hint;
@@ -38,24 +39,48 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final rawScale = ResponsiveUtils.textScaleFactor(context);
+    final scale = isTablet ? rawScale * 1.3 : rawScale;
+    final iconSize = 20 * scale;
+
+    Widget? prefixIconWidget;
+    BoxConstraints? prefixIconConstraints;
+    if (widget.prefixIcon != null) {
+      if (isTablet) {
+        final iconLeftPadding = 20 * rawScale;
+        prefixIconWidget = Padding(
+          padding: EdgeInsets.only(left: iconLeftPadding),
+          child: Icon(widget.prefixIcon, color: AppColors.inputHint, size: iconSize),
+        );
+        prefixIconConstraints = BoxConstraints(
+          minWidth: iconSize + iconLeftPadding + 12 * rawScale,
+          minHeight: 0,
+        );
+      } else {
+        prefixIconWidget = Icon(widget.prefixIcon, color: AppColors.inputHint, size: iconSize);
+      }
+    }
+
     return TextFormField(
       controller: widget.controller,
       obscureText: _obscureText,
       keyboardType: widget.keyboardType,
       validator: widget.validator,
       onChanged: widget.onChanged,
-      style: AppTextStyles.inputText,
+      style: AppTextStyles.inputText.copyWith(fontSize: 14 * scale),
       decoration: InputDecoration(
         hintText: widget.hint,
-        prefixIcon: widget.prefixIcon != null
-            ? Icon(widget.prefixIcon, color: AppColors.inputHint, size: 20)
-            : null,
+        hintStyle: AppTextStyles.inputText.copyWith(fontSize: 14 * scale, color: AppColors.inputHint),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16 * scale, vertical: 14 * scale),
+        prefixIcon: prefixIconWidget,
+        prefixIconConstraints: prefixIconConstraints,
         suffixIcon: widget.obscureText
             ? IconButton(
                 icon: Icon(
                   _obscureText ? Icons.visibility_off : Icons.visibility,
                   color: AppColors.inputHint,
-                  size: 20,
+                  size: iconSize,
                 ),
                 onPressed: () {
                   setState(() {

@@ -62,9 +62,9 @@ class WorkoutVerticalCard extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.fromLTRB(
                 24 * scale,
-                8 * scale,
+                16 * scale,
                 24 * scale,
-                8 * scale,
+                16 * scale,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +72,7 @@ class WorkoutVerticalCard extends StatelessWidget {
                   // Time chip
                   Container(
                     padding: EdgeInsets.symmetric(
-                      horizontal: 12 * textScale * scale, 
+                      horizontal: 12 * textScale * scale,
                       vertical: 4 * textScale * scale,
                     ),
                     decoration: BoxDecoration(
@@ -96,7 +96,7 @@ class WorkoutVerticalCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(height: 4 * scale),
+                  SizedBox(height: 10 * scale),
                   // Title
                   Text(
                     workout.title,
@@ -111,7 +111,7 @@ class WorkoutVerticalCard extends StatelessWidget {
                   ),
                   if (workout.description != null &&
                       workout.description!.isNotEmpty) ...[
-                    SizedBox(height: 4 * scale),
+                    SizedBox(height: 8 * scale),
                     Text(
                       workout.description!,
                       style: GoogleFonts.lexend(
@@ -124,7 +124,7 @@ class WorkoutVerticalCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
-                  SizedBox(height: 4 * scale),
+                  SizedBox(height: 12 * scale),
                   // Stats row
                   Row(
                     children: [

@@ -62,11 +62,19 @@ abstract final class ResponsiveUtils {
 
   /// Narrower max width for forms (auth, alarm)
   static double formMaxWidth(BuildContext context) {
-    if (isTabletOrLarger(context)) return 480;
+    if (isLargeTablet(context)) return 780;
+    if (isTablet(context)) return 680;
     return double.infinity;
   }
 
   // ─── Navigation ───────────────────────────────────────────────────────────
+
+  /// Height of the BottomPillNav bar: 86 / 172 / 200
+  static double navBarHeight(BuildContext context) {
+    if (isLargeTablet(context)) return 200;
+    if (isTablet(context)) return 172;
+    return 86;
+  }
 
   /// Bottom padding to clear the floating BottomNavigationBar.
   /// On tablet the nav becomes a NavigationRail, so bottom padding is 0.

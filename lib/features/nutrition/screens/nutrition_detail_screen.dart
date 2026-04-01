@@ -43,29 +43,34 @@ class _NutritionDetailLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = ResponsiveUtils.textScaleFactor(context);
+
     return SafeArea(
       child: Column(
         children: [
           // Header skeleton
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: ResponsiveUtils.horizontalPadding(context),
+              vertical: 16 * scale,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 40 * scale,
+                  height: 40 * scale,
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back_ios_new,
                     color: Colors.white,
-                    size: 17,
+                    size: 17 * scale,
                   ),
                 ),
-                const SizedBox(width: 24),
+                SizedBox(width: 24 * scale),
               ],
             ),
           ),
@@ -94,27 +99,32 @@ class _NutritionDetailError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = ResponsiveUtils.textScaleFactor(context);
+
     return SafeArea(
       child: Column(
         children: [
           // Header
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: ResponsiveUtils.horizontalPadding(context),
+              vertical: 16 * scale,
+            ),
             child: Row(
               children: [
                 GestureDetector(
                   onTap: () => context.pop(),
                   child: Container(
-                    width: 40,
-                    height: 40,
+                    width: 40 * scale,
+                    height: 40 * scale,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.arrow_back_ios_new,
                       color: Colors.white,
-                      size: 17,
+                      size: 17 * scale,
                     ),
                   ),
                 ),
@@ -124,34 +134,34 @@ class _NutritionDetailError extends StatelessWidget {
           Expanded(
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(20 * scale),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.error_outline,
-                      size: 64,
+                      size: 64 * scale,
                       color: Colors.red.shade300,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16 * scale),
                     Text(
                       'Unable to load information',
                       style: GoogleFonts.lexend(
-                        fontSize: 18,
+                        fontSize: 18 * scale,
                         fontWeight: FontWeight.w600,
                         color: _textDarkGreen,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8 * scale),
                     Text(
                       error.toString(),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.lexend(
-                        fontSize: 14,
+                        fontSize: 14 * scale,
                         color: Colors.grey,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20 * scale),
                     ElevatedButton.icon(
                       onPressed: onRetry,
                       icon: const Icon(Icons.refresh),
@@ -264,13 +274,13 @@ class _NutritionDetailContent extends ConsumerWidget {
 
                 // Hero image area with nutrition badges
                 SizedBox(
-                  height: 350 * scale,
+                  height: 400 * scale,
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
                       // Main image from API or fallback
                       Positioned(
-                        right: -140 * scale,
+                        right: -120 * scale,
                         top: -10 * scale,
                         child: _buildMainImage(scale: scale),
                       ),
@@ -405,14 +415,14 @@ class _NutritionDetailContent extends ConsumerWidget {
         borderRadius: BorderRadius.circular(200 * scale),
         child: Image.network(
           '${ApiConstants.baseUrl}${task.imagePath}',
-          width: 300 * scale,
-          height: 300 * scale,
+          width: 350 * scale,
+          height: 350 * scale,
           fit: BoxFit.cover,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return Container(
-              width: 300 * scale,
-              height: 300 * scale,
+              width: 350 * scale,
+              height: 350 * scale,
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20 * scale),
@@ -437,8 +447,8 @@ class _NutritionDetailContent extends ConsumerWidget {
 
   Widget _buildFallbackImage({required double scale}) {
     return Container(
-      width: 300 * scale,
-      height: 300 * scale,
+      width: 350 * scale,
+      height: 350 * scale,
       decoration: BoxDecoration(
         color: task.mealColor.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20 * scale),
@@ -446,7 +456,7 @@ class _NutritionDetailContent extends ConsumerWidget {
       child: Center(
         child: Icon(
           task.mealIcon,
-          size: 120 * scale,
+          size: 140 * scale,
           color: task.mealColor.withValues(alpha: 0.5),
         ),
       ),

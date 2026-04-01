@@ -74,6 +74,9 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final isLoading = authState.status == AuthStatus.loading;
+    final ts = ResponsiveUtils.textScaleFactor(context);
+    final textScale = ts * ts;
+    final layoutScale = ts;
 
     // Show error if any
     ref.listen<AuthState>(authProvider, (previous, next) {
@@ -93,14 +96,18 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        toolbarHeight: 84, // increased vertical space to match Figma padding
+        toolbarHeight: 84 * layoutScale,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.textPrimary,
+            size: (ResponsiveUtils.isTabletOrLarger(context) ? 32.0 : 24.0) * layoutScale,
+          ),
           onPressed: widget.onBackPressed,
         ),
         title: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: Text('Register', style: AppTextStyles.headline2),
+          padding: EdgeInsets.symmetric(vertical: 12.0 * layoutScale),
+          child: Text('Register', style: AppTextStyles.headline2.copyWith(fontSize: 19 * textScale)),
         ),
         centerTitle: true,
       ),
@@ -112,15 +119,15 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
             ),
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(
-                horizontal: ResponsiveUtils.horizontalPadding(context),
-                vertical: 20,
+                horizontal: 16,
+                vertical: 20 * layoutScale,
               ),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20 * layoutScale),
 
                     // Nickname field
                     AppTextField(
@@ -137,7 +144,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16 * layoutScale),
 
                     // Email field
                     AppTextField(
@@ -157,7 +164,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16 * layoutScale),
 
                     // Password field
                     AppTextField(
@@ -175,45 +182,55 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20 * layoutScale),
 
                     // Terms checkbox
                     Row(
                       children: [
                         SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: Checkbox(
-                            value: _agreedToTerms,
-                            onChanged: (value) {
-                              setState(() {
-                                _agreedToTerms = value ?? false;
-                              });
-                            },
-                            activeColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
+                          width: ResponsiveUtils.isTabletOrLarger(context) ? 48 : 24,
+                          height: ResponsiveUtils.isTabletOrLarger(context) ? 48 : 24,
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: Checkbox(
+                                value: _agreedToTerms,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _agreedToTerms = value ?? false;
+                                  });
+                                },
+                                activeColor: AppColors.primary,
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4 * layoutScale),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12 * textScale),
                         Expanded(
                           child: Text.rich(
                             TextSpan(
                               text: 'I agree to the ',
-                              style: AppTextStyles.bodySmall,
+                              style: AppTextStyles.bodySmall.copyWith(fontSize: 12 * textScale),
                               children: [
                                 TextSpan(
                                   text: 'Terms of Service',
                                   style: AppTextStyles.bodySmall.copyWith(
+                                    fontSize: 12 * textScale,
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                                const TextSpan(text: ' and '),
+                                TextSpan(text: ' and ', style: AppTextStyles.bodySmall.copyWith(fontSize: 12 * textScale)),
                                 TextSpan(
                                   text: 'Privacy Policy',
                                   style: AppTextStyles.bodySmall.copyWith(
+                                    fontSize: 12 * textScale,
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -224,7 +241,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32 * layoutScale),
 
                     // Register button
                     PrimaryButton(
@@ -232,7 +249,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                       onPressed: _handleRegister,
                       isLoading: isLoading,
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24 * layoutScale),
 
                     // Login link
                     Center(
@@ -241,11 +258,12 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                         child: Text.rich(
                           TextSpan(
                             text: 'Already have an account? ',
-                            style: AppTextStyles.bodyMedium,
+                            style: AppTextStyles.bodyMedium.copyWith(fontSize: 14 * textScale),
                             children: [
                               TextSpan(
                                 text: 'Login',
                                 style: AppTextStyles.bodyMedium.copyWith(
+                                  fontSize: 14 * textScale,
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w600,
                                 ),

@@ -218,7 +218,10 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
   }
 
   Widget _buildTitleSection({bool isTablet = false}) {
-    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final isTabletMode = ResponsiveUtils.isTabletOrLarger(context);
+    final fontScale = isLarge ? 2.3 : isTabletMode ? 2.0 : 1.0;
+
     return Align(
       alignment: Alignment.centerLeft,
       child: Column(
@@ -227,17 +230,17 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
           Text(
             'Daily Tasks',
             style: GoogleFonts.lexend(
-              fontSize: 24 * textScale,
+              fontSize: 24 * fontScale,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF070707),
               letterSpacing: -0.3,
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: 2 * fontScale),
           Text(
             'Patient Name',
             style: GoogleFonts.lexend(
-              fontSize: 14 * textScale,
+              fontSize: 14 * fontScale,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF070707).withOpacity(0.7),
             ),

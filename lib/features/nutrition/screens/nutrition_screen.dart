@@ -73,8 +73,8 @@ class NutritionScreenContent extends ConsumerWidget {
                   GestureDetector(
                     onTap: () => context.go(AppRoutes.home),
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: isLarge ? 92.0 : isTablet ? 80.0 : 40.0,
+                      height: isLarge ? 92.0 : isTablet ? 80.0 : 40.0,
                       decoration: BoxDecoration(
                         color: const Color(0xFF00695C),
                         shape: BoxShape.circle,
@@ -83,7 +83,7 @@ class NutritionScreenContent extends ConsumerWidget {
                         child: Icon(
                           Icons.arrow_back_ios_new,
                           color: Colors.white,
-                          size: 18,
+                          size: isLarge ? 36.0 : isTablet ? 32.0 : 18.0,
                         ),
                       ),
                     ),
@@ -96,26 +96,26 @@ class NutritionScreenContent extends ConsumerWidget {
                         child: Icon(
                           Icons.refresh,
                           color: AppColors.textPrimary,
-                          size: 24,
+                          size: 24 * fontScale,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16 * fontScale),
                       SizedBox(
-                        width: 24,
-                        height: 24,
+                        width: 24 * fontScale,
+                        height: 24 * fontScale,
                         child: Stack(
                           children: [
                             Icon(
                               Icons.notifications,
                               color: AppColors.textPrimary,
-                              size: 24,
+                              size: 24 * fontScale,
                             ),
                             Positioned(
                               top: 0,
                               right: 0,
                               child: Container(
-                                width: 8,
-                                height: 8,
+                                width: 8 * fontScale,
+                                height: 8 * fontScale,
                                 decoration: BoxDecoration(
                                   color: AppColors.secondary,
                                   shape: BoxShape.circle,
@@ -143,7 +143,7 @@ class NutritionScreenContent extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6 * fontScale),
 
             // Subtitle
             Padding(
@@ -157,7 +157,7 @@ class NutritionScreenContent extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20 * fontScale),
 
             // Category pills (filter by meal type)
             Padding(
@@ -167,30 +167,34 @@ class NutritionScreenContent extends ConsumerWidget {
                 child: Row(
                   children: [
                     _buildCategoryPill(
+                      context,
                       ref,
                       'All',
                       filter: NutritionFilter.all,
                       isActive: selectedFilter == NutritionFilter.all,
                       icon: Icons.restaurant_menu,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12 * fontScale),
                     _buildCategoryPill(
+                      context,
                       ref,
                       'Breakfast',
                       filter: NutritionFilter.breakfast,
                       isActive: selectedFilter == NutritionFilter.breakfast,
                       icon: Icons.free_breakfast,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12 * fontScale),
                     _buildCategoryPill(
+                      context,
                       ref,
                       'Lunch',
                       filter: NutritionFilter.lunch,
                       isActive: selectedFilter == NutritionFilter.lunch,
                       icon: Icons.lunch_dining,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12 * fontScale),
                     _buildCategoryPill(
+                      context,
                       ref,
                       'Dinner',
                       filter: NutritionFilter.dinner,
@@ -201,7 +205,7 @@ class NutritionScreenContent extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20 * fontScale),
 
             // Content — demo card always visible; API tasks appended when available
             Expanded(
@@ -222,38 +226,43 @@ class NutritionScreenContent extends ConsumerWidget {
   }
 
   Widget _buildCategoryPill(
+    BuildContext context,
     WidgetRef ref,
     String label, {
     required NutritionFilter filter,
     bool isActive = false,
     IconData? icon,
   }) {
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final fs = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+
     return GestureDetector(
       onTap: () {
         ref.read(nutritionFilterProvider.notifier).state = filter;
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 20 * fs, vertical: 10 * fs),
         decoration: BoxDecoration(
           color: isActive ? AppColors.secondary : Colors.white,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(30 * fs),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null)
               Padding(
-                padding: const EdgeInsets.only(right: 8),
+                padding: EdgeInsets.only(right: 8 * fs),
                 child: Icon(
                   icon,
-                  size: 20,
+                  size: 20 * fs,
                   color: isActive ? Colors.white : Colors.black,
                 ),
               ),
             Text(
               label,
               style: GoogleFonts.glory(
-                fontSize: 16,
+                fontSize: 16 * fs,
                 fontWeight: FontWeight.w500,
                 color: isActive ? Colors.white : Colors.black,
               ),
@@ -275,6 +284,10 @@ class NutritionScreenContent extends ConsumerWidget {
 
     final hPad = ResponsiveUtils.horizontalPadding(context);
     final bottomPad = ResponsiveUtils.bottomNavPadding(context) + 40;
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final cardScale = isLarge ? 1.6 : isTablet ? 1.4 : 1.0;
 
     return SingleChildScrollView(
       padding: EdgeInsets.only(bottom: bottomPad),
@@ -283,7 +296,7 @@ class NutritionScreenContent extends ConsumerWidget {
         children: [
           // Featured vertical cards — demo card always visible
           SizedBox(
-            height: 315,
+            height: 315 * cardScale,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: EdgeInsets.symmetric(horizontal: hPad),
@@ -291,14 +304,24 @@ class NutritionScreenContent extends ConsumerWidget {
               itemBuilder: (context, index) {
                 return Padding(
                   padding: EdgeInsets.only(
-                    right: index < displayTasks.length - 1 ? 16 : 0,
+                    right: index < displayTasks.length - 1 ? 16 * cardScale : 0,
                   ),
-                  child: NutritionVerticalCard(task: displayTasks[index]),
+                  child: SizedBox(
+                    width: 227 * cardScale,
+                    height: 300 * cardScale,
+                    child: FittedBox(
+                      child: SizedBox(
+                        width: 227,
+                        height: 300,
+                        child: NutritionVerticalCard(task: displayTasks[index]),
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24 * fontScale),
 
           // Popular recipes section header
           Padding(
@@ -309,7 +332,7 @@ class NutritionScreenContent extends ConsumerWidget {
                   TextSpan(
                     text: 'Popular ',
                     style: GoogleFonts.lexend(
-                      fontSize: 24,
+                      fontSize: 24 * fontScale,
                       fontWeight: FontWeight.w700,
                       color: Colors.black,
                     ),
@@ -317,7 +340,7 @@ class NutritionScreenContent extends ConsumerWidget {
                   TextSpan(
                     text: 'recipes',
                     style: GoogleFonts.lexend(
-                      fontSize: 24,
+                      fontSize: 24 * fontScale,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFFACACAC),
                     ),
@@ -326,7 +349,7 @@ class NutritionScreenContent extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16 * fontScale),
 
           // API state: loading indicator or error banner inline
           if (isLoading)
@@ -335,19 +358,34 @@ class NutritionScreenContent extends ConsumerWidget {
               child: Center(child: CircularProgressIndicator()),
             )
           else if (apiError != null)
-            _buildInlineApiError(ref, apiError)
+            _buildInlineApiError(context, ref, apiError)
           // Additional API task cards when data is present
           else if (tasks.length > 2)
             Padding(
               padding: EdgeInsets.symmetric(horizontal: hPad),
-              child: ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: (tasks.length - 2).clamp(0, 3),
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: NutritionHorizontalCard(task: tasks[index + 2]),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: (tasks.length - 2).clamp(0, 3),
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 16 * cardScale),
+                        child: SizedBox(
+                          height: 147 * cardScale,
+                          child: FittedBox(
+                            fit: BoxFit.fitHeight,
+                            alignment: Alignment.centerLeft,
+                            child: SizedBox(
+                              width: constraints.maxWidth / cardScale,
+                              height: 147,
+                              child: NutritionHorizontalCard(task: tasks[index + 2]),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
@@ -357,30 +395,34 @@ class NutritionScreenContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildInlineApiError(WidgetRef ref, Object error) {
+  Widget _buildInlineApiError(BuildContext context, WidgetRef ref, Object error) {
+    final isTablet = ResponsiveUtils.isTabletOrLarger(context);
+    final isLarge = ResponsiveUtils.isLargeTablet(context);
+    final fs = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
     final isPatientNotFound = error is PatientProfileNotFoundException;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.horizontalPadding(context), vertical: 8 * fs),
       child: Row(
         children: [
           Icon(
             isPatientNotFound ? Icons.person_off : Icons.error_outline,
-            size: 20,
+            size: 20 * fs,
             color: isPatientNotFound ? AppColors.primary : Colors.red.shade300,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8 * fs),
           Expanded(
             child: Text(
               isPatientNotFound
                   ? 'No patient profile — contact your doctor for a plan.'
                   : 'Could not load tasks. Tap to retry.',
-              style: GoogleFonts.lexend(fontSize: 13, color: Colors.grey),
+              style: GoogleFonts.lexend(fontSize: 13 * fs, color: Colors.grey),
             ),
           ),
           if (!isPatientNotFound)
             GestureDetector(
               onTap: () => ref.invalidate(nutritionTasksProvider),
-              child: Icon(Icons.refresh, size: 20, color: AppColors.primary),
+              child: Icon(Icons.refresh, size: 20 * fs, color: AppColors.primary),
             ),
         ],
       ),

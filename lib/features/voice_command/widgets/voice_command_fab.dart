@@ -27,9 +27,7 @@ class VoiceCommandFAB extends ConsumerWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-        bottom: ResponsiveUtils.isPhone(context) 
-            ? ResponsiveUtils.bottomNavPadding(context) - 40 // Adjust to sit above pill nav
-            : 0,
+        bottom: ResponsiveUtils.navBarHeight(context) + (ResponsiveUtils.isTabletOrLarger(context) ? 32 : ResponsiveUtils.sectionGap(context)),
       ),
       child: VoiceRecordButton.small(
         isEnabled: !isAudioPlaying,

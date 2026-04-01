@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../shared/widgets/widgets.dart';
 
 class OnboardingScreen extends StatelessWidget {
@@ -14,14 +15,15 @@ class OnboardingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = ResponsiveUtils.textScaleFactor(context);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             child: Container(
-              // reduce vertical padding so the image and content are closer
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 28),
+              padding: EdgeInsets.symmetric(horizontal: 30 * scale, vertical: 28 * scale),
               constraints: const BoxConstraints(maxWidth: 900),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -35,44 +37,48 @@ class OnboardingScreen extends StatelessWidget {
                           ? screenW * 0.95
                           : screenW * 0.9;
 
-                      // Use the image's original size. Do not force width/height.
-                      // Wrap with Center and constrain max width so it doesn't overflow on small screens.
                       return SizedBox(
                         width: boxWidth,
                         child: Center(
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12 * scale),
                             child: Image.asset(
                               'assets/images/logo.png',
-                              // no width/height: original image size will be used
-                              fit: BoxFit.none,
+                              width: boxWidth * 0.5,
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ),
                       );
                     },
                   ),
-                  // Content below image (all inside the same centered box)
+                  // Content below image
                   Text(
                     "Let's get started",
-                    style: AppTextStyles.headline1,
+                    style: AppTextStyles.headline1.copyWith(fontSize: 22 * scale * scale),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8 * scale),
                   Text(
                     'Experience Memotion today!',
                     style: AppTextStyles.bodyLarge.copyWith(
+                      fontSize: 16 * scale * scale,
                       color: AppColors.textSecondary,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 40),
-                  PrimaryButton(text: 'Login', onPressed: onLoginPressed),
-                  const SizedBox(height: 16),
-                  SecondaryButton(
-                    text: 'Register',
-                    onPressed: onRegisterPressed,
-                  ),
+                  SizedBox(height: 40 * scale),
+                PrimaryButton(
+                  text: 'Login',
+                  onPressed: onLoginPressed,
+                  fontSize: ResponsiveUtils.isTabletOrLarger(context) ? 20 : null,
+                ),
+                SizedBox(height: 16 * scale),
+                SecondaryButton(
+                  text: 'Register',
+                  onPressed: onRegisterPressed,
+                  fontSize: ResponsiveUtils.isTabletOrLarger(context) ? 20 : null,
+                ),
                 ],
               ),
             ),
