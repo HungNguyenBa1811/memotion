@@ -10,6 +10,8 @@ import '../providers/medication_provider.dart';
 import '../models/medication.dart';
 import '../widgets/medication_task_card.dart';
 import '../data/medication_scheduler.dart';
+import '../data/medication_cache_store.dart';
+import '../data/medication_sync_service.dart';
 import '../../workout/widgets/calendar_day_picker.dart';
 import '../../workout/models/workout_model.dart';
 
@@ -42,6 +44,7 @@ class MedicationMainScreenContent extends ConsumerStatefulWidget {
 class _MedicationMainScreenContentState
     extends ConsumerState<MedicationMainScreenContent> {
   int _selectedIndex = 0;
+  bool _showDebug = false;
   late int _selectedDayIndex;
   late List<CalendarDay> _calendarDays;
 
@@ -186,7 +189,33 @@ class _MedicationMainScreenContentState
                   ),
                   error: (error, _) => _buildErrorWidget(error),
                 ),
-                SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
+                const SizedBox(height: 24),
+                GestureDetector(
+                  onTap: () => setState(() => _showDebug = !_showDebug),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _showDebug ? Icons.bug_report : Icons.bug_report_outlined,
+                        size: 16,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _showDebug ? 'Hide Debug' : 'Show Debug',
+                        style: GoogleFonts.lexend(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_showDebug) ...[
+                  const SizedBox(height: 12),
+                  _buildDebugSection(context),
+                ],
+                SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 2),
               ],
             ),
           ),
@@ -494,6 +523,150 @@ class _MedicationMainScreenContentState
     }
   }
 
+
+  Widget _buildDebugSection(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Debug Tools',
+            style: GoogleFonts.lexend(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Row 1: Clear Cache + Reload Cache
+          Row(
+            children: [
+              Expanded(
+                child: _debugButton(
+                  icon: Icons.delete_outline,
+                  label: 'Clear Cache',
+                  color: Colors.red.shade400,
+                  onTap: () async {
+                    await MedicationCacheStore().clear();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Cache cleared')),
+                      );
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _debugButton(
+                  icon: Icons.refresh,
+                  label: 'Reload Cache',
+                  color: AppColors.primary,
+                  onTap: () async {
+                    ref.invalidate(medicationsProvider);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Cache reloaded from API')),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Row 2: Schedule alarm buttons
+          Text(
+            'Schedule Test Alarm',
+            style: GoogleFonts.lexend(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [1, 2, 3, 5, 10].map((minutes) {
+              return _debugButton(
+                icon: Icons.alarm_add,
+                label: '${minutes}m',
+                color: Colors.orange.shade600,
+                onTap: () => _scheduleQuickAlarm(context, minutes),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _debugButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.lexend(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _scheduleQuickAlarm(BuildContext context, int minutes) async {
+    final dueDate = DateTime.now().add(Duration(minutes: minutes));
+    // ignore: deprecated_member_use
+    await MedicationScheduler.syncTasks({
+      'code': '200',
+      'data': [
+        {
+          'task_id': 'test-${dueDate.millisecondsSinceEpoch}',
+          'task_duedate': dueDate.toIso8601String(),
+          'medication_detail': {
+            'name': 'Test Vitamin D3',
+            'dosage': '1 viên',
+            'notes': 'Test alarm — $minutes min delay',
+            'image_path': null,
+          },
+        },
+      ],
+    });
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Alarm scheduled: $minutes min from now')),
+      );
+    }
+  }
 
   Widget _buildOfflineBanner() {
     final pendingCount =
