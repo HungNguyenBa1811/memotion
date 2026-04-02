@@ -25,19 +25,14 @@ class WorkoutVerticalCard extends StatelessWidget {
     final typeColor = _colorForType(workout.type);
     final typeIcon = _iconForType(workout.type);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32 * scale),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
+    return GestureDetector(
+      onTap: onStart,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(32 * scale),
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Image / visual area ──────────────────────────────────────
@@ -97,33 +92,54 @@ class WorkoutVerticalCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 10 * scale),
-                  // Title
-                  Text(
-                    workout.title,
-                    style: GoogleFonts.lexend(
-                      fontSize: 22 * textScale * scale,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1A1A2E),
-                      height: 1.2,
+                  // Title + description (adaptive to available height)
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final showDescription =
+                            constraints.maxHeight > 60 * scale &&
+                            workout.description != null &&
+                            workout.description!.isNotEmpty;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  workout.title,
+                                  style: GoogleFonts.lexend(
+                                    fontSize: 22 * textScale * scale,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF1A1A2E),
+                                    height: 1.2,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                            if (showDescription) ...[
+                              SizedBox(height: 8 * scale),
+                              Text(
+                                workout.description!,
+                                style: GoogleFonts.lexend(
+                                  fontSize: 14 * textScale * scale,
+                                  color: const Color(0xFF6B7280),
+                                  height: 1.4,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
+                        );
+                      },
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  if (workout.description != null &&
-                      workout.description!.isNotEmpty) ...[
-                    SizedBox(height: 8 * scale),
-                    Text(
-                      workout.description!,
-                      style: GoogleFonts.lexend(
-                        fontSize: 14 * textScale * scale,
-                        color: const Color(0xFF6B7280),
-                        height: 1.4,
-                        fontWeight: FontWeight.w300,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
                   SizedBox(height: 12 * scale),
                   // Stats row
                   Row(
@@ -145,30 +161,7 @@ class WorkoutVerticalCard extends StatelessWidget {
                         ),
                       ],
                       const Spacer(),
-                      // CTA
-                      if (!workout.isCompleted)
-                        ElevatedButton(
-                          onPressed: onStart,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14 * scale)),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 20 * scale,
-                              vertical: 8 * scale,
-                            ),
-                          ),
-                          child: Text(
-                            'Start',
-                            style: GoogleFonts.lexend(
-                              fontSize: 15 * textScale * scale,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        )
-                      else
+                      if (workout.isCompleted)
                         Row(
                           children: [
                             Icon(Icons.check_circle_rounded,
@@ -191,6 +184,7 @@ class WorkoutVerticalCard extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

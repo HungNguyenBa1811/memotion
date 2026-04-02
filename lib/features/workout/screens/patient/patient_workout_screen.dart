@@ -78,47 +78,51 @@ class _PatientWorkoutScreenContentState
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header + Title + Calendar (constrained width on tablet)
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isTablet
-                    ? ResponsiveUtils.horizontalPadding(context)
-                    : 0,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header + Title + Calendar (constrained width on tablet)
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet
+                      ? ResponsiveUtils.horizontalPadding(context)
+                      : 0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(context),
+                    _buildTitleSection(context),
+                    const SizedBox(height: 16),
+                    CalendarDayPicker(
+                      days: _calendarDays,
+                      scale: calendarScale,
+                      selectedIndex: _selectedDayIndex,
+                      onDaySelected: (index) {
+                        setState(() => _selectedDayIndex = index);
+                        _resetSelection();
+                        ref
+                            .read(workoutListProvider.notifier)
+                            .selectDate(_calendarDays[index].date);
+                      },
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(context),
-                  _buildTitleSection(context),
-                  const SizedBox(height: 16),
-                  CalendarDayPicker(
-                    days: _calendarDays,
-                    scale: calendarScale,
-                    selectedIndex: _selectedDayIndex,
-                    onDaySelected: (index) {
-                      setState(() => _selectedDayIndex = index);
-                      _resetSelection();
-                      ref
-                          .read(workoutListProvider.notifier)
-                          .selectDate(_calendarDays[index].date);
-                    },
-                  ),
-                ],
+              SizedBox(height: isTablet ? 40 * calendarScale : 20),
+              // PageView slideshow — same on both mobile and tablet
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.55,
+                child: _buildContent(
+                  context,
+                  workoutState,
+                  cardScale: cardScale
+                ),
               ),
-            ),
-            SizedBox(height: isTablet ? 40 * calendarScale : 20),
-            // PageView slideshow — same on both mobile and tablet
-            Expanded(
-              child: _buildContent(
-                context, 
-                workoutState, 
-                cardScale: cardScale
-              ),
-            ),
-          ],
+              SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 2),
+            ],
+          ),
         ),
       ),
       floatingActionButton: const VoiceCommandFAB(),
@@ -291,11 +295,8 @@ class _PatientWorkoutScreenContentState
       itemBuilder: (context, index) {
         final workout = workouts[index];
         return Padding(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            0,
-            20,
-            ResponsiveUtils.bottomNavPadding(context) + 20,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
           ),
           child: Align(
             alignment: Alignment.topCenter,

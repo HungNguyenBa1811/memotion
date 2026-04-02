@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../models/voice_command_key.dart';
 import '../models/voice_command_response.dart';
@@ -73,7 +74,7 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
           if (messenger != null) {
             messenger.showSnackBar(
               const SnackBar(
-                content: Text('Đã hủy lệnh thoại'),
+                content: Text('Voice command cancelled'),
                 duration: Duration(seconds: 2),
               ),
             );
@@ -81,7 +82,13 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 124),
+        width: double.infinity,
+        padding: EdgeInsets.fromLTRB(
+          20,
+          16,
+          20,
+          ResponsiveUtils.navBarHeight(context) * 2,
+        ),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -117,10 +124,10 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
         children: [
           const Icon(Icons.mic, size: 52, color: AppColors.primary),
           const SizedBox(height: 12),
-          Text('Sẵn sàng lắng nghe', style: AppTextStyles.headline2),
+          Text('Ready to listen', style: AppTextStyles.headline2),
           const SizedBox(height: 8),
           Text(
-            'Nhấn bắt đầu để ghi âm lệnh thoại.',
+            'Tap Start to record a voice command.',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -130,7 +137,7 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
           ElevatedButton.icon(
             onPressed: () => unawaited(notifier.startRecording()),
             icon: const Icon(Icons.fiber_manual_record),
-            label: const Text('Bắt đầu'),
+            label: const Text('Start'),
           ),
         ],
       ),
@@ -156,10 +163,10 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
             ),
           ),
           const SizedBox(height: 20),
-          Text('Đang nghe...', style: AppTextStyles.headline2),
+          Text('Listening...', style: AppTextStyles.headline2),
           const SizedBox(height: 6),
           Text(
-            'Hãy nói yêu cầu của bạn',
+            'Please say your request',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -209,10 +216,10 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
         children: [
           const CircularProgressIndicator(color: AppColors.primary),
           const SizedBox(height: 18),
-          Text('Đang xử lý...', style: AppTextStyles.headline2),
+          Text('Processing...', style: AppTextStyles.headline2),
           const SizedBox(height: 8),
           Text(
-            'Đang chuyển giọng nói thành lệnh điều hướng',
+            'Converting speech to a navigation command',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -236,7 +243,7 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
             color: AppColors.success,
           ),
           const SizedBox(height: 14),
-          Text('Đã hiểu lệnh', style: AppTextStyles.headline2),
+          Text('Command recognized', style: AppTextStyles.headline2),
           const SizedBox(height: 8),
           Text(
             state.response?.transcript ?? '',
@@ -260,10 +267,10 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
         children: [
           const Icon(Icons.error_rounded, size: 52, color: AppColors.error),
           const SizedBox(height: 14),
-          Text('Không thể xử lý lệnh', style: AppTextStyles.headline2),
+          Text('Unable to process command', style: AppTextStyles.headline2),
           const SizedBox(height: 8),
           Text(
-            state.errorMessage ?? 'Đã xảy ra lỗi không xác định.',
+            state.errorMessage ?? 'An unknown error occurred.',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -275,14 +282,14 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Đóng'),
+                  child: const Text('Close'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () => unawaited(notifier.startRecording()),
-                  child: const Text('Thử lại'),
+                  child: const Text('Try again'),
                 ),
               ),
             ],

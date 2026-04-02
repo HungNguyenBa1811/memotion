@@ -269,6 +269,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
   void dispose() {
     _timer?.cancel();
     _videoController?.dispose();
+    _cameraService.dispose();
     super.dispose();
   }
 

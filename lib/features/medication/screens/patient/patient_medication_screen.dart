@@ -82,44 +82,49 @@ class _PatientMedicationScreenContentState
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header + Calendar (constrained width on tablet)
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: ResponsiveUtils.horizontalPadding(context),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header + Calendar (constrained width on tablet)
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: ResponsiveUtils.horizontalPadding(context),
+                ),
+                child: Column(
+                  children: [
+                    _buildHeader(context),
+                    if (isOffline) _buildOfflineBanner(),
+                    CalendarDayPicker(
+                      days: _calendarDays,
+                      scale: calendarScale,
+                      selectedIndex: _selectedDayIndex,
+                      onDaySelected: (index) {
+                        setState(() => _selectedDayIndex = index);
+                        ref.read(selectedDateProvider.notifier).state =
+                            _calendarDays[index].date;
+                        _resetSelection();
+                      },
+                    ),
+                    const SizedBox(height: 16)
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  _buildHeader(context),
-                  if (isOffline) _buildOfflineBanner(),
-                  CalendarDayPicker(
-                    days: _calendarDays,
-                    scale: calendarScale,
-                    selectedIndex: _selectedDayIndex,
-                    onDaySelected: (index) {
-                      setState(() => _selectedDayIndex = index);
-                      ref.read(selectedDateProvider.notifier).state =
-                          _calendarDays[index].date;
-                      _resetSelection();
-                    },
-                  ),
-                ],
+              SizedBox(height: isTablet ? 40 * calendarScale : 4),
+              // PageView slideshow — same on both mobile and tablet
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.55,
+                child: medicationsAsync.when(
+                  data: (medications) =>
+                      _buildPagedCards(medications, cardScale: cardScale),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, _) => _buildErrorWidget(error),
+                ),
               ),
-            ),
-            SizedBox(height: isTablet ? 40 * calendarScale : 4),
-            // PageView slideshow — same on both mobile and tablet
-            Expanded(
-              child: medicationsAsync.when(
-                data: (medications) =>
-                    _buildPagedCards(medications, cardScale: cardScale),
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
-                error: (error, _) => _buildErrorWidget(error),
-              ),
-            ),
-          ],
+              SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 2),
+            ],
+          ),
         ),
       ),
       floatingActionButton: const VoiceCommandFAB(),
@@ -166,7 +171,7 @@ class _PatientMedicationScreenContentState
                 'My Medications',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lexend(
-                  fontSize: 18 * textScale * fontScale * 0.7,
+                  fontSize: 18 * textScale * fontScale,
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF1A1A2E),
                 ),
@@ -212,11 +217,8 @@ class _PatientMedicationScreenContentState
       itemBuilder: (context, index) {
         final medication = medications[index];
         return Padding(
-          padding: EdgeInsets.fromLTRB(
-            ResponsiveUtils.horizontalPadding(context),
-            0,
-            ResponsiveUtils.horizontalPadding(context),
-            ResponsiveUtils.bottomNavPadding(context) + 20,
+          padding: EdgeInsets.symmetric(
+            horizontal: ResponsiveUtils.horizontalPadding(context),
           ),
           child: Align(
             alignment: Alignment.topCenter,

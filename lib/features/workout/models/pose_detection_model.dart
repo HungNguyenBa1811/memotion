@@ -102,28 +102,10 @@ class PoseFrameResult {
 
   factory PoseFrameResult.fromJson(Map<String, dynamic> json) {
     final phaseNum = json['phase'] as int? ?? 1;
-    
-    // Lấy data từ đúng field dựa trên phase
-    // Backend gửi: detection (phase 1), calibration (phase 2), sync (phase 3), final_report (phase 4)
-    Map<String, dynamic> phaseData = {};
-    switch (phaseNum) {
-      case 1:
-        phaseData = json['detection'] as Map<String, dynamic>? ?? {};
-        break;
-      case 2:
-        // Backend sends calibration data in 'data' field, not 'calibration'
-        phaseData = json['calibration'] as Map<String, dynamic>? ??
-                    json['data'] as Map<String, dynamic>? ?? {};
-        break;
-      case 3:
-        phaseData = json['sync'] as Map<String, dynamic>? ?? {};
-        break;
-      case 4:
-        phaseData = json['final_report'] as Map<String, dynamic>? ?? {};
-        break;
-      default:
-        phaseData = json['data'] as Map<String, dynamic>? ?? {};
-    }
+
+    // Backend wraps all phase data in the 'data' key
+    final Map<String, dynamic> phaseData =
+        json['data'] as Map<String, dynamic>? ?? {};
     
     return PoseFrameResult(
       phase: phaseNum,

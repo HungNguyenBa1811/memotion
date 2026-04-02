@@ -145,6 +145,7 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
     String? userId,
     String exerciseType = 'arm_raise',
     String defaultJoint = 'left_shoulder',
+    String? refVideoPath,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -153,6 +154,7 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
         userId: userId,
         exerciseType: exerciseType,
         defaultJoint: defaultJoint,
+        refVideoPath: refVideoPath,
       );
 
       state = state.copyWith(
@@ -175,8 +177,12 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
   /// Connect to WebSocket and start listening
   Future<void> connectWebSocket() async {
     try {
-      await _service.connectWebSocket();
       _setupListeners();
+      await _service.connectWebSocket();
+
+      // Sync state directly — broadcast stream delivers async (microtask),
+      // so state.isConnected would still be false if we only rely on the stream.
+      state = state.copyWith(isConnected: _service.isConnected);
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }

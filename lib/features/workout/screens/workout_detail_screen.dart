@@ -293,6 +293,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildBackButton(),
+              const SizedBox(height: 12),
               _buildHeroImageSection(workout),
               SizedBox(height: ResponsiveUtils.sectionGap(context) * 2),
               _buildScrollableBody(workout),

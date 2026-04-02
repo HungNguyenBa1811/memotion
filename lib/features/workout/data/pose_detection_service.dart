@@ -14,6 +14,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_constants.dart';
@@ -98,6 +99,7 @@ class PoseDetectionService {
     String? userId,
     String exerciseType = 'arm_raise',
     String defaultJoint = 'left_shoulder',
+    String? refVideoPath,
   }) async {
     PoseLogger.info('Starting session: userId=$userId, exercise=$exerciseType');
 
@@ -108,11 +110,12 @@ class PoseDetectionService {
           'user_id': userId,
           'exercise_type': exerciseType,
           'default_joint': defaultJoint,
+          if (refVideoPath != null) 'ref_video_path': refVideoPath,
         },
       );
 
       final sessionResponse = PoseSessionResponse.fromJson(response.data);
-      
+
       _sessionId = sessionResponse.sessionId;
       _websocketUrl = sessionResponse.websocketUrl;
       _currentPhase = 1;
@@ -141,11 +144,21 @@ class PoseDetectionService {
       // Build full WebSocket URL
       final baseUrl = ApiConstants.baseUrl.replaceFirst('http', 'ws');
       final fullUrl = '$baseUrl$_websocketUrl';
-      
+
       PoseLogger.ws('Full URL: $fullUrl');
 
       _channel = WebSocketChannel.connect(Uri.parse(fullUrl));
-      
+
+      // Await the ready state to confirm handshake completes
+      try {
+        await _channel!.ready;
+      } catch (e) {
+        _isConnected = false;
+        _connectionStateController.add(false);
+        _channel = null;
+        rethrow;
+      }
+
       // Listen for messages
       _channel!.stream.listen(
         _onMessage,
@@ -168,7 +181,6 @@ class PoseDetectionService {
   /// Send a camera frame for processing
   void sendFrame(Uint8List frameBytes, {int? timestampMs}) {
     if (!_isConnected || _channel == null) {
-      PoseLogger.error('Cannot send frame: not connected');
       return;
     }
 
@@ -273,10 +285,10 @@ class PoseDetectionService {
       if (result.phase != _currentPhase) {
         final oldPhase = _currentPhase;
         _currentPhase = result.phase;
-        
-        PoseLogger.phase(_currentPhase, 
+
+        PoseLogger.phase(_currentPhase,
           'Phase changed: ${PosePhase.fromValue(oldPhase).displayName} → ${result.posePhase.displayName}');
-        
+
         _phaseChangeController.add(result.posePhase);
       }
 

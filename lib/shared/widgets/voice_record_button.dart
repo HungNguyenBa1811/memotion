@@ -4,6 +4,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/responsive_utils.dart';
 
 enum VoiceRecordButtonSize { small, medium, large, custom }
+enum VoiceRecordButtonType { primary, secondary }
 
 /// Reusable circular voice-record button.
 ///
@@ -20,6 +21,7 @@ enum VoiceRecordButtonSize { small, medium, large, custom }
 class VoiceRecordButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final VoiceRecordButtonSize size;
+  final VoiceRecordButtonType type;
 
   /// Only used when [size] == [VoiceRecordButtonSize.custom].
   final double? customDiameter;
@@ -36,6 +38,7 @@ class VoiceRecordButton extends StatelessWidget {
     super.key,
     this.onPressed,
     this.size = VoiceRecordButtonSize.medium,
+    this.type = VoiceRecordButtonType.primary,
     this.customDiameter,
     this.color,
     this.iconColor,
@@ -46,6 +49,7 @@ class VoiceRecordButton extends StatelessWidget {
   const VoiceRecordButton.small({
     super.key,
     this.onPressed,
+    this.type = VoiceRecordButtonType.primary,
     this.color,
     this.iconColor,
     this.label = 'Ghi âm',
@@ -56,6 +60,7 @@ class VoiceRecordButton extends StatelessWidget {
   const VoiceRecordButton.large({
     super.key,
     this.onPressed,
+    this.type = VoiceRecordButtonType.primary,
     this.color,
     this.iconColor,
     this.label = 'Ghi âm',
@@ -85,7 +90,10 @@ class VoiceRecordButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final diameter = _getDiameter(context);
-    final bg = isEnabled ? (color ?? AppColors.primary) : Colors.grey.shade400;
+    final defaultColor = type == VoiceRecordButtonType.secondary
+        ? AppColors.primary
+        : Colors.red;
+    final bg = isEnabled ? (color ?? defaultColor) : Colors.grey.shade400;
     final fg = iconColor ?? Colors.white;
     final textScale = ResponsiveUtils.textScaleFactor(context);
 

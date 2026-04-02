@@ -48,9 +48,14 @@ class VoiceCommandNavigator {
     }
   }
 
-  static Future<void> playResponseAudio(String? responseAudio, WidgetRef ref) async {
+  static Future<void> playResponseAudio(
+    String? responseAudio,
+    WidgetRef ref,
+  ) async {
     // Forward to the persistent audio player provider
-    await ref.read(voiceAudioPlayingProvider.notifier).playResponse(responseAudio);
+    await ref
+        .read(voiceAudioPlayingProvider.notifier)
+        .playResponse(responseAudio);
   }
 
   // Moved to voice_audio_playing_provider.dart
@@ -70,10 +75,7 @@ class VoiceCommandNavigator {
     }
 
     if (workouts.isEmpty) {
-      _showUnknownCommand(
-        messenger,
-        message: 'Không tìm thấy bài tập để bắt đầu.',
-      );
+      _showUnknownCommand(messenger, message: 'No workout found to start.');
       return;
     }
 
@@ -90,7 +92,8 @@ class VoiceCommandNavigator {
 
   static void _showUnknownCommand(
     ScaffoldMessengerState? messenger, {
-    String message = 'Không hiểu lệnh thoại. Vui lòng thử lại.',
+    String message =
+        'Could not understand the voice command. Please try again.',
   }) {
     if (messenger == null) {
       return;

@@ -64,22 +64,30 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
       // 1. Initialize camera (front camera for user)
       await _cameraService.initialize(useFrontCamera: true);
+      if (!mounted) return;
       setState(() => _isCameraInitialized = true);
-      PoseLogger.info('Camera initialized successfully');
 
       // 2. Start pose detection session via WebSocket
       await ref
           .read(poseSessionProvider.notifier)
-          .startSession(exerciseType: widget.exerciseType ?? 'arm_raise');
+          .startSession(
+            exerciseType: widget.exerciseType ?? 'arm_raise',
+            refVideoPath: widget.videoPath,
+          );
+
+      final stateAfterSession = ref.read(poseSessionProvider);
+      if (!stateAfterSession.isConnected) {
+        setState(() => _error = 'WebSocket failed to connect');
+        return;
+      }
 
       // 3. Setup phase change listener for auto navigation
       ref.read(poseSessionProvider.notifier).onPhaseChange = _onPhaseChange;
 
       // 4. Start streaming camera frames to backend
       await _startStreaming();
-
-      PoseLogger.info('Session started, streaming frames...');
     } catch (e) {
+      if (!mounted) return;
       setState(() => _error = e.toString());
       PoseLogger.error('Failed to initialize session', e);
     }
@@ -176,7 +184,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
   /// End session early
   Future<void> _endSession() async {
-    await _cameraService.stopStreaming();
+    await _cameraService.dispose();
     await ref.read(poseSessionProvider.notifier).endSession();
 
     if (mounted) {
@@ -186,7 +194,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
   @override
   void dispose() {
-    _cameraService.stopStreaming();
+    _cameraService.dispose();
     super.dispose();
   }
 

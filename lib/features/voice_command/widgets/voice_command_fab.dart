@@ -9,10 +9,20 @@ import '../screens/voice_command_sheet.dart';
 import '../../../shared/widgets/voice_record_button.dart';
 
 /// A global, role-based FloatingActionButton for 'Ask AI'.
-/// Automatically handles visibility (Patients only) and 
+/// Automatically handles visibility (Patients only) and
 /// disabled state (during audio playback).
 class VoiceCommandFAB extends ConsumerWidget {
-  const VoiceCommandFAB({super.key});
+  const VoiceCommandFAB({
+    super.key,
+    this.buttonSize = VoiceRecordButtonSize.medium,
+    this.customDiameter,
+  }) : assert(
+         buttonSize != VoiceRecordButtonSize.custom || customDiameter != null,
+         'customDiameter must be provided when buttonSize is custom',
+       );
+
+  final VoiceRecordButtonSize buttonSize;
+  final double? customDiameter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,9 +37,15 @@ class VoiceCommandFAB extends ConsumerWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-        bottom: ResponsiveUtils.navBarHeight(context) + (ResponsiveUtils.isTabletOrLarger(context) ? 32 : ResponsiveUtils.sectionGap(context)),
+        bottom:
+            ResponsiveUtils.navBarHeight(context) +
+            (ResponsiveUtils.isTabletOrLarger(context)
+                ? 32
+                : ResponsiveUtils.sectionGap(context)),
       ),
-      child: VoiceRecordButton.small(
+      child: VoiceRecordButton(
+        size: buttonSize,
+        customDiameter: customDiameter,
         isEnabled: !isAudioPlaying,
         onPressed: () => _onAskAiPressed(context),
         label: null, // Icon only as requested
@@ -55,7 +71,7 @@ class VoiceCommandFAB extends ConsumerWidget {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Cần quyền truy cập micro để dùng Ask AI.'),
+        content: Text('Microphone permission is required to use Ask AI.'),
         backgroundColor: AppColors.warning,
       ),
     );
@@ -76,21 +92,21 @@ class VoiceCommandFAB extends ConsumerWidget {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Bật quyền truy cập micro'),
+          title: const Text('Enable microphone access'),
           content: const Text(
-            'Vui lòng cho phép truy cập micro trong Cài đặt để Ask AI có thể nghe lệnh của bạn.',
+            'Please allow microphone access in Settings so Ask AI can hear your command.',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Hủy'),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
                 openAppSettings();
               },
-              child: const Text('Mở Cài đặt'),
+              child: const Text('Open Settings'),
             ),
           ],
         );

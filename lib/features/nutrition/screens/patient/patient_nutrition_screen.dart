@@ -10,6 +10,7 @@ import '../../../../core/utils/responsive_utils.dart';
 import '../../models/nutrition_task.dart';
 import '../../providers/nutrition_provider.dart';
 import '../../../workout/widgets/calendar_day_picker.dart';
+import '../../../workout/models/workout_model.dart';
 import '../../../voice_command/widgets/voice_command_fab.dart';
 
 /// Nutrition screen for PATIENT (Elderly) role.
@@ -25,6 +26,30 @@ class PatientNutritionScreenContent extends ConsumerStatefulWidget {
 class _PatientNutritionScreenContentState
     extends ConsumerState<PatientNutritionScreenContent> {
   final PageController _pageController = PageController();
+  late int _selectedDayIndex;
+  late List<CalendarDay> _calendarDays;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _rebuildCalendarDays();
+  }
+
+  void _rebuildCalendarDays() {
+    final dayCount = ResponsiveUtils.dateSelectorDays(context);
+    final offset = dayCount ~/ 2;
+    final now = DateTime.now();
+    _calendarDays = List.generate(dayCount, (i) {
+      final date = now.add(Duration(days: i - offset));
+      return CalendarDay(
+        date: date,
+        dayOfWeek: '',
+        month: '',
+        isSelected: i == offset,
+      );
+    });
+    _selectedDayIndex = offset;
+  }
 
   @override
   void dispose() {
@@ -45,21 +70,38 @@ class _PatientNutritionScreenContentState
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
-        child: Column(
-          children: [
-            _buildHeader(context, ref),
-            const SizedBox(height: 20),
-            Expanded(
-              child: _buildPagedCards(
-                context,
-                displayTasks,
-                isLoading: nutritionTasksAsync.isLoading,
-                apiError: nutritionTasksAsync.hasError
-                    ? nutritionTasksAsync.error
-                    : null,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildHeader(context, ref),
+              const SizedBox(height: 16),
+              CalendarDayPicker(
+                days: _calendarDays,
+                selectedIndex: _selectedDayIndex,
+                scale: ResponsiveUtils.isTabletOrLarger(context)
+                    ? (ResponsiveUtils.isLargeTablet(context) ? 2.3 : 2.0)
+                    : 1.0,
+                onDaySelected: (index) {
+                  setState(() => _selectedDayIndex = index);
+                  ref.read(nutritionSelectedDateProvider.notifier).state =
+                      _calendarDays[index].date;
+                },
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.55,
+                child: _buildPagedCards(
+                  context,
+                  displayTasks,
+                  isLoading: nutritionTasksAsync.isLoading,
+                  apiError: nutritionTasksAsync.hasError
+                      ? nutritionTasksAsync.error
+                      : null,
+                ),
+              ),
+              SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 2),
+            ],
+          ),
         ),
       ),
       floatingActionButton: const VoiceCommandFAB(),
@@ -194,11 +236,8 @@ class _PatientNutritionScreenContentState
             onPageChanged: (_) {},
             itemBuilder: (context, index) => Center(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  ResponsiveUtils.horizontalPadding(context),
-                  0,
-                  ResponsiveUtils.horizontalPadding(context),
-                  ResponsiveUtils.bottomNavPadding(context) + (isTablet ? 180 : 16),
+                padding: EdgeInsets.symmetric(
+                  horizontal: ResponsiveUtils.horizontalPadding(context),
                 ),
                 child: _PatientNutritionCard(
                   task: tasks[index],
@@ -233,8 +272,8 @@ class _PatientNutritionCard extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final scale = ResponsiveUtils.textScaleFactor(context);
-          // Image fills ~86% of card width, same circle + border style as caretaker
-          final imageSize = constraints.maxWidth * 0.86;
+          // Image fills ~60% of card width
+          final imageSize = constraints.maxWidth * 0.75;
           // Image overlaps ~45% above the card top edge
           final imageOverlap = imageSize * 0.45;
 
@@ -254,20 +293,13 @@ class _PatientNutritionCard extends StatelessWidget {
                       bottomLeft: Radius.circular(27 * scale),
                       bottomRight: Radius.circular(27 * scale),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.25),
-                        blurRadius: 10 * scale,
-                        offset: Offset(0, 4 * scale),
-                      ),
-                    ],
                   ),
                   // Padding inside the white card
                   padding: EdgeInsets.only(
                     top: (imageSize - imageOverlap) + (24 * scale), // push text below image
                     left: 28 * scale,
                     right: 28 * scale,
-                    bottom: 32 * scale,
+                    bottom: 28 * scale,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,27 +308,27 @@ class _PatientNutritionCard extends StatelessWidget {
                       Text(
                         task.name,
                         style: GoogleFonts.lexend(
-                          fontSize: 28 * scale,
+                          fontSize: 24 * scale,
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1B4332),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 4 * scale),
+                      SizedBox(height: 2 * scale),
                       if (task.description != null &&
                           task.description!.isNotEmpty)
                         Text(
                           task.description!,
                           style: GoogleFonts.lexend(
-                            fontSize: 18 * scale,
+                            fontSize: 14 * scale,
                             fontWeight: FontWeight.w300,
                             color: const Color(0xFF1B4332),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      SizedBox(height: 12 * scale),
+                      SizedBox(height: 8 * scale),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

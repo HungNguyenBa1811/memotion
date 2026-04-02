@@ -39,7 +39,7 @@ class PatientHomeScreen extends ConsumerWidget {
       userName: 'Grandpa/Grandma',
       greeting: _getGreeting(),
       avatarUrl: dashboardData?.avatarUrl,
-      moodMessage: "You don't seem to be in a good mood today",
+      moodMessage: "You don't seem\nto be in a good mood today",
       actionButtonText: 'EMERGENCY CALL',
       onActionPressed: () {
         homeNotifier.triggerSOS();
@@ -120,14 +120,15 @@ class PatientHomeScreen extends ConsumerWidget {
                           size: VoiceRecordButtonSize.custom,
                           customDiameter:
                               ResponsiveUtils.isTabletOrLarger(context)
-                                  ? 160
-                                  : 120,
+                                  ? 200
+                                  : 160,
                           onPressed: () => _onAskAiPressed(context),
                           label: 'Ask AI',
+                          type: VoiceRecordButtonType.secondary,
                         ),
                       ),
                       SizedBox(
-                        height: ResponsiveUtils.bottomNavPadding(context),
+                        height: ResponsiveUtils.bottomNavPadding(context) * 2,
                       ),
                     ],
                   ),

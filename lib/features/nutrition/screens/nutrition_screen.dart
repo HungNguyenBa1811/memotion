@@ -11,6 +11,8 @@ import '../providers/nutrition_provider.dart';
 import '../widgets/nutrition_vertical_card.dart';
 import '../widgets/nutrition_horizontal_card.dart';
 import '../../../features/profile/providers/profile_provider.dart';
+import '../../workout/widgets/calendar_day_picker.dart';
+import '../../workout/models/workout_model.dart';
 import 'patient/patient_nutrition_screen.dart';
 
 /// Role-aware entry point: CARETAKER → NutritionScreenContent, PATIENT → PatientNutritionScreenContent
@@ -40,11 +42,42 @@ class NutritionScreen extends ConsumerWidget {
 }
 
 /// Content version without bottom nav - used inside MainShell
-class NutritionScreenContent extends ConsumerWidget {
+class NutritionScreenContent extends ConsumerStatefulWidget {
   const NutritionScreenContent({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NutritionScreenContent> createState() =>
+      _NutritionScreenContentState();
+}
+
+class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent> {
+  late int _selectedDayIndex;
+  late List<CalendarDay> _calendarDays;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _rebuildCalendarDays();
+  }
+
+  void _rebuildCalendarDays() {
+    final dayCount = ResponsiveUtils.dateSelectorDays(context);
+    final offset = dayCount ~/ 2;
+    final now = DateTime.now();
+    _calendarDays = List.generate(dayCount, (i) {
+      final date = now.add(Duration(days: i - offset));
+      return CalendarDay(
+        date: date,
+        dayOfWeek: '',
+        month: '',
+        isSelected: i == offset,
+      );
+    });
+    _selectedDayIndex = offset;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final selectedFilter = ref.watch(nutritionFilterProvider);
     final nutritionTasksAsync = ref.watch(
       filteredNutritionTasksProvider(selectedFilter),
@@ -157,7 +190,20 @@ class NutritionScreenContent extends ConsumerWidget {
                 ),
               ),
             ),
-            SizedBox(height: 20 * fontScale),
+            SizedBox(height: 16 * fontScale),
+
+            // Calendar day picker
+            CalendarDayPicker(
+              days: _calendarDays,
+              selectedIndex: _selectedDayIndex,
+              scale: isTablet ? fontScale : 1.0,
+              onDaySelected: (index) {
+                setState(() => _selectedDayIndex = index);
+                ref.read(nutritionSelectedDateProvider.notifier).state =
+                    _calendarDays[index].date;
+              },
+            ),
+            SizedBox(height: 16 * fontScale),
 
             // Category pills (filter by meal type)
             Padding(
@@ -168,7 +214,6 @@ class NutritionScreenContent extends ConsumerWidget {
                   children: [
                     _buildCategoryPill(
                       context,
-                      ref,
                       'All',
                       filter: NutritionFilter.all,
                       isActive: selectedFilter == NutritionFilter.all,
@@ -177,7 +222,6 @@ class NutritionScreenContent extends ConsumerWidget {
                     SizedBox(width: 12 * fontScale),
                     _buildCategoryPill(
                       context,
-                      ref,
                       'Breakfast',
                       filter: NutritionFilter.breakfast,
                       isActive: selectedFilter == NutritionFilter.breakfast,
@@ -186,7 +230,6 @@ class NutritionScreenContent extends ConsumerWidget {
                     SizedBox(width: 12 * fontScale),
                     _buildCategoryPill(
                       context,
-                      ref,
                       'Lunch',
                       filter: NutritionFilter.lunch,
                       isActive: selectedFilter == NutritionFilter.lunch,
@@ -195,7 +238,6 @@ class NutritionScreenContent extends ConsumerWidget {
                     SizedBox(width: 12 * fontScale),
                     _buildCategoryPill(
                       context,
-                      ref,
                       'Dinner',
                       filter: NutritionFilter.dinner,
                       isActive: selectedFilter == NutritionFilter.dinner,
@@ -211,7 +253,6 @@ class NutritionScreenContent extends ConsumerWidget {
             Expanded(
               child: _buildTasksList(
                 context,
-                ref,
                 nutritionTasksAsync.valueOrNull ?? [],
                 isLoading: nutritionTasksAsync.isLoading,
                 apiError: nutritionTasksAsync.hasError
@@ -227,7 +268,6 @@ class NutritionScreenContent extends ConsumerWidget {
 
   Widget _buildCategoryPill(
     BuildContext context,
-    WidgetRef ref,
     String label, {
     required NutritionFilter filter,
     bool isActive = false,
@@ -275,7 +315,6 @@ class NutritionScreenContent extends ConsumerWidget {
 
   Widget _buildTasksList(
     BuildContext context,
-    WidgetRef ref,
     List<NutritionTask> tasks, {
     bool isLoading = false,
     Object? apiError,
@@ -358,7 +397,7 @@ class NutritionScreenContent extends ConsumerWidget {
               child: Center(child: CircularProgressIndicator()),
             )
           else if (apiError != null)
-            _buildInlineApiError(context, ref, apiError)
+            _buildInlineApiError(context, apiError)
           // Additional API task cards when data is present
           else if (tasks.length > 2)
             Padding(
@@ -395,7 +434,7 @@ class NutritionScreenContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildInlineApiError(BuildContext context, WidgetRef ref, Object error) {
+  Widget _buildInlineApiError(BuildContext context, Object error) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
     final fs = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
