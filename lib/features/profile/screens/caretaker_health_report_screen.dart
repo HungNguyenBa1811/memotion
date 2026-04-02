@@ -56,7 +56,12 @@ class _CaretakerHealthReportScreenState
                   const SizedBox(height: 24),
                   _buildTodaysInfoSection(health, hrState, padding: hPad),
                   const SizedBox(height: 24),
-                  SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
+                  _buildWeeklySummaryCard(padding: hPad),
+                  const SizedBox(height: 16),
+                  _buildSleepAndBpRow(padding: hPad),
+                  const SizedBox(height: 16),
+                  _buildRecentActivitySection(padding: hPad),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -482,6 +487,379 @@ class _CaretakerHealthReportScreenState
               color: const Color(0xFF7F7F7F),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeeklySummaryCard({required double padding}) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final values = [0.6, 0.8, 0.5, 0.9, 0.7, 0.85, 0.4];
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: padding),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: const Color(0xFFBFBFBF).withOpacity(0.2),
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.bar_chart_rounded,
+                    color: AppColors.primary, size: 22 * textScale),
+                const SizedBox(width: 8),
+                Text(
+                  'Weekly Activity',
+                  style: GoogleFonts.sourceSans3(
+                    fontSize: 16 * textScale,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF040415),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'This week',
+                  style: GoogleFonts.mavenPro(
+                    fontSize: 12 * textScale,
+                    color: const Color(0xFF7F7F7F),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 100 * textScale,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: List.generate(days.length, (i) {
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: FractionallySizedBox(
+                              heightFactor: values[i],
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: i == DateTime.now().weekday - 1
+                                      ? AppColors.primary
+                                      : AppColors.primary.withOpacity(0.25),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            days[i],
+                            style: GoogleFonts.mavenPro(
+                              fontSize: 10 * textScale,
+                              fontWeight: i == DateTime.now().weekday - 1
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: i == DateTime.now().weekday - 1
+                                  ? AppColors.primary
+                                  : const Color(0xFF7F7F7F),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSleepAndBpRow({required double padding}) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: padding),
+      child: Row(
+        children: [
+          // Sleep card
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: const Color(0xFFBFBFBF).withOpacity(0.2),
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Sleep',
+                        style: GoogleFonts.sourceSans3(
+                          fontSize: 14 * textScale,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF040415),
+                        ),
+                      ),
+                      const Spacer(),
+                      Icon(Icons.bedtime_rounded,
+                          color: Colors.indigo.shade300, size: 24 * textScale),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '7h 30m',
+                    style: GoogleFonts.sourceSans3(
+                      fontSize: 18 * textScale,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF040415),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Last night',
+                    style: GoogleFonts.mavenPro(
+                      fontSize: 12 * textScale,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF7F7F7F),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.arrow_upward_rounded,
+                          color: const Color(0xFF66BB6A), size: 14 * textScale),
+                      Text(
+                        '12% better',
+                        style: GoogleFonts.mavenPro(
+                          fontSize: 11 * textScale,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF66BB6A),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Blood Pressure card
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: const Color(0xFFBFBFBF).withOpacity(0.2),
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Blood Pressure',
+                          style: GoogleFonts.sourceSans3(
+                            fontSize: 14 * textScale,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF040415),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.water_drop_rounded,
+                          color: Colors.red.shade300, size: 24 * textScale),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '120/80',
+                    style: GoogleFonts.sourceSans3(
+                      fontSize: 18 * textScale,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF040415),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'mmHg',
+                    style: GoogleFonts.mavenPro(
+                      fontSize: 12 * textScale,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF7F7F7F),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF66BB6A).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Normal',
+                      style: GoogleFonts.mavenPro(
+                        fontSize: 11 * textScale,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF66BB6A),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentActivitySection({required double padding}) {
+    final textScale = ResponsiveUtils.textScaleFactor(context);
+    final activities = [
+      {
+        'icon': Icons.directions_walk_rounded,
+        'color': AppColors.primary,
+        'title': 'Morning Walk',
+        'subtitle': '30 min — 2,100 steps',
+        'time': '7:30 AM',
+      },
+      {
+        'icon': Icons.medication_rounded,
+        'color': Colors.blue.shade400,
+        'title': 'Medication Taken',
+        'subtitle': 'Vitamin D3 — 1 tablet',
+        'time': '8:00 AM',
+      },
+      {
+        'icon': Icons.restaurant_rounded,
+        'color': Colors.orange.shade400,
+        'title': 'Breakfast',
+        'subtitle': 'Oatmeal with fruits — 320 kcal',
+        'time': '8:30 AM',
+      },
+      {
+        'icon': Icons.self_improvement_rounded,
+        'color': Colors.purple.shade300,
+        'title': 'Yoga Session',
+        'subtitle': '20 min — Arm raise exercise',
+        'time': '10:00 AM',
+      },
+    ];
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: padding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Recent Activity',
+                style: GoogleFonts.sourceSans3(
+                  fontSize: 16 * textScale,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF040415),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                'Today',
+                style: GoogleFonts.mavenPro(
+                  fontSize: 12 * textScale,
+                  color: const Color(0xFF7F7F7F),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...activities.map((a) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFBFBFBF).withOpacity(0.15),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 42 * textScale,
+                        height: 42 * textScale,
+                        decoration: BoxDecoration(
+                          color: (a['color'] as Color).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          a['icon'] as IconData,
+                          color: a['color'] as Color,
+                          size: 22 * textScale,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              a['title'] as String,
+                              style: GoogleFonts.sourceSans3(
+                                fontSize: 14 * textScale,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF040415),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              a['subtitle'] as String,
+                              style: GoogleFonts.mavenPro(
+                                fontSize: 12 * textScale,
+                                color: const Color(0xFF7F7F7F),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        a['time'] as String,
+                        style: GoogleFonts.mavenPro(
+                          fontSize: 11 * textScale,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF7F7F7F),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
         ],
       ),
     );

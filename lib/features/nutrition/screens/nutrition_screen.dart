@@ -190,20 +190,7 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
                 ),
               ),
             ),
-            SizedBox(height: 16 * fontScale),
-
-            // Calendar day picker
-            CalendarDayPicker(
-              days: _calendarDays,
-              selectedIndex: _selectedDayIndex,
-              scale: isTablet ? fontScale : 1.0,
-              onDaySelected: (index) {
-                setState(() => _selectedDayIndex = index);
-                ref.read(nutritionSelectedDateProvider.notifier).state =
-                    _calendarDays[index].date;
-              },
-            ),
-            SizedBox(height: 16 * fontScale),
+            SizedBox(height: 20 * fontScale),
 
             // Category pills (filter by meal type)
             Padding(
@@ -335,7 +322,7 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
         children: [
           // Featured vertical cards — demo card always visible
           SizedBox(
-            height: 315 * cardScale,
+            height: 335 * cardScale,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: EdgeInsets.symmetric(horizontal: hPad),
@@ -347,11 +334,11 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
                   ),
                   child: SizedBox(
                     width: 227 * cardScale,
-                    height: 300 * cardScale,
+                    height: 320 * cardScale,
                     child: FittedBox(
                       child: SizedBox(
                         width: 227,
-                        height: 300,
+                        height: 320,
                         child: NutritionVerticalCard(task: displayTasks[index]),
                       ),
                     ),
@@ -360,7 +347,7 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
               },
             ),
           ),
-          SizedBox(height: 24 * fontScale),
+          SizedBox(height: 24 * fontScale + 4),
 
           // Popular recipes section header
           Padding(

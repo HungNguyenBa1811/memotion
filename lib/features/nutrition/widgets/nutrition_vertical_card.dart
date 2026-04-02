@@ -30,7 +30,7 @@ class NutritionVerticalCard extends StatelessWidget {
       child: SizedBox(
         // Card width 227px; image fills width-2px; total height gives room for text
         width: 227,
-        height: 300,
+        height: 320,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -40,7 +40,7 @@ class NutritionVerticalCard extends StatelessWidget {
               left: 0,
               right: 0,
               child: Container(
-                height: 220,
+                height: 240,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: const BorderRadius.only(
@@ -78,7 +78,7 @@ class NutritionVerticalCard extends StatelessWidget {
 
             // Text content — title 24px, subtitle 16px, calories 16px (Figma spec)
             Positioned(
-              bottom: 16,
+              bottom: 10,
               left: 16,
               right: 16,
               child: Column(

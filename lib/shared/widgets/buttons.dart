@@ -24,7 +24,7 @@ class PrimaryButton extends StatelessWidget {
     final scale = ResponsiveUtils.textScaleFactor(context);
     return SizedBox(
       width: width ?? double.infinity,
-      height: 56 * scale,
+      height: 64 * scale,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         child: isLoading
@@ -67,7 +67,7 @@ class SecondaryButton extends StatelessWidget {
     final scale = ResponsiveUtils.textScaleFactor(context);
     return SizedBox(
       width: width ?? double.infinity,
-      height: 56 * scale,
+      height: 64 * scale,
       child: OutlinedButton(
         onPressed: onPressed,
         child: Text(
