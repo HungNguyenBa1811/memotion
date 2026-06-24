@@ -17,6 +17,11 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(":app")
+    project.plugins.withId("com.android.library") {
+        project.extensions.configure<com.android.build.gradle.LibraryExtension> {
+            compileSdk = 36
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {

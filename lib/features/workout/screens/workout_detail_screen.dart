@@ -1,0 +1,1313 @@
+import 'dart:typed_data';
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
+import '../../../core/router/app_router.dart';
+import '../../../core/theme/theme.dart';
+import '../../../core/utils/responsive_utils.dart';
+import '../../../core/network/api_constants.dart';
+import '../providers/workout_provider.dart';
+import '../models/workout_model.dart';
+import '../../voice_command/widgets/voice_command_fab.dart';
+
+class WorkoutDetailScreen extends ConsumerStatefulWidget {
+  final String workoutId;
+
+  const WorkoutDetailScreen({super.key, required this.workoutId});
+
+  @override
+  ConsumerState<WorkoutDetailScreen> createState() =>
+      _WorkoutDetailScreenState();
+}
+
+class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
+  VideoPlayerController? _videoController;
+  bool _isVideoPlaying = false;
+  bool _isVideoInitialized = false;
+  bool _isVideoLoading = false;
+  String? _currentVideoUrl;
+  Uint8List? _thumbnailData;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load workout details when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(workoutDetailProvider.notifier).loadWorkout(widget.workoutId);
+    });
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _generateThumbnail(String videoPath) async {
+    try {
+      final fullVideoUrl = '${ApiConstants.baseUrl}$videoPath';
+      final data = await VideoThumbnail.thumbnailData(
+        video: fullVideoUrl,
+        imageFormat: ImageFormat.JPEG,
+        maxWidth: 512,
+        quality: 75,
+        timeMs: 0,
+      );
+      if (mounted && data != null) {
+        setState(() => _thumbnailData = data);
+      }
+    } catch (e) {
+      debugPrint('Thumbnail generation failed: $e');
+    }
+  }
+
+  Future<void> _initializeAndPlayVideo(String videoPath) async {
+    if (_isVideoLoading) return;
+
+    setState(() => _isVideoLoading = true);
+
+    try {
+      final fullVideoUrl = '${ApiConstants.baseUrl}$videoPath';
+      debugPrint('🎬🎬🎬 INITIALIZING VIDEO 🎬🎬🎬');
+      debugPrint('📹 URL: $fullVideoUrl');
+
+      // Dispose old controller if exists
+      await _videoController?.dispose();
+
+      _currentVideoUrl = fullVideoUrl;
+      _videoController = VideoPlayerController.networkUrl(
+        Uri.parse(fullVideoUrl),
+      );
+
+      await _videoController!.initialize();
+      debugPrint('✅ Video initialized! Size: ${_videoController!.value.size}');
+
+      await _videoController!.setLooping(true);
+      await _videoController!.play();
+
+      setState(() {
+        _isVideoInitialized = true;
+        _isVideoPlaying = true;
+        _isVideoLoading = false;
+      });
+
+      debugPrint('🎉 VIDEO PLAYING! 🎉');
+    } catch (e) {
+      debugPrint('💀 VIDEO ERROR: $e');
+      setState(() => _isVideoLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Video loading error: $e',
+              style: GoogleFonts.lexend(),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _toggleVideoPlayPause() {
+    if (_videoController == null) return;
+
+    setState(() {
+      if (_videoController!.value.isPlaying) {
+        _videoController!.pause();
+        _isVideoPlaying = false;
+      } else {
+        _videoController!.play();
+        _isVideoPlaying = true;
+      }
+    });
+  }
+
+  void _stopVideo() {
+    _videoController?.pause();
+    setState(() {
+      _isVideoPlaying = false;
+      _isVideoInitialized = false;
+    });
+    _videoController?.dispose();
+    _videoController = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final detailState = ref.watch(workoutDetailProvider);
+
+    // Generate thumbnail when workout data is available
+    final workout = detailState.workout;
+    if (workout != null &&
+        _thumbnailData == null &&
+        workout.videoPath != null &&
+        workout.videoPath!.isNotEmpty) {
+      _generateThumbnail(workout.videoPath!);
+    }
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: detailState.isLoading
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              )
+            : detailState.error != null
+            ? _buildErrorView(detailState.error!)
+            : detailState.workout != null
+            ? _buildDetailContent(detailState.workout!)
+            : _buildErrorView('Task not found'),
+      ),
+      floatingActionButton: const VoiceCommandFAB(),
+    );
+  }
+
+  Widget _buildErrorView(String error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: AppColors.error),
+            const SizedBox(height: 16),
+            Text(
+              error,
+              style: GoogleFonts.lexend(fontSize: 16, color: AppColors.error),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => context.pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              child: Text(
+                'Back',
+                style: GoogleFonts.lexend(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Back button – always pinned to top-left of the screen.
+  Widget _buildBackButton() {
+    final hPad = ResponsiveUtils.horizontalPadding(context);
+    return Padding(
+      padding: EdgeInsets.only(left: hPad, top: 8),
+      child: GestureDetector(
+        onTap: () => context.pop(),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: const BoxDecoration(
+            color: Color(0xFF00695C),
+            shape: BoxShape.circle,
+          ),
+          child: const Center(
+            child: Icon(
+              Icons.arrow_back_ios_new,
+              color: Colors.white,
+              size: 18,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailContent(WorkoutTask workout) {
+    final useTwoColumn = ResponsiveUtils.useTwoColumn(context);
+    final hPad = ResponsiveUtils.horizontalPadding(context);
+    final maxWidth = ResponsiveUtils.contentMaxWidth(context);
+
+    if (useTwoColumn) {
+      // Stack: back button always top-left, content centred.
+      return Stack(
+        children: [
+          // Main two-column content
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: Column(
+                children: [
+                  const SizedBox(height: 56), // space for the back button row
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: hPad),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: _buildHeroImageSection(workout)),
+                          SizedBox(width: ResponsiveUtils.sectionGap(context)),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: _buildScrollableBody(workout, inTwoColumn: true),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Back button – top-left, outside ConstrainedBox
+          Positioned(
+            top: 0,
+            left: 0,
+            child: _buildBackButton(),
+          ),
+        ],
+      );
+    }
+
+    // Single-column (phone) layout
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildBackButton(),
+              const SizedBox(height: 12),
+              _buildHeroImageSection(workout),
+              SizedBox(height: ResponsiveUtils.sectionGap(context) * 2),
+              _buildScrollableBody(workout),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScrollableBody(WorkoutTask workout, {bool inTwoColumn = false}) {
+    // In two-column mode the parent Row already applies hPad,
+    // so inner widgets must NOT add it again.
+    final hPad = inTwoColumn ? 0.0 : ResponsiveUtils.horizontalPadding(context);
+
+    // Use a gentler scale in two-column mode to avoid word-splitting.
+    final scaleFactor = inTwoColumn ? 1.0 : ResponsiveUtils.textScaleFactor(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: hPad),
+          child: Text(
+            workout.title,
+            style: GoogleFonts.lexend(
+              fontSize: 24 * scaleFactor,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF1B4332),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Description
+        if (workout.description != null) ...[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: hPad),
+            child: Text(
+              workout.description!,
+              style: GoogleFonts.lexend(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+                height: 22 / 15,
+                color: const Color(0xFF1B4332),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+        ],
+
+        // Steps
+        if (workout.steps != null && workout.steps!.isNotEmpty) ...[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: hPad),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Execution Steps',
+                  style: GoogleFonts.lexend(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ...workout.steps!.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final step = entry.value;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _buildStepItem(index + 1, step),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ],
+
+        const SizedBox(height: 40),
+
+        // Action buttons
+        if (!workout.isCompleted)
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: hPad),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _startWorkoutExercise(workout),
+                    child: Container(
+                      height: ResponsiveUtils.buttonHeight(context),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Lets Workout',
+                          style: GoogleFonts.lexend(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFFFAFAF5),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: () => _connectToPc(workout),
+                  child: Container(
+                    height: ResponsiveUtils.buttonHeight(context),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(color: AppColors.primary, width: 1.5),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.computer_rounded,
+                          size: 18,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'PC Mode',
+                          style: GoogleFonts.lexend(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          Center(
+            child: Container(
+              width: 163,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.textSecondary.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(32),
+              ),
+              child: Center(
+                child: Text(
+                  'Completed',
+                  style: GoogleFonts.lexend(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFFFAFAF5),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+        SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
+      ],
+    );
+  }
+
+  Widget _buildStepItem(int stepNumber, String step) {
+    return Container(
+      padding: EdgeInsets.all(ResponsiveUtils.sectionGap(context) + 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Step number
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.secondary.withOpacity(0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                stepNumber.toString(),
+                style: GoogleFonts.lexend(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.secondary,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          // Step content
+          Expanded(
+            child: Text(
+              step,
+              style: GoogleFonts.lexend(
+                fontSize: 14,
+                height: 1.5,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the hero image section with glassmorphism overlay card
+  /// Design pattern: Stack with positioned overlay for depth effect
+  Widget _buildHeroImageSection(WorkoutTask workout) {
+    final useTwoColumn = ResponsiveUtils.useTwoColumn(context);
+    final double imageHeight = ResponsiveUtils.heroImageHeight(context);
+    const double overlayCardHeight = 60.0;
+    const double overlapOffset = 30.0;
+
+    return Container(
+      margin: useTwoColumn
+          ? EdgeInsets.zero
+          : EdgeInsets.symmetric(
+              horizontal: ResponsiveUtils.horizontalPadding(context) - 6,
+            ),
+      height: imageHeight + overlayCardHeight - overlapOffset,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Main image/video container
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: imageHeight,
+              decoration: BoxDecoration(
+                color: _getColorForType(workout.type).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: _getColorForType(workout.type).withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                    spreadRadius: 0,
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: _isVideoInitialized && _videoController != null
+                    ? _buildVideoPlayer()
+                    : _thumbnailData != null
+                    ? Image.memory(
+                        _thumbnailData!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: imageHeight,
+                      )
+                    : workout.imageAsset != null
+                    ? Image.asset(
+                        workout.imageAsset!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: imageHeight,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildImagePlaceholder(workout);
+                        },
+                      )
+                    : _buildImagePlaceholder(workout),
+              ),
+            ),
+          ),
+
+          // Play/Pause button overlay (center of image)
+          Positioned(
+            top: (imageHeight - 38) / 2,
+            left: 0,
+            right: 0,
+            child: Center(child: _buildPlayButton(workout)),
+          ),
+
+          // Fullscreen button (bottom right of image)
+          if (_isVideoInitialized)
+            Positioned(
+              top: imageHeight - 42,
+              right: 10,
+              child: GestureDetector(
+                onTap: _openFullscreenVideo,
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.fullscreen,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+
+          // Glassmorphism info overlay card
+          Positioned(
+            bottom: 0,
+            left: 50,
+            right: 50,
+            child: _buildGlassmorphismInfoCard(workout),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openFullscreenVideo() {
+    if (_videoController == null || _currentVideoUrl == null) return;
+    final position = _videoController!.value.position;
+    _videoController!.pause();
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (_) => _FullscreenVideoPage(
+              videoUrl: _currentVideoUrl!,
+              initialPosition: position,
+            ),
+          ),
+        )
+        .then((result) {
+          if (mounted && _videoController != null) {
+            if (result is Duration) {
+              _videoController!.seekTo(result);
+            }
+            _videoController!.play();
+            setState(() => _isVideoPlaying = true);
+          }
+        });
+  }
+
+  /// Builds the video player widget
+  Widget _buildVideoPlayer() {
+    return GestureDetector(
+      onTap: _toggleVideoPlayPause,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AspectRatio(
+            aspectRatio: _videoController!.value.aspectRatio,
+            child: VideoPlayer(_videoController!),
+          ),
+          // Show pause icon briefly when paused
+          if (!_isVideoPlaying)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(12),
+              child: const Icon(
+                Icons.play_arrow,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds placeholder when image is not available
+  Widget _buildImagePlaceholder(WorkoutTask workout) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            _getColorForType(workout.type).withOpacity(0.3),
+            _getColorForType(workout.type).withOpacity(0.1),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          _getIconForType(workout.type),
+          size: 80,
+          color: _getColorForType(workout.type),
+        ),
+      ),
+    );
+  }
+
+  /// Builds the centered play button - 38x38px per Figma
+  Widget _buildPlayButton(WorkoutTask workout) {
+    // Don't show play button when video is playing (use tap on video to pause)
+    if (_isVideoInitialized && _isVideoPlaying) {
+      return const SizedBox.shrink();
+    }
+
+    // Show loading indicator when initializing
+    if (_isVideoLoading) {
+      return Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () {
+        if (_isVideoInitialized) {
+          // Toggle play/pause
+          _toggleVideoPlayPause();
+        } else if (workout.videoPath != null && workout.videoPath!.isNotEmpty) {
+          // Initialize and play video inline
+          _initializeAndPlayVideo(workout.videoPath!);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Video not available for this exercise',
+                style: GoogleFonts.lexend(),
+              ),
+              backgroundColor: AppColors.primary,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+      },
+      child: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Icon(
+            _isVideoInitialized && !_isVideoPlaying
+                ? Icons.play_arrow_rounded
+                : Icons.play_arrow_rounded,
+            color: const Color(0xFF1B4332),
+            size: 22,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds the glassmorphism info card with Time and Burn calories
+  /// Design: Semi-transparent background with blur effect and gradient border
+  Widget _buildGlassmorphismInfoCard(WorkoutTask workout) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(15),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+        child: Container(
+          height: 60,
+          decoration: BoxDecoration(
+            color: const Color(0xFF192126).withOpacity(0.3),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(
+              width: 0.5,
+              color: const Color(0xFFBBF246).withOpacity(0.3),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Time section
+              Expanded(
+                child: _buildInfoItem(
+                  icon: Icons.access_time_rounded,
+                  iconColor: AppColors.primary,
+                  label: 'Time',
+                  value: workout.durationMinutes != null
+                      ? '${workout.durationMinutes} min'
+                      : workout.time,
+                ),
+              ),
+
+              // Vertical divider
+              Container(width: 1, height: 35, color: AppColors.primary),
+
+              // Burn calories section
+              Expanded(
+                child: _buildInfoItem(
+                  icon: Icons.local_fire_department_rounded,
+                  iconColor: AppColors.textPrimary,
+                  label: 'Burn',
+                  value: workout.caloriesBurn != null
+                      ? '${workout.caloriesBurn} kcal'
+                      : '-- kcal',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds individual info item (Time or Burn)
+  Widget _buildInfoItem({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String value,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Row(
+        children: [
+          // Icon container with background
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Icon(icon, color: const Color(0xFFFAFAF5), size: 18),
+          ),
+          const SizedBox(width: 6),
+
+          // Label and value
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.lexend(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFFFAFAF5),
+                  ),
+                ),
+                Text(
+                  value,
+                  style: GoogleFonts.lexend(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFFFAFAF5),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _connectToPc(WorkoutTask workout) {
+    context.push(
+      AppRoutes.pcQrScan,
+      extra: {
+        'workoutId': workout.id,
+        'exerciseType': _getExerciseType(workout.type),
+        'videoPath': workout.videoPath,
+      },
+    );
+  }
+
+  void _startWorkoutExercise(WorkoutTask workout) {
+    // Navigate to pose detection flow with real-time AI analysis
+    context.push(
+      '/pose-detection',
+      extra: {
+        'workoutId': workout.id,
+        'exerciseType': _getExerciseType(workout.type),
+        'videoPath': workout.videoPath,
+      },
+    );
+  }
+
+  String _getExerciseType(WorkoutType type) {
+    switch (type) {
+      case WorkoutType.yoga:
+        return 'yoga';
+      case WorkoutType.exercise:
+        return 'arm_raise';
+      default:
+        return 'arm_raise';
+    }
+  }
+
+  // ignore: unused_element
+  void _markAsCompleted(WorkoutTask workout) {
+    ref.read(workoutDetailProvider.notifier).markCompleted();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          workout.isCompleted ? 'Marked as incomplete' : 'Task completed!',
+          style: GoogleFonts.lexend(),
+        ),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  IconData _getIconForType(WorkoutType type) {
+    switch (type) {
+      case WorkoutType.yoga:
+        return Icons.self_improvement;
+      case WorkoutType.meal:
+        return Icons.restaurant;
+      case WorkoutType.medicine:
+        return Icons.medication;
+      case WorkoutType.exercise:
+        return Icons.fitness_center;
+      case WorkoutType.rest:
+        return Icons.hotel;
+      case WorkoutType.other:
+        return Icons.event;
+    }
+  }
+
+  Color _getColorForType(WorkoutType type) {
+    switch (type) {
+      case WorkoutType.yoga:
+        return const Color(0xFF7E57C2); // Purple
+      case WorkoutType.meal:
+        return const Color(0xFFFF7043); // Orange
+      case WorkoutType.medicine:
+        return const Color(0xFF42A5F5); // Blue
+      case WorkoutType.exercise:
+        return const Color(0xFF66BB6A); // Green
+      case WorkoutType.rest:
+        return const Color(0xFFAB47BC); // Violet
+      case WorkoutType.other:
+        return AppColors.primary;
+    }
+  }
+}
+
+class _FullscreenVideoPage extends StatefulWidget {
+  final String videoUrl;
+  final Duration initialPosition;
+
+  const _FullscreenVideoPage({
+    required this.videoUrl,
+    required this.initialPosition,
+  });
+
+  @override
+  State<_FullscreenVideoPage> createState() => _FullscreenVideoPageState();
+}
+
+class _FullscreenVideoPageState extends State<_FullscreenVideoPage> {
+  late VideoPlayerController _controller;
+  bool _showControls = true;
+  bool _isDragging = false;
+  double _dragValue = 0;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initController();
+  }
+
+  Future<void> _initController() async {
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
+    await _controller.initialize();
+    await _controller.seekTo(widget.initialPosition);
+    await _controller.play();
+    if (mounted) {
+      setState(() => _initialized = true);
+      _controller.addListener(_videoListener);
+      _startHideTimer();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_videoListener);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _videoListener() {
+    if (mounted && !_isDragging) {
+      setState(() {});
+    }
+  }
+
+  void _startHideTimer() {
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted && !_isDragging) {
+        setState(() => _showControls = false);
+      }
+    });
+  }
+
+  void _toggleControls() {
+    setState(() => _showControls = !_showControls);
+    if (_showControls) {
+      _startHideTimer();
+    }
+  }
+
+  void _togglePlayPause() {
+    if (_controller.value.isPlaying) {
+      _controller.pause();
+    } else {
+      _controller.play();
+    }
+    setState(() {});
+  }
+
+  void _seekTo(Duration position) {
+    _controller.seekTo(position);
+  }
+
+  void _seekRelative(int seconds) {
+    final current = _controller.value.position;
+    final target = current + Duration(seconds: seconds);
+    final duration = _controller.value.duration;
+
+    if (target < Duration.zero) {
+      _controller.seekTo(Duration.zero);
+    } else if (target > duration) {
+      _controller.seekTo(duration);
+    } else {
+      _controller.seekTo(target);
+    }
+  }
+
+  String _formatDuration(Duration d) {
+    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_initialized) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      );
+    }
+
+    final value = _controller.value;
+    final position = value.position;
+    final duration = value.duration;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: _toggleControls,
+        child: Stack(
+          children: [
+            // Video
+            Center(
+              child: AspectRatio(
+                aspectRatio: value.aspectRatio,
+                child: VideoPlayer(_controller),
+              ),
+            ),
+
+            // Controls overlay
+            AnimatedOpacity(
+              opacity: _showControls ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              child: IgnorePointer(
+                ignoring: !_showControls,
+                child: Container(
+                  color: Colors.black.withOpacity(0.4),
+                  child: Stack(
+                    children: [
+                      // Close button (top right)
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top + 10,
+                        right: 16,
+                        child: GestureDetector(
+                          onTap: () => Navigator.of(
+                            context,
+                          ).pop(_controller.value.position),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.fullscreen_exit,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Center playback controls
+                      Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Rewind 10s
+                            _buildControlButton(
+                              icon: Icons.replay_10,
+                              onTap: () => _seekRelative(-10),
+                            ),
+                            const SizedBox(width: 32),
+
+                            // Play/Pause
+                            GestureDetector(
+                              onTap: _togglePlayPause,
+                              child: Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  value.isPlaying
+                                      ? Icons.pause
+                                      : Icons.play_arrow,
+                                  color: Colors.white,
+                                  size: 40,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 32),
+
+                            // Forward 10s
+                            _buildControlButton(
+                              icon: Icons.forward_10,
+                              onTap: () => _seekRelative(10),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Bottom: seek bar and time
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: MediaQuery.of(context).padding.bottom + 16,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Seek slider
+                              SliderTheme(
+                                data: SliderTheme.of(context).copyWith(
+                                  activeTrackColor: AppColors.primary,
+                                  inactiveTrackColor: Colors.white30,
+                                  thumbColor: AppColors.primary,
+                                  overlayColor: AppColors.primary.withOpacity(
+                                    0.2,
+                                  ),
+                                  trackHeight: 3,
+                                  thumbShape: const RoundSliderThumbShape(
+                                    enabledThumbRadius: 6,
+                                  ),
+                                ),
+                                child: Slider(
+                                  value: _isDragging
+                                      ? _dragValue
+                                      : (duration.inMilliseconds > 0
+                                            ? position.inMilliseconds
+                                                  .clamp(
+                                                    0,
+                                                    duration.inMilliseconds,
+                                                  )
+                                                  .toDouble()
+                                            : 0),
+                                  min: 0,
+                                  max: duration.inMilliseconds > 0
+                                      ? duration.inMilliseconds.toDouble()
+                                      : 1,
+                                  onChangeStart: (val) {
+                                    setState(() {
+                                      _isDragging = true;
+                                      _dragValue = val;
+                                    });
+                                  },
+                                  onChanged: (val) {
+                                    setState(() => _dragValue = val);
+                                  },
+                                  onChangeEnd: (val) {
+                                    _seekTo(
+                                      Duration(milliseconds: val.toInt()),
+                                    );
+                                    setState(() => _isDragging = false);
+                                    _startHideTimer();
+                                  },
+                                ),
+                              ),
+                              // Time display
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      _isDragging
+                                          ? _formatDuration(
+                                              Duration(
+                                                milliseconds: _dragValue
+                                                    .toInt(),
+                                              ),
+                                            )
+                                          : _formatDuration(position),
+                                      style: GoogleFonts.lexend(
+                                        fontSize: 12,
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                    Text(
+                                      _formatDuration(duration),
+                                      style: GoogleFonts.lexend(
+                                        fontSize: 12,
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControlButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white, size: 28),
+      ),
+    );
+  }
+}
