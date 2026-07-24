@@ -88,7 +88,7 @@ class WorkoutCalibrationCompleteScreen extends ConsumerWidget {
 
                 // Great Effort text
                 Text(
-                  'Great Effort!',
+                  'You’re Ready',
                   style: GoogleFonts.lexend(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
@@ -101,7 +101,7 @@ class WorkoutCalibrationCompleteScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
-                    "You're making excellent progress on your daily posture goals.",
+                    'Your comfortable movement range has been saved for this exercise.',
                     style: GoogleFonts.lexend(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -227,7 +227,7 @@ class WorkoutCalibrationCompleteScreen extends ConsumerWidget {
         _buildStatCard(
           icon: _buildAngleIcon(),
           value: '$minAngle',
-          label: 'Min Angle',
+          label: 'Starting Angle',
         ),
 
         const SizedBox(width: 8),
@@ -236,7 +236,7 @@ class WorkoutCalibrationCompleteScreen extends ConsumerWidget {
         _buildStatCard(
           icon: _buildChartIcon(),
           value: '$maxAngle',
-          label: 'Max Angle',
+          label: 'Comfortable Limit',
         ),
 
         const SizedBox(width: 8),
@@ -360,10 +360,10 @@ class WorkoutCalibrationCompleteScreen extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         // Navigate to training phase
-        context.push('/workout-training', extra: {
-          'workoutId': workoutId,
-          'videoPath': videoPath,
-        });
+        context.push(
+          '/workout-training',
+          extra: {'workoutId': workoutId, 'videoPath': videoPath},
+        );
       },
       child: Container(
         width: 301,

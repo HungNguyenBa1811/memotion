@@ -57,7 +57,7 @@ class ProfileApiService extends BaseApiService {
     throw BadRequestException(
       message: response.message.isNotEmpty
           ? response.message
-          : 'Failed to fetch user details',
+          : 'We could not load the profile. Please try again.',
     );
   }
 }

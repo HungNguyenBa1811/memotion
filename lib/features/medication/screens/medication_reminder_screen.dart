@@ -13,8 +13,8 @@ const Map<String, dynamic> _sampleApiResponse = {
       'task_duedate': '2026-02-10T08:00:00',
       'medication_detail': {
         'name': 'Paracetamol 500mg',
-        'dosage': '1 vien',
-        'notes': 'Uong sau an',
+        'dosage': '1 tablet',
+        'notes': 'Take after a meal',
         'image_path': '/images/meds/paracetamol.png',
       },
     },
@@ -41,7 +41,10 @@ class _MedicationReminderScreenState
       setState(() => _status = 'Scheduled $count alarm(s)');
     } catch (e) {
       if (!mounted) return;
-      setState(() => _status = 'Error: $e');
+      setState(
+        () =>
+            _status = 'We could not schedule the reminders. Please try again.',
+      );
     }
   }
 
@@ -63,11 +66,7 @@ class _MedicationReminderScreenState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.alarm,
-                size: 80,
-                color: AppColors.primary,
-              ),
+              Icon(Icons.alarm, size: 80, color: AppColors.primary),
               const SizedBox(height: 24),
               Text(
                 'Medication Alarm Scheduler',

@@ -4,6 +4,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/responsive_utils.dart';
 
 enum VoiceRecordButtonSize { small, medium, large, custom }
+
 enum VoiceRecordButtonType { primary, secondary }
 
 /// Reusable circular voice-record button.
@@ -52,10 +53,10 @@ class VoiceRecordButton extends StatelessWidget {
     this.type = VoiceRecordButtonType.primary,
     this.color,
     this.iconColor,
-    this.label = 'Ghi âm',
+    this.label = 'Record',
     this.isEnabled = true,
-  })  : size = VoiceRecordButtonSize.small,
-        customDiameter = null;
+  }) : size = VoiceRecordButtonSize.small,
+       customDiameter = null;
 
   const VoiceRecordButton.large({
     super.key,
@@ -63,15 +64,19 @@ class VoiceRecordButton extends StatelessWidget {
     this.type = VoiceRecordButtonType.primary,
     this.color,
     this.iconColor,
-    this.label = 'Ghi âm',
+    this.label = 'Record',
     this.isEnabled = true,
-  })  : size = VoiceRecordButtonSize.large,
-        customDiameter = null;
+  }) : size = VoiceRecordButtonSize.large,
+       customDiameter = null;
 
   double _getDiameter(BuildContext context) {
     final isLarge = ResponsiveUtils.isLargeTablet(context);
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
-    final scale = isLarge ? 1.8 : isTablet ? 1.6 : 1.0;
+    final scale = isLarge
+        ? 1.8
+        : isTablet
+        ? 1.6
+        : 1.0;
 
     switch (size) {
       case VoiceRecordButtonSize.small:
@@ -81,8 +86,10 @@ class VoiceRecordButton extends StatelessWidget {
       case VoiceRecordButtonSize.large:
         return 110 * scale;
       case VoiceRecordButtonSize.custom:
-        assert(customDiameter != null,
-            'customDiameter must be provided when size is custom');
+        assert(
+          customDiameter != null,
+          'customDiameter must be provided when size is custom',
+        );
         return customDiameter ?? 80; // Caller handles responsive sizing
     }
   }
@@ -118,11 +125,7 @@ class VoiceRecordButton extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Icon(
-                Icons.mic,
-                color: fg,
-                size: diameter * 0.42,
-              ),
+              child: Icon(Icons.mic, color: fg, size: diameter * 0.42),
             ),
             if (label != null) ...[
               SizedBox(height: diameter * 0.08),

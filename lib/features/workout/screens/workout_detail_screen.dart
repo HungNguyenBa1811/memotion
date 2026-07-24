@@ -103,7 +103,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Video loading error: $e',
+              'The exercise video is not available right now. You can still review the written steps.',
               style: GoogleFonts.lexend(),
             ),
             backgroundColor: Colors.red,
@@ -262,7 +262,10 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                           SizedBox(width: ResponsiveUtils.sectionGap(context)),
                           Expanded(
                             child: SingleChildScrollView(
-                              child: _buildScrollableBody(workout, inTwoColumn: true),
+                              child: _buildScrollableBody(
+                                workout,
+                                inTwoColumn: true,
+                              ),
                             ),
                           ),
                         ],
@@ -274,11 +277,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
             ),
           ),
           // Back button – top-left, outside ConstrainedBox
-          Positioned(
-            top: 0,
-            left: 0,
-            child: _buildBackButton(),
-          ),
+          Positioned(top: 0, left: 0, child: _buildBackButton()),
         ],
       );
     }
@@ -310,7 +309,9 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
     final hPad = inTwoColumn ? 0.0 : ResponsiveUtils.horizontalPadding(context);
 
     // Use a gentler scale in two-column mode to avoid word-splitting.
-    final scaleFactor = inTwoColumn ? 1.0 : ResponsiveUtils.textScaleFactor(context);
+    final scaleFactor = inTwoColumn
+        ? 1.0
+        : ResponsiveUtils.textScaleFactor(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,7 +355,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Execution Steps',
+                  'Exercise Steps',
                   style: GoogleFonts.lexend(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -394,7 +395,7 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          'Lets Workout',
+                          'Start Exercise',
                           style: GoogleFonts.lexend(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -940,7 +941,9 @@ class _WorkoutDetailScreenState extends ConsumerState<WorkoutDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          workout.isCompleted ? 'Marked as incomplete' : 'Task completed!',
+          workout.isCompleted
+              ? 'Exercise marked as not complete.'
+              : 'Exercise marked as complete.',
           style: GoogleFonts.lexend(),
         ),
         backgroundColor: AppColors.primary,

@@ -71,8 +71,16 @@ class _PatientWorkoutScreenContentState
     final workoutState = ref.watch(workoutListProvider);
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final calendarScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
-    final cardScale = isLarge ? 1.5 : isTablet ? 1.3 : 1.0;
+    final calendarScale = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
+    final cardScale = isLarge
+        ? 1.5
+        : isTablet
+        ? 1.3
+        : 1.0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -117,7 +125,7 @@ class _PatientWorkoutScreenContentState
                 child: _buildContent(
                   context,
                   workoutState,
-                  cardScale: cardScale
+                  cardScale: cardScale,
                 ),
               ),
               SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 2),
@@ -168,7 +176,11 @@ class _PatientWorkoutScreenContentState
   Widget _buildTitleSection(BuildContext context) {
     final isTabletMode = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final fontScale = isLarge ? 2.3 : isTabletMode ? 2.0 : 1.0;
+    final fontScale = isLarge
+        ? 2.3
+        : isTabletMode
+        ? 2.0
+        : 1.0;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: isTabletMode ? 0 : 20),
@@ -198,7 +210,11 @@ class _PatientWorkoutScreenContentState
     );
   }
 
-  Widget _buildContent(BuildContext context, WorkoutListState workoutState, {required double cardScale}) {
+  Widget _buildContent(
+    BuildContext context,
+    WorkoutListState workoutState, {
+    required double cardScale,
+  }) {
     if (workoutState.isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primary),
@@ -224,19 +240,23 @@ class _PatientWorkoutScreenContentState
               const SizedBox(height: 16),
               Text(
                 workoutState.isPatientProfileNotFound
-                    ? 'No patient profile yet'
-                    : 'Unable to load tasks',
+                    ? 'No care profile yet'
+                    : 'We could not load the exercise plan',
                 style: GoogleFonts.lexend(
-                    fontSize: 18, fontWeight: FontWeight.w600),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 workoutState.isPatientProfileNotFound
-                    ? 'Please contact your doctor to set up your workout plan.'
+                    ? 'Please ask the doctor or care team to set up an exercise plan.'
                     : workoutState.error!,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lexend(
-                    fontSize: 14, color: Colors.grey[600]),
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
               ),
               if (!workoutState.isPatientProfileNotFound) ...[
                 const SizedBox(height: 20),
@@ -263,29 +283,44 @@ class _PatientWorkoutScreenContentState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.event_available_outlined,
-                size: 72, color: AppColors.textSecondary),
+            const Icon(
+              Icons.event_available_outlined,
+              size: 72,
+              color: AppColors.textSecondary,
+            ),
             const SizedBox(height: 16),
             Text(
-              'No tasks for this day',
+              'No exercises scheduled for this day',
               style: GoogleFonts.lexend(
-                  fontSize: 16, color: AppColors.textSecondary),
+                fontSize: 16,
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
-              'Stay active!',
+              'Move at a pace that feels comfortable.',
               style: GoogleFonts.lexend(
-                  fontSize: 14, color: AppColors.textSecondary),
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
       );
     }
 
-    return _buildPagedCards(context, workoutState.workouts, cardScale: cardScale);
+    return _buildPagedCards(
+      context,
+      workoutState.workouts,
+      cardScale: cardScale,
+    );
   }
 
-  Widget _buildPagedCards(BuildContext context, List<WorkoutTask> workouts, {required double cardScale}) {
+  Widget _buildPagedCards(
+    BuildContext context,
+    List<WorkoutTask> workouts, {
+    required double cardScale,
+  }) {
     return PageView.builder(
       controller: _pageController,
       itemCount: workouts.length,
@@ -295,9 +330,7 @@ class _PatientWorkoutScreenContentState
       itemBuilder: (context, index) {
         final workout = workouts[index];
         return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
@@ -319,8 +352,18 @@ class _PatientWorkoutScreenContentState
 
   String _getMonthName(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return months[month - 1];
   }

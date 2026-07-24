@@ -20,7 +20,7 @@ class GreetingHero extends StatefulWidget {
     this.greeting = 'Good morning',
     this.avatarUrl,
     this.moodMessage,
-    this.actionButtonText = 'SITUATION HANDLING',
+    this.actionButtonText = 'GET HELP',
     this.onActionPressed,
   });
 
@@ -82,17 +82,25 @@ class _GreetingHeroState extends State<GreetingHero>
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isPhone = ResponsiveUtils.isPhone(context);
     final textScale = ResponsiveUtils.textScaleFactor(context);
-    final avatarSize = ResponsiveUtils.isLargeTablet(context) ? 170.0
-        : ResponsiveUtils.isTablet(context) ? 150.0
+    final avatarSize = ResponsiveUtils.isLargeTablet(context)
+        ? 170.0
+        : ResponsiveUtils.isTablet(context)
+        ? 150.0
         : 59.0;
-    final notifIconSize = ResponsiveUtils.isLargeTablet(context) ? 64.0
-        : ResponsiveUtils.isTablet(context) ? 56.0
+    final notifIconSize = ResponsiveUtils.isLargeTablet(context)
+        ? 64.0
+        : ResponsiveUtils.isTablet(context)
+        ? 56.0
         : 24.0;
-    final notifBoxSize = ResponsiveUtils.isLargeTablet(context) ? 96.0
-        : ResponsiveUtils.isTablet(context) ? 84.0
+    final notifBoxSize = ResponsiveUtils.isLargeTablet(context)
+        ? 96.0
+        : ResponsiveUtils.isTablet(context)
+        ? 84.0
         : 48.0;
-    final phoneIconSize = ResponsiveUtils.isLargeTablet(context) ? 68.0
-        : ResponsiveUtils.isTablet(context) ? 56.0
+    final phoneIconSize = ResponsiveUtils.isLargeTablet(context)
+        ? 68.0
+        : ResponsiveUtils.isTablet(context)
+        ? 56.0
         : 28.0;
 
     // No outer Padding here — the parent screen owns horizontal padding.
@@ -117,9 +125,7 @@ class _GreetingHeroState extends State<GreetingHero>
                         fit: BoxFit.cover,
                       )
                     : const DecorationImage(
-                        image: AssetImage(
-                          'assets/images/caregiver_avatar.png',
-                        ),
+                        image: AssetImage('assets/images/caregiver_avatar.png'),
                         fit: BoxFit.cover,
                       ),
               ),
@@ -213,10 +219,13 @@ class _GreetingHeroState extends State<GreetingHero>
                                 border: Border.all(color: AppColors.primary),
                               ),
                               padding: EdgeInsets.only(
-                                  left: 24, top: 16, right: (isTablet ? 0 : 24)),
+                                left: 24,
+                                top: 16,
+                                right: (isTablet ? 0 : 24),
+                              ),
                               child: Text(
                                 widget.moodMessage ??
-                                    "Please pay attention to the patient's mood today",
+                                    'The person you care for may need a little extra support today.',
                                 style: AppTextStyles.headline3.copyWith(
                                   fontSize: (isTablet ? 20 : 16) * textScale,
                                   fontWeight: FontWeight.w700,
@@ -261,7 +270,11 @@ class _GreetingHeroState extends State<GreetingHero>
               borderRadius: BorderRadius.circular(13),
               child: Container(
                 width: double.infinity,
-                height: ResponsiveUtils.isLargeTablet(context) ? 128 : isTablet ? 114 : 75,
+                height: ResponsiveUtils.isLargeTablet(context)
+                    ? 128
+                    : isTablet
+                    ? 114
+                    : 75,
                 decoration: BoxDecoration(
                   color: AppColors.sosButton,
                   borderRadius: BorderRadius.circular(13),

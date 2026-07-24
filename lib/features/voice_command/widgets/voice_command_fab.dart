@@ -71,7 +71,7 @@ class VoiceCommandFAB extends ConsumerWidget {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Microphone permission is required to use Ask AI.'),
+        content: Text('Please allow microphone access to use Ask AI.'),
         backgroundColor: AppColors.warning,
       ),
     );
@@ -94,7 +94,7 @@ class VoiceCommandFAB extends ConsumerWidget {
         return AlertDialog(
           title: const Text('Enable microphone access'),
           content: const Text(
-            'Please allow microphone access in Settings so Ask AI can hear your command.',
+            'Allow microphone access in Settings so Ask AI can hear your request.',
           ),
           actions: [
             TextButton(

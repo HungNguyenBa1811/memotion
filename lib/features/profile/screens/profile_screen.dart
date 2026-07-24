@@ -59,7 +59,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
   @override
   Widget build(BuildContext context) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
-    
+
     // Tách biệt hoàn toàn layout giữa Mobile và Tablet
     if (isTablet) {
       return _buildTabletLayout(context);
@@ -93,10 +93,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
           ),
           child: user?.avatarUrl != null
               ? ClipOval(
-                  child: Image.network(
-                    user!.avatarUrl!,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.network(user!.avatarUrl!, fit: BoxFit.cover),
                 )
               : ClipOval(
                   child: Image.asset(
@@ -148,11 +145,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
                     textScale: textScale,
                     iconSize: 32 * scale,
                   ),
-                  Container(
-                    width: 1,
-                    height: 44,
-                    color: AppColors.background,
-                  ),
+                  Container(width: 1, height: 44, color: AppColors.background),
                   _buildHealthStat(
                     svgAsset: 'assets/images/fire_icon.svg',
                     fallbackIcon: Icons.local_fire_department,
@@ -161,11 +154,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
                     textScale: textScale,
                     iconSize: 32 * scale,
                   ),
-                  Container(
-                    width: 1,
-                    height: 44,
-                    color: AppColors.background,
-                  ),
+                  Container(width: 1, height: 44, color: AppColors.background),
                   _buildHealthStat(
                     svgAsset: 'assets/images/weight_icon.svg',
                     fallbackIcon: Icons.fitness_center,
@@ -202,7 +191,10 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        title: Text('Profile', style: AppTextStyles.headline2.copyWith(fontSize: 20 * textScale)),
+        title: Text(
+          'Profile',
+          style: AppTextStyles.headline2.copyWith(fontSize: 20 * textScale),
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -236,7 +228,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
     final user = vm.user;
     final hrState = ref.watch(heartRateProvider);
     final bpmText = hrState.bpm > 0 ? '${hrState.bpm} bpm' : '-- bpm';
-    
+
     // Thuần túy tính theo ResponsiveUtils
     final textScale = ResponsiveUtils.textScaleFactor(context);
 
@@ -254,10 +246,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
           ),
           child: user?.avatarUrl != null
               ? ClipOval(
-                  child: Image.network(
-                    user!.avatarUrl!,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.network(user!.avatarUrl!, fit: BoxFit.cover),
                 )
               : ClipOval(
                   child: Image.asset(
@@ -305,11 +294,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
                   textScale: textScale,
                   iconSize: 32,
                 ),
-                Container(
-                  width: 1,
-                  height: 44,
-                  color: AppColors.background,
-                ),
+                Container(width: 1, height: 44, color: AppColors.background),
                 _buildHealthStat(
                   svgAsset: 'assets/images/fire_icon.svg',
                   fallbackIcon: Icons.local_fire_department,
@@ -318,11 +303,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
                   textScale: textScale,
                   iconSize: 32,
                 ),
-                Container(
-                  width: 1,
-                  height: 44,
-                  color: AppColors.background,
-                ),
+                Container(width: 1, height: 44, color: AppColors.background),
                 _buildHealthStat(
                   svgAsset: 'assets/images/weight_icon.svg',
                   fallbackIcon: Icons.fitness_center,
@@ -353,7 +334,10 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        title: Text('Profile', style: AppTextStyles.headline2.copyWith(fontSize: 20 * textScale)),
+        title: Text(
+          'Profile',
+          style: AppTextStyles.headline2.copyWith(fontSize: 20 * textScale),
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -399,7 +383,11 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
             height: iconSize,
             child: Center(
               child: svgAsset != null
-                  ? SvgPicture.asset(svgAsset, width: iconSize, height: iconSize)
+                  ? SvgPicture.asset(
+                      svgAsset,
+                      width: iconSize,
+                      height: iconSize,
+                    )
                   : Icon(
                       fallbackIcon ?? Icons.help_outline,
                       color: AppColors.primary,
@@ -432,7 +420,13 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
     );
   }
 
-  Widget _buildFigmaMenu(BuildContext context, WidgetRef ref, bool isTablet, double textScale, double scale) {
+  Widget _buildFigmaMenu(
+    BuildContext context,
+    WidgetRef ref,
+    bool isTablet,
+    double textScale,
+    double scale,
+  ) {
     final vm = ref.watch(profileViewModelProvider);
     // Items: Edit Profile, Patient Information, Help, Log out
     final items = [
@@ -446,14 +440,16 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Only caretakers can edit patient profiles'),
+                content: Text(
+                  'Only caregivers can edit the care recipient’s profile.',
+                ),
               ),
             );
           }
         },
       },
       {
-        'title': 'Patient Information',
+        'title': 'Care Recipient Information',
         'iconAssetSvg': 'assets/images/document_icon.svg',
         'action': () {
           context.push(AppRoutes.caretakerHealthReport);
@@ -475,15 +471,24 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
               final scale = ResponsiveUtils.textScaleFactor(c);
               return AlertDialog(
                 title: Text('Log out', style: TextStyle(fontSize: 20 * scale)),
-                content: Text('Are you sure you want to log out?', style: TextStyle(fontSize: 16 * scale)),
+                content: Text(
+                  'Would you like to sign out of Memotion?',
+                  style: TextStyle(fontSize: 16 * scale),
+                ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(c, false),
-                    child: Text('Cancel', style: TextStyle(fontSize: 14 * scale)),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(fontSize: 14 * scale),
+                    ),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(c, true),
-                    child: Text('Log out', style: TextStyle(fontSize: 14 * scale)),
+                    child: Text(
+                      'Log out',
+                      style: TextStyle(fontSize: 14 * scale),
+                    ),
                   ),
                 ],
               );
@@ -503,7 +508,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
     ];
 
     // Sử dụng iconBoxSize tuỳ chỉnh theo scale của Tablet (hoặc 48 trên Mobile)
-    final iconBoxSize = isTablet ? 72.0 * scale : 48.0; 
+    final iconBoxSize = isTablet ? 72.0 * scale : 48.0;
     final iconImageSize = isTablet ? 42.0 * scale : 24.0;
 
     return Column(
@@ -553,7 +558,11 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
                                 height: iconImageSize,
                                 color: Colors.white,
                               )
-                            : Icon(it['icon'] as IconData, color: Colors.white, size: iconImageSize),
+                            : Icon(
+                                it['icon'] as IconData,
+                                color: Colors.white,
+                                size: iconImageSize,
+                              ),
                       ),
                     ),
                     SizedBox(width: isTablet ? 24 * scale : 16),
@@ -680,14 +689,11 @@ class _BleScanSheetState extends ConsumerState<_BleScanSheet> {
       _devices.clear();
       _scanning = true;
     });
-    _scanSub = widget.notifier.scanForDevices().listen(
-      (device) {
-        if (!_devices.any((d) => d.remoteId == device.remoteId)) {
-          setState(() => _devices.add(device));
-        }
-      },
-      onDone: () => setState(() => _scanning = false),
-    );
+    _scanSub = widget.notifier.scanForDevices().listen((device) {
+      if (!_devices.any((d) => d.remoteId == device.remoteId)) {
+        setState(() => _devices.add(device));
+      }
+    }, onDone: () => setState(() => _scanning = false));
   }
 
   @override

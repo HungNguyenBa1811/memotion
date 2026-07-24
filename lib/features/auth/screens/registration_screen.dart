@@ -44,7 +44,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     if (!_agreedToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please agree to the Terms of Service'),
+          content: Text('Please review and accept the Terms of Service.'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -62,7 +62,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Registration successful! Please sign in.'),
+          content: Text('Your account is ready. Please sign in.'),
           backgroundColor: AppColors.success,
         ),
       );
@@ -101,13 +101,18 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           icon: Icon(
             Icons.arrow_back_ios_new,
             color: AppColors.textPrimary,
-            size: (ResponsiveUtils.isTabletOrLarger(context) ? 32.0 : 24.0) * layoutScale,
+            size:
+                (ResponsiveUtils.isTabletOrLarger(context) ? 32.0 : 24.0) *
+                layoutScale,
           ),
           onPressed: widget.onBackPressed,
         ),
         title: Padding(
           padding: EdgeInsets.symmetric(vertical: 12.0 * layoutScale),
-          child: Text('Register', style: AppTextStyles.headline2.copyWith(fontSize: 19 * textScale)),
+          child: Text(
+            'Create account',
+            style: AppTextStyles.headline2.copyWith(fontSize: 19 * textScale),
+          ),
         ),
         centerTitle: true,
       ),
@@ -131,15 +136,15 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
                     // Nickname field
                     AppTextField(
-                      hint: 'Your Nickname',
+                      hint: 'Your name',
                       controller: _nicknameController,
                       prefixIcon: Icons.person_outline,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your nickname';
+                          return 'Please enter your name.';
                         }
                         if (value.length < 3) {
-                          return 'Nickname must be at least 3 characters';
+                          return 'Your name must be at least 3 characters.';
                         }
                         return null;
                       },
@@ -148,18 +153,18 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
                     // Email field
                     AppTextField(
-                      hint: 'Your Email',
+                      hint: 'Email address',
                       controller: _emailController,
                       prefixIcon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
+                          return 'Please enter your email address.';
                         }
                         if (!RegExp(
                           r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                         ).hasMatch(value)) {
-                          return 'Invalid email address';
+                          return 'Please enter a valid email address.';
                         }
                         return null;
                       },
@@ -168,16 +173,16 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
                     // Password field
                     AppTextField(
-                      hint: 'Your Password',
+                      hint: 'Password',
                       controller: _passwordController,
                       prefixIcon: Icons.lock_outline,
                       obscureText: true,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
+                          return 'Please enter your password.';
                         }
                         if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
+                          return 'Your password must be at least 6 characters.';
                         }
                         return null;
                       },
@@ -188,8 +193,12 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                     Row(
                       children: [
                         SizedBox(
-                          width: ResponsiveUtils.isTabletOrLarger(context) ? 48 : 24,
-                          height: ResponsiveUtils.isTabletOrLarger(context) ? 48 : 24,
+                          width: ResponsiveUtils.isTabletOrLarger(context)
+                              ? 48
+                              : 24,
+                          height: ResponsiveUtils.isTabletOrLarger(context)
+                              ? 48
+                              : 24,
                           child: FittedBox(
                             fit: BoxFit.contain,
                             child: SizedBox(
@@ -203,9 +212,12 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                   });
                                 },
                                 activeColor: AppColors.primary,
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4 * layoutScale),
+                                  borderRadius: BorderRadius.circular(
+                                    4 * layoutScale,
+                                  ),
                                 ),
                               ),
                             ),
@@ -216,7 +228,9 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                           child: Text.rich(
                             TextSpan(
                               text: 'I agree to the ',
-                              style: AppTextStyles.bodySmall.copyWith(fontSize: 12 * textScale),
+                              style: AppTextStyles.bodySmall.copyWith(
+                                fontSize: 12 * textScale,
+                              ),
                               children: [
                                 TextSpan(
                                   text: 'Terms of Service',
@@ -226,7 +240,12 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                                TextSpan(text: ' and ', style: AppTextStyles.bodySmall.copyWith(fontSize: 12 * textScale)),
+                                TextSpan(
+                                  text: ' and ',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    fontSize: 12 * textScale,
+                                  ),
+                                ),
                                 TextSpan(
                                   text: 'Privacy Policy',
                                   style: AppTextStyles.bodySmall.copyWith(
@@ -245,7 +264,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
                     // Register button
                     PrimaryButton(
-                      text: 'Register',
+                      text: 'Create account',
                       onPressed: _handleRegister,
                       isLoading: isLoading,
                     ),
@@ -258,10 +277,12 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                         child: Text.rich(
                           TextSpan(
                             text: 'Already have an account? ',
-                            style: AppTextStyles.bodyMedium.copyWith(fontSize: 14 * textScale),
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontSize: 14 * textScale,
+                            ),
                             children: [
                               TextSpan(
-                                text: 'Login',
+                                text: 'Sign in',
                                 style: AppTextStyles.bodyMedium.copyWith(
                                   fontSize: 14 * textScale,
                                   color: AppColors.primary,

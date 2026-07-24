@@ -74,7 +74,7 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
           if (messenger != null) {
             messenger.showSnackBar(
               const SnackBar(
-                content: Text('Voice command cancelled'),
+                content: Text('Voice request cancelled.'),
                 duration: Duration(seconds: 2),
               ),
             );
@@ -127,7 +127,7 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
           Text('Ready to listen', style: AppTextStyles.headline2),
           const SizedBox(height: 8),
           Text(
-            'Tap Start to record a voice command.',
+            'Tap Start, then say what you need.',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -166,7 +166,7 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
           Text('Listening...', style: AppTextStyles.headline2),
           const SizedBox(height: 6),
           Text(
-            'Please say your request',
+            'Say what you need',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -219,7 +219,7 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
           Text('Processing...', style: AppTextStyles.headline2),
           const SizedBox(height: 8),
           Text(
-            'Converting speech to a navigation command',
+            'Getting your request ready',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -243,7 +243,7 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
             color: AppColors.success,
           ),
           const SizedBox(height: 14),
-          Text('Command recognized', style: AppTextStyles.headline2),
+          Text('Got it', style: AppTextStyles.headline2),
           const SizedBox(height: 8),
           Text(
             state.response?.transcript ?? '',
@@ -267,10 +267,10 @@ class _VoiceCommandSheetState extends ConsumerState<VoiceCommandSheet> {
         children: [
           const Icon(Icons.error_rounded, size: 52, color: AppColors.error),
           const SizedBox(height: 14),
-          Text('Unable to process command', style: AppTextStyles.headline2),
+          Text('We could not understand that', style: AppTextStyles.headline2),
           const SizedBox(height: 8),
           Text(
-            state.errorMessage ?? 'An unknown error occurred.',
+            state.errorMessage ?? 'Please try saying your request again.',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),

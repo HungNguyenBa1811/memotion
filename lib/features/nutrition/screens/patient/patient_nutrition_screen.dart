@@ -113,8 +113,12 @@ class _PatientNutritionScreenContentState
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
     // Mimic the font scale from medication screen
-    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
-    
+    final fontScale = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
+
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: ResponsiveUtils.horizontalPadding(context),
@@ -126,15 +130,30 @@ class _PatientNutritionScreenContentState
           GestureDetector(
             onTap: () => context.go(AppRoutes.home),
             child: Container(
-              width: isLarge ? 92.0 : isTablet ? 80.0 : 40.0,
-              height: isLarge ? 92.0 : isTablet ? 80.0 : 40.0,
+              width: isLarge
+                  ? 92.0
+                  : isTablet
+                  ? 80.0
+                  : 40.0,
+              height: isLarge
+                  ? 92.0
+                  : isTablet
+                  ? 80.0
+                  : 40.0,
               decoration: const BoxDecoration(
                 color: Color(0xFF00695C),
                 shape: BoxShape.circle,
               ),
               child: Center(
-                child: Icon(Icons.arrow_back_ios_new,
-                    color: Colors.white, size: isLarge ? 36.0 : isTablet ? 32.0 : 18.0),
+                child: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Colors.white,
+                  size: isLarge
+                      ? 36.0
+                      : isTablet
+                      ? 32.0
+                      : 18.0,
+                ),
               ),
             ),
           ),
@@ -159,13 +178,17 @@ class _PatientNutritionScreenContentState
               ),
             ],
           ),
-          SizedBox(width: isLarge ? 92.0 : isTablet ? 80.0 : 40.0),
+          SizedBox(
+            width: isLarge
+                ? 92.0
+                : isTablet
+                ? 80.0
+                : 40.0,
+          ),
         ],
       ),
     );
   }
-
-
 
   Widget _buildPagedCards(
     BuildContext context,
@@ -175,7 +198,11 @@ class _PatientNutritionScreenContentState
   }) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final fontScale = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
 
     return Column(
       children: [
@@ -194,8 +221,10 @@ class _PatientNutritionScreenContentState
         else if (apiError != null)
           Padding(
             padding: EdgeInsets.fromLTRB(
-              ResponsiveUtils.horizontalPadding(context), 0,
-              ResponsiveUtils.horizontalPadding(context), 8 * fontScale,
+              ResponsiveUtils.horizontalPadding(context),
+              0,
+              ResponsiveUtils.horizontalPadding(context),
+              8 * fontScale,
             ),
             child: Row(
               children: [
@@ -212,17 +241,22 @@ class _PatientNutritionScreenContentState
                 Expanded(
                   child: Text(
                     apiError is PatientProfileNotFoundException
-                        ? 'No patient profile — showing demo meal.'
-                        : 'Could not load meals — showing demo.',
+                        ? 'Your meal plan is not available yet. Here is an example meal.'
+                        : 'We could not load your meals. Here is an example meal.',
                     style: GoogleFonts.lexend(
-                        fontSize: 12 * fontScale, color: Colors.grey[600]),
+                      fontSize: 12 * fontScale,
+                      color: Colors.grey[600],
+                    ),
                   ),
                 ),
                 if (apiError is! PatientProfileNotFoundException)
                   GestureDetector(
                     onTap: () => ref.invalidate(nutritionTasksProvider),
-                    child: Icon(Icons.refresh,
-                        size: 16 * fontScale, color: AppColors.primary),
+                    child: Icon(
+                      Icons.refresh,
+                      size: 16 * fontScale,
+                      color: AppColors.primary,
+                    ),
                   ),
               ],
             ),
@@ -250,11 +284,9 @@ class _PatientNutritionScreenContentState
             ),
           ),
         ),
-
       ],
     );
   }
-
 }
 
 // ─── Full-width patient card — same layout as Keto Salad, scaled to screen ───
@@ -276,7 +308,10 @@ class _PatientNutritionCard extends StatelessWidget {
           // never exceeds the available height (prevents bottom clipping).
           final contentReserve = 130 * scale; // text + paddings below image
           final maxByHeight = constraints.maxHeight - contentReserve;
-          final imageSize = (constraints.maxWidth * 0.75).clamp(0.0, maxByHeight.clamp(120.0, double.infinity));
+          final imageSize = (constraints.maxWidth * 0.75).clamp(
+            0.0,
+            maxByHeight.clamp(120.0, double.infinity),
+          );
           // Image overlaps ~45% above the card top edge
           final imageOverlap = imageSize * 0.45;
 
@@ -299,7 +334,9 @@ class _PatientNutritionCard extends StatelessWidget {
                   ),
                   // Padding inside the white card
                   padding: EdgeInsets.only(
-                    top: (imageSize - imageOverlap) + (24 * scale), // push text below image
+                    top:
+                        (imageSize - imageOverlap) +
+                        (24 * scale), // push text below image
                     left: 28 * scale,
                     right: 28 * scale,
                     bottom: 28 * scale,
@@ -337,7 +374,7 @@ class _PatientNutritionCard extends StatelessWidget {
                         children: [
                           Text(
                             task.calories != null
-                                ? '${task.calories} Kcal'
+                                ? '${task.calories} kcal'
                                 : '',
                             style: GoogleFonts.lexend(
                               fontSize: 20 * scale,
@@ -348,8 +385,7 @@ class _PatientNutritionCard extends StatelessWidget {
                           Icon(
                             Icons.favorite_outline,
                             size: 28 * scale,
-                            color:
-                                const Color(0xFF4DB6AC).withOpacity(0.7),
+                            color: const Color(0xFF4DB6AC).withOpacity(0.7),
                           ),
                         ],
                       ),
@@ -401,7 +437,7 @@ class _PatientNutritionCard extends StatelessWidget {
               color: task.mealColor,
               value: progress.expectedTotalBytes != null
                   ? progress.cumulativeBytesLoaded /
-                      progress.expectedTotalBytes!
+                        progress.expectedTotalBytes!
                   : null,
             ),
           );

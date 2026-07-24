@@ -76,17 +76,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       debugPrint('🔐 AuthNotifier: Fetching user details from /api/users/me');
 
       // Set loading state
-      state = state.copyWith(
-        status: AuthStatus.loading,
-        accessToken: token,
-      );
+      state = state.copyWith(status: AuthStatus.loading, accessToken: token);
 
       final userDetailResult = await _authRepository.getUserDetails();
 
       switch (userDetailResult) {
         case Success(:final data):
           debugPrint('🔐 AuthNotifier: Session restored successfully');
-debugPrint('🔐 AuthNotifier: role = ${data.role}');
+          debugPrint('🔐 AuthNotifier: role = ${data.role}');
 
           final user = User(
             id: data.userId,
@@ -103,8 +100,12 @@ debugPrint('🔐 AuthNotifier: role = ${data.role}');
           );
 
         case Failure(:final exception):
-          debugPrint('🔐 AuthNotifier: Failed to restore session: ${exception.message}');
-          debugPrint('🔐 AuthNotifier: Token might be expired, clearing storage');
+          debugPrint(
+            '🔐 AuthNotifier: Failed to restore session: ${exception.message}',
+          );
+          debugPrint(
+            '🔐 AuthNotifier: Token might be expired, clearing storage',
+          );
           // Token invalid hoặc expired, clear storage
           await _tokenStorage.clearAll();
           state = state.copyWith(status: AuthStatus.unauthenticated);
@@ -120,7 +121,7 @@ debugPrint('🔐 AuthNotifier: role = ${data.role}');
     await _tokenStorage.clearAll();
     state = const AuthState(
       status: AuthStatus.unauthenticated,
-      error: 'Session expired. Please login again.',
+      error: 'Your session has ended. Please sign in again.',
     );
   }
 
@@ -191,7 +192,9 @@ debugPrint('🔐 AuthNotifier: role = ${data.role}');
           createdAt: DateTime.now(),
         );
       case Failure(:final exception):
-        debugPrint('🔐 AuthNotifier: Failed to get user details: ${exception.message}');
+        debugPrint(
+          '🔐 AuthNotifier: Failed to get user details: ${exception.message}',
+        );
         // Fallback to basic user info
         user = User(
           id: '',

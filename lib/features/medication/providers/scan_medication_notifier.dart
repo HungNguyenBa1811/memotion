@@ -39,9 +39,10 @@ class ScanMedicationNotifier extends Notifier<ScanMedicationState> {
         );
       } else {
         // Medication not found or agent error
-        final errorMsg = response.data?.agentError ??
+        final errorMsg =
+            response.data?.agentError ??
             response.data?.message ??
-            'Failed to identify medication';
+            'We could not identify the medication. Please use a clear photo and try again.';
         state = state.copyWith(
           isScanning: false,
           isSuccess: false,
@@ -54,7 +55,8 @@ class ScanMedicationNotifier extends Notifier<ScanMedicationState> {
       state = state.copyWith(
         isScanning: false,
         isSuccess: false,
-        errorMessage: 'Error scanning medication: ${e.toString()}',
+        errorMessage:
+            'We could not identify the medication. Please use a clear photo and try again.',
         scannedMedication: null,
       );
     }
@@ -74,5 +76,5 @@ class ScanMedicationNotifier extends Notifier<ScanMedicationState> {
 /// Provider for ScanMedicationNotifier
 final scanMedicationNotifierProvider =
     NotifierProvider<ScanMedicationNotifier, ScanMedicationState>(
-  ScanMedicationNotifier.new,
-);
+      ScanMedicationNotifier.new,
+    );

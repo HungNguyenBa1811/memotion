@@ -114,17 +114,17 @@ enum WorkoutType {
   String get displayName {
     switch (this) {
       case WorkoutType.yoga:
-        return 'Tập Yoga';
+        return 'Yoga';
       case WorkoutType.meal:
-        return 'Ăn';
+        return 'Meal';
       case WorkoutType.medicine:
-        return 'Uống thuốc';
+        return 'Medication';
       case WorkoutType.exercise:
-        return 'Tập thể dục';
+        return 'Exercise';
       case WorkoutType.rest:
-        return 'Nghỉ ngơi';
+        return 'Rest';
       case WorkoutType.other:
-        return 'Khác';
+        return 'Other';
     }
   }
 }

@@ -15,7 +15,8 @@ sealed class ApiException implements Exception {
 /// Network Exception - No internet, timeout, etc.
 class NetworkException extends ApiException {
   const NetworkException({
-    super.message = 'Network error occurred. Please check your connection.',
+    super.message =
+        'We could not connect. Please check your internet connection.',
     super.statusCode,
     super.data,
   });
@@ -24,7 +25,8 @@ class NetworkException extends ApiException {
 /// Server Exception - 5xx errors
 class ServerException extends ApiException {
   const ServerException({
-    super.message = 'Server error occurred. Please try again later.',
+    super.message =
+        'Something went wrong on our side. Please try again in a moment.',
     super.statusCode,
     super.data,
   });
@@ -33,7 +35,7 @@ class ServerException extends ApiException {
 /// Unauthorized Exception - 401
 class UnauthorizedException extends ApiException {
   const UnauthorizedException({
-    super.message = 'Unauthorized. Please login again.',
+    super.message = 'Your session has ended. Please sign in again.',
     super.statusCode = 401,
     super.data,
   });
@@ -42,7 +44,7 @@ class UnauthorizedException extends ApiException {
 /// Forbidden Exception - 403
 class ForbiddenException extends ApiException {
   const ForbiddenException({
-    super.message = 'Access denied.',
+    super.message = 'You do not have permission to view this information.',
     super.statusCode = 403,
     super.data,
   });
@@ -51,7 +53,7 @@ class ForbiddenException extends ApiException {
 /// Not Found Exception - 404
 class NotFoundException extends ApiException {
   const NotFoundException({
-    super.message = 'Resource not found.',
+    super.message = 'We could not find the requested information.',
     super.statusCode = 404,
     super.data,
   });
@@ -62,7 +64,7 @@ class ValidationException extends ApiException {
   final List<ValidationError> errors;
 
   const ValidationException({
-    super.message = 'Validation error occurred.',
+    super.message = 'Please review the information and try again.',
     super.statusCode = 422,
     super.data,
     this.errors = const [],
@@ -101,7 +103,8 @@ class ValidationError {
 /// Bad Request Exception - 400
 class BadRequestException extends ApiException {
   const BadRequestException({
-    super.message = 'Bad request.',
+    super.message =
+        'We could not process that request. Please check the information and try again.',
     super.statusCode = 400,
     super.data,
   });
@@ -112,7 +115,7 @@ class BadRequestException extends ApiException {
 class PatientProfileNotFoundException extends ApiException {
   const PatientProfileNotFoundException({
     super.message =
-        'Không tìm thấy hồ sơ bệnh nhân. Vui lòng liên hệ bác sĩ để được tạo hồ sơ.',
+        'No care profile was found. Please ask your doctor or care team to create one.',
     super.statusCode = 400,
     super.data,
   });
@@ -121,7 +124,7 @@ class PatientProfileNotFoundException extends ApiException {
 /// Unknown Exception
 class UnknownApiException extends ApiException {
   const UnknownApiException({
-    super.message = 'An unknown error occurred.',
+    super.message = 'Something went wrong. Please try again.',
     super.statusCode,
     super.data,
   });

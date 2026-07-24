@@ -86,13 +86,13 @@ class _MedicationMainScreenContentState
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Delay (phút)'),
+          decoration: const InputDecoration(labelText: 'Delay (minutes)'),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () =>
@@ -112,17 +112,17 @@ class _MedicationMainScreenContentState
           'task_duedate': dueDate.toIso8601String(),
           'medication_detail': {
             'name': 'Vitamin D3 1000IU',
-            'dosage': '1 viên',
-            'notes': 'Uống sau ăn tối',
+            'dosage': '1 tablet',
+            'notes': 'Take after dinner',
             'image_path': null,
           },
         },
       ],
     });
     if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Alarm set: $minutes phút nữa')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Reminder set for $minutes minutes from now')),
+      );
     }
   }
 
@@ -141,8 +141,18 @@ class _MedicationMainScreenContentState
       body: SafeArea(
         bottom: false,
         child: isTablet
-          ? _buildTabletLayout(medicationsAsync, selectedDate, selectedFilter, isOffline)
-          : _buildMobileLayout(medicationsAsync, selectedDate, selectedFilter, isOffline),
+            ? _buildTabletLayout(
+                medicationsAsync,
+                selectedDate,
+                selectedFilter,
+                isOffline,
+              )
+            : _buildMobileLayout(
+                medicationsAsync,
+                selectedDate,
+                selectedFilter,
+                isOffline,
+              ),
       ),
     );
   }
@@ -151,7 +161,7 @@ class _MedicationMainScreenContentState
     AsyncValue<List<Medication>> medicationsAsync,
     DateTime selectedDate,
     MedicationFilter selectedFilter,
-    bool isOffline
+    bool isOffline,
   ) {
     return SingleChildScrollView(
       child: Center(
@@ -196,7 +206,9 @@ class _MedicationMainScreenContentState
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        _showDebug ? Icons.bug_report : Icons.bug_report_outlined,
+                        _showDebug
+                            ? Icons.bug_report
+                            : Icons.bug_report_outlined,
                         size: 16,
                         color: Colors.grey,
                       ),
@@ -215,7 +227,9 @@ class _MedicationMainScreenContentState
                   const SizedBox(height: 12),
                   _buildDebugSection(context),
                 ],
-                SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 20),
+                SizedBox(
+                  height: ResponsiveUtils.bottomNavPadding(context) * 20,
+                ),
               ],
             ),
           ),
@@ -228,7 +242,7 @@ class _MedicationMainScreenContentState
     AsyncValue<List<Medication>> medicationsAsync,
     DateTime selectedDate,
     MedicationFilter selectedFilter,
-    bool isOffline
+    bool isOffline,
   ) {
     final hPad = ResponsiveUtils.horizontalPadding(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
@@ -257,7 +271,8 @@ class _MedicationMainScreenContentState
           const SizedBox(height: 16),
           Expanded(
             child: medicationsAsync.when(
-              data: (medications) => _buildMedicationList(medications, isTablet: true),
+              data: (medications) =>
+                  _buildMedicationList(medications, isTablet: true),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => _buildErrorWidget(error),
             ),
@@ -271,9 +286,21 @@ class _MedicationMainScreenContentState
     final textScale = ResponsiveUtils.textScaleFactor(context);
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
-    final qrBoxSize = isLarge ? 92.0 : isTablet ? 80.0 : 40.0;
-    final qrIconSize = isLarge ? 46.0 : isTablet ? 40.0 : 20.0;
+    final fontScale = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
+    final qrBoxSize = isLarge
+        ? 92.0
+        : isTablet
+        ? 80.0
+        : 40.0;
+    final qrIconSize = isLarge
+        ? 46.0
+        : isTablet
+        ? 40.0
+        : 20.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -301,7 +328,7 @@ class _MedicationMainScreenContentState
           Expanded(
             child: Center(
               child: Text(
-                'Medications Schedule',
+                'Medication Schedule',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lexend(
                   fontSize: 18 * textScale * fontScale * 0.7,
@@ -334,13 +361,20 @@ class _MedicationMainScreenContentState
     );
   }
 
-
   Widget _buildFilterTabs(MedicationFilter selectedFilter) {
     final medicationsAsync = ref.watch(medicationsProvider);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
-    final tabHeight = isLarge ? 128.0 : isTablet ? 112.0 : 56.0;
-    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final tabHeight = isLarge
+        ? 128.0
+        : isTablet
+        ? 112.0
+        : 56.0;
+    final fontScale = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
 
     return Container(
       height: tabHeight,
@@ -351,18 +385,24 @@ class _MedicationMainScreenContentState
       child: Row(
         children: MedicationFilter.values.map((filter) {
           final isSelected = filter == selectedFilter;
-          final count = medicationsAsync.whenOrNull(
-            data: (meds) {
-              switch (filter) {
-                case MedicationFilter.all:
-                  return meds.length;
-                case MedicationFilter.taken:
-                  return meds.where((m) => m.status == MedicationStatus.taken).length;
-                case MedicationFilter.missed:
-                  return meds.where((m) => m.status == MedicationStatus.missed).length;
-              }
-            },
-          ) ?? 0;
+          final count =
+              medicationsAsync.whenOrNull(
+                data: (meds) {
+                  switch (filter) {
+                    case MedicationFilter.all:
+                      return meds.length;
+                    case MedicationFilter.taken:
+                      return meds
+                          .where((m) => m.status == MedicationStatus.taken)
+                          .length;
+                    case MedicationFilter.missed:
+                      return meds
+                          .where((m) => m.status == MedicationStatus.missed)
+                          .length;
+                  }
+                },
+              ) ??
+              0;
 
           return Expanded(
             child: GestureDetector(
@@ -384,7 +424,9 @@ class _MedicationMainScreenContentState
                       filter.displayText,
                       style: GoogleFonts.lexend(
                         fontSize: 14 * fontScale,
-                        color: isSelected ? Colors.white : const Color(0xFF353535),
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF353535),
                       ),
                     ),
                     SizedBox(width: 4 * fontScale),
@@ -394,14 +436,18 @@ class _MedicationMainScreenContentState
                         vertical: 0,
                       ),
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF0B2455) : const Color(0xFFF7F7F7),
+                        color: isSelected
+                            ? const Color(0xFF0B2455)
+                            : const Color(0xFFF7F7F7),
                         borderRadius: BorderRadius.circular(8 * fontScale),
                       ),
                       child: Text(
                         count.toString(),
                         style: GoogleFonts.lexend(
                           fontSize: 14 * fontScale,
-                          color: isSelected ? Colors.white : const Color(0xFF353535),
+                          color: isSelected
+                              ? Colors.white
+                              : const Color(0xFF353535),
                         ),
                       ),
                     ),
@@ -434,8 +480,8 @@ class _MedicationMainScreenContentState
             const SizedBox(height: 16),
             Text(
               isPatientNotFound
-                  ? 'No patient profile yet'
-                  : 'Unable to load medication data',
+                  ? 'No care profile yet'
+                  : 'We could not load the medication schedule',
               style: GoogleFonts.lexend(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -444,8 +490,8 @@ class _MedicationMainScreenContentState
             const SizedBox(height: 8),
             Text(
               isPatientNotFound
-                  ? 'Please contact your doctor to create a patient profile and receive a medication schedule.'
-                  : error.toString(),
+                  ? 'Please ask the doctor or care team to create a care profile and medication schedule.'
+                  : 'Please check your connection and try again.',
               textAlign: TextAlign.center,
               style: GoogleFonts.lexend(fontSize: 14, color: Colors.grey),
             ),
@@ -466,7 +512,10 @@ class _MedicationMainScreenContentState
     );
   }
 
-  Widget _buildMedicationList(List<Medication> medications, {bool isTablet = false}) {
+  Widget _buildMedicationList(
+    List<Medication> medications, {
+    bool isTablet = false,
+  }) {
     if (medications.isEmpty) {
       return Center(
         child: Column(
@@ -475,7 +524,7 @@ class _MedicationMainScreenContentState
             Icon(Icons.medication_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'No medications found',
+              'No medications scheduled for this day',
               style: GoogleFonts.lexend(fontSize: 16, color: Colors.grey[600]),
             ),
           ],
@@ -488,7 +537,9 @@ class _MedicationMainScreenContentState
       final scale = isLarge ? 2.3 : 2.0;
 
       return ListView.builder(
-        padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 40),       
+        padding: EdgeInsets.only(
+          bottom: ResponsiveUtils.bottomNavPadding(context) + 40,
+        ),
         itemCount: medications.length,
         itemBuilder: (context, index) {
           final isSelected = index == _selectedIndex;
@@ -500,9 +551,14 @@ class _MedicationMainScreenContentState
               margin: EdgeInsets.only(bottom: 12 * scale),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(27 * scale),
-                border: isSelected ? Border.all(color: AppColors.primary, width: 2 * scale) : Border.all(color: Colors.transparent, width: 2 * scale),
+                border: isSelected
+                    ? Border.all(color: AppColors.primary, width: 2 * scale)
+                    : Border.all(color: Colors.transparent, width: 2 * scale),
               ),
-              child: MedicationTaskCard(medication: medications[index], scale: scale),
+              child: MedicationTaskCard(
+                medication: medications[index],
+                scale: scale,
+              ),
             ),
           );
         },
@@ -522,7 +578,6 @@ class _MedicationMainScreenContentState
       );
     }
   }
-
 
   Widget _buildDebugSection(BuildContext context) {
     return Container(
@@ -572,7 +627,9 @@ class _MedicationMainScreenContentState
                     ref.invalidate(medicationsProvider);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Cache reloaded from API')),
+                        const SnackBar(
+                          content: Text('Cache reloaded from API'),
+                        ),
                       );
                     }
                   },
@@ -654,7 +711,7 @@ class _MedicationMainScreenContentState
           'task_duedate': dueDate.toIso8601String(),
           'medication_detail': {
             'name': 'Test Vitamin D3',
-            'dosage': '1 viên',
+            'dosage': '1 tablet',
             'notes': 'Test alarm — $minutes min delay',
             'image_path': null,
           },

@@ -76,13 +76,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           icon: Icon(
             Icons.arrow_back_ios_new,
             color: AppColors.textPrimary,
-            size: (ResponsiveUtils.isTabletOrLarger(context) ? 32.0 : 24.0) * layoutScale,
+            size:
+                (ResponsiveUtils.isTabletOrLarger(context) ? 32.0 : 24.0) *
+                layoutScale,
           ),
           onPressed: widget.onBackPressed,
         ),
         title: Padding(
           padding: EdgeInsets.symmetric(vertical: 12.0 * layoutScale),
-          child: Text('Login', style: AppTextStyles.headline2.copyWith(fontSize: 19 * textScale)),
+          child: Text(
+            'Sign in',
+            style: AppTextStyles.headline2.copyWith(fontSize: 19 * textScale),
+          ),
         ),
         centerTitle: true,
       ),
@@ -98,148 +103,160 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 vertical: 20 * layoutScale,
               ),
               child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: 20 * layoutScale),
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(height: 20 * layoutScale),
 
-                // Email field
-                AppTextField(
-                  hint: 'Your Email',
-                  controller: _emailController,
-                  prefixIcon: Icons.email_outlined,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    // if (!RegExp(
-                    //   r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    // ).hasMatch(value)) {
-                    //   return 'Invalid email';
-                    // }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16 * layoutScale),
+                    // Email field
+                    AppTextField(
+                      hint: 'Email address',
+                      controller: _emailController,
+                      prefixIcon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email address.';
+                        }
+                        // if (!RegExp(
+                        //   r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        // ).hasMatch(value)) {
+                        //   return 'Invalid email';
+                        // }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16 * layoutScale),
 
-                // Password field
-                AppTextField(
-                  hint: 'Your Password',
-                  controller: _passwordController,
-                  prefixIcon: Icons.lock_outline,
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 12 * layoutScale),
+                    // Password field
+                    AppTextField(
+                      hint: 'Password',
+                      controller: _passwordController,
+                      prefixIcon: Icons.lock_outline,
+                      obscureText: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password.';
+                        }
+                        if (value.length < 6) {
+                          return 'Your password must be at least 6 characters.';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 12 * layoutScale),
 
-                // Forgot password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: () {
-                      // TODO: Implement forgot password
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('This feature is under development'),
+                    // Forgot password
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          // TODO: Implement forgot password
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Password recovery will be available soon.',
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Forgot password?',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontSize: 14 * textScale,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      );
-                    },
-                    child: Text(
-                      'Forgot password?',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontSize: 14 * textScale,
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                ),
-                SizedBox(height: 32 * layoutScale),
+                    SizedBox(height: 32 * layoutScale),
 
-                // Login button
-                PrimaryButton(
-                  text: 'Sign In',
-                  onPressed: _handleLogin,
-                  isLoading: isLoading,
-                ),
-                SizedBox(height: 24 * layoutScale),
+                    // Login button
+                    PrimaryButton(
+                      text: 'Sign In',
+                      onPressed: _handleLogin,
+                      isLoading: isLoading,
+                    ),
+                    SizedBox(height: 24 * layoutScale),
 
-                // Register link
-                Center(
-                  child: GestureDetector(
-                    onTap: widget.onRegisterPressed,
-                    child: Text.rich(
-                      TextSpan(
-                        text: "Don't have an account? ",
-                        style: AppTextStyles.bodyMedium.copyWith(fontSize: 14 * textScale),
-                        children: [
+                    // Register link
+                    Center(
+                      child: GestureDetector(
+                        onTap: widget.onRegisterPressed,
+                        child: Text.rich(
                           TextSpan(
-                            text: 'Sign Up',
+                            text: "Don't have an account? ",
                             style: AppTextStyles.bodyMedium.copyWith(
                               fontSize: 14 * textScale,
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w600,
                             ),
+                            children: [
+                              TextSpan(
+                                text: 'Sign Up',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  fontSize: 14 * textScale,
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 32 * layoutScale),
-
-                // Divider with text
-                Row(
-                  children: [
-                    const Expanded(child: Divider(color: AppColors.divider)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16 * layoutScale),
-                      child: Text(
-                        'OR',
-                        style: AppTextStyles.caption.copyWith(
-                          fontSize: 11 * textScale,
-                          color: AppColors.textSecondary,
                         ),
                       ),
                     ),
-                    const Expanded(child: Divider(color: AppColors.divider)),
+                    SizedBox(height: 32 * layoutScale),
+
+                    // Divider with text
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Divider(color: AppColors.divider),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16 * layoutScale,
+                          ),
+                          child: Text(
+                            'OR',
+                            style: AppTextStyles.caption.copyWith(
+                              fontSize: 11 * textScale,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                        const Expanded(
+                          child: Divider(color: AppColors.divider),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 24 * layoutScale),
+
+                    // Google login button
+                    SocialButton(
+                      text: 'Sign in with Google',
+                      icon: Image.network(
+                        'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                        width: 24 * textScale,
+                        height: 24 * textScale,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.g_mobiledata, size: 24 * textScale);
+                        },
+                      ),
+                      onPressed: () {
+                        // TODO: Implement Google login
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Google sign-in will be available soon.',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
-                SizedBox(height: 24 * layoutScale),
-
-                // Google login button
-                SocialButton(
-                  text: 'Sign in with Google',
-                  icon: Image.network(
-                    'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-                    width: 24 * textScale,
-                    height: 24 * textScale,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(Icons.g_mobiledata, size: 24 * textScale);
-                    },
-                  ),
-                  onPressed: () {
-                    // TODO: Implement Google login
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('This feature is under development'),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
+              ),
             ),
           ),
         ),

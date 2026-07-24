@@ -36,11 +36,11 @@ class PatientHomeScreen extends ConsumerWidget {
     final dashboardData = homeState.data;
 
     final heroSection = PatientGreetingHero(
-      userName: 'Grandpa/Grandma',
+      userName: dashboardData?.userName ?? 'there',
       greeting: _getGreeting(),
       avatarUrl: dashboardData?.avatarUrl,
-      moodMessage: "You don't seem\nto be in a good mood today",
-      actionButtonText: 'EMERGENCY CALL',
+      moodMessage: 'How are you feeling today?',
+      actionButtonText: 'GET HELP',
       onActionPressed: () {
         homeNotifier.triggerSOS();
         _showSOSDialog(context);
@@ -48,7 +48,7 @@ class PatientHomeScreen extends ConsumerWidget {
     );
 
     final medicationSection = UpcomingMedicationCard(
-      title: firstMed?.name ?? 'Upcoming Schedule',
+      title: firstMed?.name ?? 'Next Medication',
       time:
           firstMed?.time ??
           dashboardData?.upcomingMedication?.time ??
@@ -56,14 +56,14 @@ class PatientHomeScreen extends ConsumerWidget {
       dosage:
           firstMed?.dosage ??
           dashboardData?.upcomingMedication?.dosage ??
-          'Take 1 Vitamin C tablet after meal',
+          'Take 1 Vitamin C tablet after a meal',
       imageUrl: firstMed?.imageUrl.isNotEmpty == true
           ? firstMed!.imageUrl
           : dashboardData?.upcomingMedication?.imageUrl,
       onTakenPressed: () {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Marked as taken!'),
+            content: Text('Medication marked as taken.'),
             backgroundColor: AppColors.primary,
           ),
         );
@@ -74,7 +74,7 @@ class PatientHomeScreen extends ConsumerWidget {
     );
 
     final titleSection = Text(
-      'For Grandpa/Grandma',
+      'Your Daily Support',
       style: AppTextStyles.headline1.copyWith(
         fontSize: 22 * ResponsiveUtils.textScaleFactor(context),
         fontWeight: FontWeight.w700,
@@ -120,8 +120,8 @@ class PatientHomeScreen extends ConsumerWidget {
                           size: VoiceRecordButtonSize.custom,
                           customDiameter:
                               ResponsiveUtils.isTabletOrLarger(context)
-                                  ? 200
-                                  : 160,
+                              ? 200
+                              : 160,
                           onPressed: () => _onAskAiPressed(context),
                           label: 'Ask AI',
                           type: VoiceRecordButtonType.secondary,
@@ -174,7 +174,7 @@ class PatientHomeScreen extends ConsumerWidget {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Microphone permission is required to use Ask AI.'),
+        content: Text('Please allow microphone access to use Ask AI.'),
         backgroundColor: AppColors.warning,
       ),
     );
@@ -197,7 +197,7 @@ class PatientHomeScreen extends ConsumerWidget {
         return AlertDialog(
           title: const Text('Enable microphone access'),
           content: const Text(
-            'Please allow microphone permission in Settings so Ask AI can hear your command.',
+            'Allow microphone access in Settings so Ask AI can hear your request.',
           ),
           actions: [
             TextButton(
@@ -241,7 +241,7 @@ class PatientHomeScreen extends ConsumerWidget {
               SizedBox(width: 12 * scale),
               Expanded(
                 child: Text(
-                  'EMERGENCY CALL',
+                  'Get emergency help',
                   style: TextStyle(
                     fontSize: 16 * scale,
                     fontWeight: FontWeight.w700,
@@ -252,7 +252,7 @@ class PatientHomeScreen extends ConsumerWidget {
             ],
           ),
           content: Text(
-            'Do you want to make an emergency call to family or emergency services?',
+            'Choose who you would like to call. If you are in immediate danger, call emergency services.',
             style: TextStyle(fontSize: 16 * scale),
           ),
           actions: [
@@ -272,7 +272,7 @@ class PatientHomeScreen extends ConsumerWidget {
                 // TODO: Implement emergency call to family
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Calling family...'),
+                    content: Text('Calling your family contact...'),
                     backgroundColor: AppColors.tealGreen,
                   ),
                 );
@@ -288,7 +288,7 @@ class PatientHomeScreen extends ConsumerWidget {
                 ),
               ),
               child: Text(
-                'Call Family',
+                'Call family',
                 style: TextStyle(fontSize: 14 * scale),
               ),
             ),
@@ -298,7 +298,7 @@ class PatientHomeScreen extends ConsumerWidget {
                 // TODO: Implement 115 emergency call
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Calling 115...'),
+                    content: Text('Calling emergency services at 115...'),
                     backgroundColor: Color(0xFFD77658),
                   ),
                 );

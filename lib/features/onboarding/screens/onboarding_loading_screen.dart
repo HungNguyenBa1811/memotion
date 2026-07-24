@@ -24,10 +24,10 @@ class _OnboardingLoadingScreenState
 
   int _currentStep = 0;
   final List<String> _loadingMessages = [
-    'Creating health profile...',
-    'Analyzing physical therapy information...',
-    'Generating AI care plan...',
-    'Completed!',
+    'Creating the care profile...',
+    'Reviewing mobility information...',
+    'Preparing the care plan...',
+    'Care plan ready',
   ];
 
   @override
@@ -40,17 +40,11 @@ class _OnboardingLoadingScreenState
     )..repeat(reverse: true);
 
     _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
     _opacityAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
     // Start API submission after widget is built
@@ -132,7 +126,7 @@ class _OnboardingLoadingScreenState
 
                 // Title
                 Text(
-                  'Setting up your profile',
+                  'Preparing the care profile',
                   style: GoogleFonts.lexend(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
@@ -144,7 +138,7 @@ class _OnboardingLoadingScreenState
 
                 // Subtitle
                 Text(
-                  'Please wait a moment...',
+                  'This may take a moment.',
                   style: GoogleFonts.lexend(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
@@ -197,30 +191,30 @@ class _OnboardingLoadingScreenState
               color: isCompleted
                   ? AppColors.primary
                   : isCurrent
-                      ? AppColors.primary.withValues(alpha: 0.2)
-                      : Colors.grey.withValues(alpha: 0.2),
+                  ? AppColors.primary.withValues(alpha: 0.2)
+                  : Colors.grey.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: isCompleted
                   ? const Icon(Icons.check, color: Colors.white, size: 16)
                   : isCurrent
-                      ? SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.primary,
-                          ),
-                        )
-                      : Text(
-                          '${index + 1}',
-                          style: GoogleFonts.lexend(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey,
-                          ),
-                        ),
+                  ? SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
+                    )
+                  : Text(
+                      '${index + 1}',
+                      style: GoogleFonts.lexend(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey,
+                      ),
+                    ),
             ),
           ),
 

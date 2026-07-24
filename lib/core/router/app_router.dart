@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/registration_screen.dart';
 import '../../features/auth/screens/sign_in_screen.dart';
-import '../../features/onboarding/screens/onboarding_screen.dart';
-import '../../features/onboarding/screens/onboarding_screen_new.dart';
+import '../../features/onboarding/screens/welcome_screen.dart';
+import '../../features/onboarding/screens/onboarding_wizard_screen.dart';
 import '../../features/onboarding/screens/onboarding_loading_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/home/screens/home_screen.dart';
@@ -119,7 +119,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (context, state) => OnboardingScreen(
+        builder: (context, state) => WelcomeScreen(
           onRegisterPressed: () => context.go(AppRoutes.registration),
           onLoginPressed: () => context.go(AppRoutes.signIn),
         ),
@@ -143,7 +143,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Onboarding wizard — single route, PageView handles step navigation internally
       GoRoute(
         path: AppRoutes.onboardingStep1,
-        builder: (context, state) => const OnboardingScreenNew(initialStep: 1),
+        builder: (context, state) => const OnboardingWizardScreen(initialStep: 1),
       ),
 
       // Onboarding Loading screen - shown while submitting data

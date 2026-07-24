@@ -24,12 +24,13 @@ class WorkoutScreen extends ConsumerWidget {
     if (profileViewModel.isLoadingUserDetails) {
       return const Scaffold(
         backgroundColor: AppColors.background,
-        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
-    final role =
-        profileViewModel.userDetails?.role.toUpperCase() ?? 'PATIENT';
+    final role = profileViewModel.userDetails?.role.toUpperCase() ?? 'PATIENT';
 
     if (role == 'CARETAKER') {
       return const WorkoutScreenContent();
@@ -220,7 +221,11 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
   Widget _buildTitleSection({bool isTablet = false}) {
     final isLarge = ResponsiveUtils.isLargeTablet(context);
     final isTabletMode = ResponsiveUtils.isTabletOrLarger(context);
-    final fontScale = isLarge ? 2.3 : isTabletMode ? 2.0 : 1.0;
+    final fontScale = isLarge
+        ? 2.3
+        : isTabletMode
+        ? 2.0
+        : 1.0;
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -238,7 +243,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
           ),
           SizedBox(height: 2 * fontScale),
           Text(
-            'Patient Name',
+            'Care Recipient',
             style: GoogleFonts.lexend(
               fontSize: 14 * fontScale,
               fontWeight: FontWeight.w500,
@@ -250,7 +255,11 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
     );
   }
 
-  Widget _buildContent(BuildContext context, WorkoutListState workoutState, {required bool isTablet}) {  
+  Widget _buildContent(
+    BuildContext context,
+    WorkoutListState workoutState, {
+    required bool isTablet,
+  }) {
     if (workoutState.isLoading) {
       return const Padding(
         padding: EdgeInsets.all(32.0),
@@ -279,8 +288,8 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
               const SizedBox(height: 16),
               Text(
                 workoutState.isPatientProfileNotFound
-                    ? 'No patient profile yet'
-                    : 'Unable to load data',
+                    ? 'No care profile yet'
+                    : 'We could not load the exercise plan',
                 style: GoogleFonts.lexend(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -291,7 +300,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
               const SizedBox(height: 8),
               Text(
                 workoutState.isPatientProfileNotFound
-                    ? 'Please contact your doctor to create a patient profile and receive a workout plan.'
+                    ? 'Please ask the doctor or care team to create a care profile and exercise plan.'
                     : workoutState.error!,
                 style: GoogleFonts.lexend(
                   fontSize: 14,
@@ -333,7 +342,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
               ),
               const SizedBox(height: 16),
               Text(
-                'No tasks available',
+                'No exercises scheduled for this day',
                 style: GoogleFonts.lexend(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -342,7 +351,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Stay active',
+                'Gentle movement supports well-being',
                 style: GoogleFonts.lexend(
                   fontSize: 14,
                   color: AppColors.textSecondary,
@@ -357,13 +366,19 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
     return _buildTaskList(context, workoutState.workouts, isTablet: isTablet);
   }
 
-  Widget _buildTaskList(BuildContext context, List<WorkoutTask> workouts, {required bool isTablet}) {    
+  Widget _buildTaskList(
+    BuildContext context,
+    List<WorkoutTask> workouts, {
+    required bool isTablet,
+  }) {
     if (isTablet) {
       final isLarge = ResponsiveUtils.isLargeTablet(context);
       final scale = isLarge ? 2.3 : 2.0;
 
       return ListView.builder(
-        padding: EdgeInsets.only(bottom: ResponsiveUtils.bottomNavPadding(context) + 16),
+        padding: EdgeInsets.only(
+          bottom: ResponsiveUtils.bottomNavPadding(context) + 16,
+        ),
         itemCount: workouts.length,
         itemBuilder: (context, index) {
           return Padding(
@@ -402,10 +417,21 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
       },
     );
   }
+
   String _getMonthName(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return months[month - 1];
   }

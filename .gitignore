@@ -47,6 +47,9 @@ app.*.map.json
 .vscode/
 *.json
 
+.rtk/
+RTK.md
+
 .vscode/
 .github/
 .shared/

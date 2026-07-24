@@ -1,19 +1,19 @@
 /// Pose Detection Models for real-time pose analysis
-/// 
+///
 /// These models match the backend API responses for pose detection
 
 import 'dart:convert';
 
 /// Phases in pose detection flow
 enum PosePhase {
-  detection(1, 'detection', 'Phát hiện tư thế'),
-  calibration(2, 'calibration', 'Hiệu chỉnh khớp'),
-  sync(3, 'sync', 'Đồng bộ với video'),
-  scoring(4, 'scoring', 'Tính điểm'),
-  completed(5, 'completed', 'Hoàn thành');
+  detection(1, 'detection', 'Finding your position'),
+  calibration(2, 'calibration', 'Checking your range of motion'),
+  sync(3, 'sync', 'Matching the guide video'),
+  scoring(4, 'scoring', 'Reviewing your movement'),
+  completed(5, 'completed', 'Complete');
 
   const PosePhase(this.value, this.name, this.displayName);
-  
+
   final int value;
   final String name;
   final String displayName;
@@ -106,7 +106,7 @@ class PoseFrameResult {
     // Backend wraps all phase data in the 'data' key
     final Map<String, dynamic> phaseData =
         json['data'] as Map<String, dynamic>? ?? {};
-    
+
     return PoseFrameResult(
       phase: phaseNum,
       phaseName: json['phase_name'] as String? ?? 'detection',
@@ -130,12 +130,15 @@ class PoseFrameResult {
   String? get currentJointName => data['current_joint_name'] as String?;
   double get currentAngle => (data['current_angle'] as num?)?.toDouble() ?? 0.0;
   double get maxAngle => (data['user_max_angle'] as num?)?.toDouble() ?? 0.0;
-  double get calibrationProgress => (data['progress'] as num?)?.toDouble() ?? 0.0;
+  double get calibrationProgress =>
+      (data['progress'] as num?)?.toDouble() ?? 0.0;
   int get queueIndex => data['queue_index'] as int? ?? 0;
   int get totalJoints => data['total_joints'] as int? ?? 6;
-  double get overallProgress => (data['overall_progress'] as num?)?.toDouble() ?? 0.0;
+  double get overallProgress =>
+      (data['overall_progress'] as num?)?.toDouble() ?? 0.0;
   String? get calibrationStatus => data['status'] as String?;
-  double? get countdownRemaining => (data['countdown_remaining'] as num?)?.toDouble();
+  double? get countdownRemaining =>
+      (data['countdown_remaining'] as num?)?.toDouble();
   String? get positionInstruction => data['position_instruction'] as String?;
 
   // ==================== Phase 3: Sync Data ====================
@@ -147,7 +150,8 @@ class PoseFrameResult {
   // ==================== Phase 4: Scoring Data ====================
   double get totalScore => (data['total_score'] as num?)?.toDouble() ?? 0.0;
   double get romScore => (data['rom_score'] as num?)?.toDouble() ?? 0.0;
-  double get stabilityScore => (data['stability_score'] as num?)?.toDouble() ?? 0.0;
+  double get stabilityScore =>
+      (data['stability_score'] as num?)?.toDouble() ?? 0.0;
   double get flowScore => (data['flow_score'] as num?)?.toDouble() ?? 0.0;
   String get grade => data['grade'] as String? ?? '';
 }
@@ -200,15 +204,18 @@ class PoseSessionResults {
       gradeColor: data['grade_color'] as String? ?? 'yellow',
       totalReps: data['total_reps'] as int? ?? 0,
       fatigueLevel: data['fatigue_level'] as String? ?? 'FRESH',
-      calibratedJoints: (data['calibrated_joints'] as List<dynamic>?)
+      calibratedJoints:
+          (data['calibrated_joints'] as List<dynamic>?)
               ?.map((j) => CalibratedJoint.fromJson(j))
               .toList() ??
           [],
-      repScores: (data['rep_scores'] as List<dynamic>?)
+      repScores:
+          (data['rep_scores'] as List<dynamic>?)
               ?.map((r) => RepScore.fromJson(r))
               .toList() ??
           [],
-      recommendations: (data['recommendations'] as List<dynamic>?)
+      recommendations:
+          (data['recommendations'] as List<dynamic>?)
               ?.map((r) => r as String)
               .toList() ??
           [],
@@ -227,10 +234,7 @@ class CalibratedJoint {
   final String joint;
   final double maxAngle;
 
-  const CalibratedJoint({
-    required this.joint,
-    required this.maxAngle,
-  });
+  const CalibratedJoint({required this.joint, required this.maxAngle});
 
   factory CalibratedJoint.fromJson(Map<String, dynamic> json) {
     return CalibratedJoint(
@@ -245,10 +249,7 @@ class RepScore {
   final int rep;
   final double score;
 
-  const RepScore({
-    required this.rep,
-    required this.score,
-  });
+  const RepScore({required this.rep, required this.score});
 
   factory RepScore.fromJson(Map<String, dynamic> json) {
     return RepScore(
@@ -263,10 +264,7 @@ class PoseWebSocketError {
   final String error;
   final String code;
 
-  const PoseWebSocketError({
-    required this.error,
-    required this.code,
-  });
+  const PoseWebSocketError({required this.error, required this.code});
 
   factory PoseWebSocketError.fromJson(Map<String, dynamic> json) {
     return PoseWebSocketError(

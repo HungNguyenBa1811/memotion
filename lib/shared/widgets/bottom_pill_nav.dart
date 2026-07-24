@@ -11,9 +11,9 @@ class BottomPillNav extends StatelessWidget {
 
   static const _items = [
     {'asset': 'assets/images/BottomNavHomeIcon.svg', 'label': 'Home'},
-    {'asset': 'assets/images/HeartbeatIcon.svg', 'label': 'Med'},
-    {'asset': 'assets/images/BottomNavDocumentIcon.svg', 'label': 'Nutri'},
-    {'asset': 'assets/images/FireIcon.svg', 'label': 'Phys'},
+    {'asset': 'assets/images/HeartbeatIcon.svg', 'label': 'Medicine'},
+    {'asset': 'assets/images/BottomNavDocumentIcon.svg', 'label': 'Meals'},
+    {'asset': 'assets/images/FireIcon.svg', 'label': 'Exercise'},
     {'asset': 'assets/images/ProfileIcon.svg', 'label': 'Profile'},
   ];
 
@@ -21,11 +21,31 @@ class BottomPillNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLarge = ResponsiveUtils.isLargeTablet(context);
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
-    final navHeight = isLarge ? 200.0 : isTablet ? 172.0 : 86.0;
-    final bubbleSize = isLarge ? 88.0 : isTablet ? 80.0 : 40.0;
-    final iconSize = isLarge ? 52.0 : isTablet ? 44.0 : 22.0;
-    final labelSize = isLarge ? 23.0 : isTablet ? 20.0 : 10.0;
-    final vPad = isLarge ? 28.0 : isTablet ? 24.0 : 12.0;
+    final navHeight = isLarge
+        ? 200.0
+        : isTablet
+        ? 172.0
+        : 86.0;
+    final bubbleSize = isLarge
+        ? 88.0
+        : isTablet
+        ? 80.0
+        : 40.0;
+    final iconSize = isLarge
+        ? 52.0
+        : isTablet
+        ? 44.0
+        : 22.0;
+    final labelSize = isLarge
+        ? 23.0
+        : isTablet
+        ? 20.0
+        : 10.0;
+    final vPad = isLarge
+        ? 28.0
+        : isTablet
+        ? 24.0
+        : 12.0;
 
     return SafeArea(
       top: false,

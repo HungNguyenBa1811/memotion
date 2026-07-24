@@ -17,6 +17,4 @@ export 'repositories/onboarding_repository.dart';
 export 'widgets/widgets.dart';
 
 // Screens
-export 'screens/onboarding_screen_new.dart';
-
-// export 'screens/onboarding_steps.dart'; // Legacy - deprecated
+export 'screens/onboarding_wizard_screen.dart';

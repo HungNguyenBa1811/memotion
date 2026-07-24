@@ -103,7 +103,7 @@ class WorkoutListNotifier extends StateNotifier<WorkoutListState> {
   final WorkoutRepository _repository;
 
   WorkoutListNotifier(this._repository, {bool autoLoad = true})
-      : super(const WorkoutListState()) {
+    : super(const WorkoutListState()) {
     if (autoLoad) loadWorkoutsForDate(DateTime.now());
   }
 
@@ -134,7 +134,7 @@ class WorkoutListNotifier extends StateNotifier<WorkoutListState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Failed to load workouts: $e',
+        error: 'We could not load the exercise plan. Please try again.',
         isPatientProfileNotFound: false,
       );
     }
@@ -148,7 +148,7 @@ class WorkoutListNotifier extends StateNotifier<WorkoutListState> {
       await loadWorkoutsForDate(state.selectedDate);
     } catch (e) {
       state = state.copyWith(
-        error: 'Failed to mark workout as completed: $e',
+        error: 'We could not update this exercise. Please try again.',
         isPatientProfileNotFound: false,
       );
     }
@@ -207,12 +207,15 @@ class WorkoutDetailNotifier extends StateNotifier<WorkoutDetailState> {
       if (workout != null) {
         state = state.copyWith(workout: workout, isLoading: false);
       } else {
-        state = state.copyWith(isLoading: false, error: 'Workout not found');
+        state = state.copyWith(
+          isLoading: false,
+          error: 'We could not find this exercise.',
+        );
       }
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Failed to load workout: $e',
+        error: 'We could not load this exercise. Please try again.',
       );
     }
   }
@@ -227,7 +230,9 @@ class WorkoutDetailNotifier extends StateNotifier<WorkoutDetailState> {
         workout: state.workout!.copyWith(isCompleted: true),
       );
     } catch (e) {
-      state = state.copyWith(error: 'Failed to mark as completed: $e');
+      state = state.copyWith(
+        error: 'We could not update this exercise. Please try again.',
+      );
     }
   }
 }

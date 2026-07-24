@@ -43,7 +43,11 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error accessing camera: $e')),
+          const SnackBar(
+            content: Text(
+              'We could not open the camera. Please check camera access and try again.',
+            ),
+          ),
         );
       }
     }
@@ -65,7 +69,11 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error accessing gallery: $e')),
+          const SnackBar(
+            content: Text(
+              'We could not open your photos. Please check photo access and try again.',
+            ),
+          ),
         );
       }
     }
@@ -76,10 +84,7 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
     final scanState = ref.watch(scanMedicationNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan Medication'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Scan Medication'), centerTitle: true),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -94,10 +99,10 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
                 child: scanState.isScanning
                     ? _buildScanningState()
                     : scanState.isSuccess
-                        ? _buildSuccessResult(scanState.scannedMedication!)
-                        : scanState.errorMessage != null
-                            ? _buildErrorState(scanState.errorMessage!)
-                            : _buildPlaceholder(),
+                    ? _buildSuccessResult(scanState.scannedMedication!)
+                    : scanState.errorMessage != null
+                    ? _buildErrorState(scanState.errorMessage!)
+                    : _buildPlaceholder(),
               ),
 
               const SizedBox(height: 24),
@@ -126,10 +131,7 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
           Expanded(
             child: Text(
               'Take a clear photo of the medication packaging or pills to identify it automatically.',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[700],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
             ),
           ),
         ],
@@ -142,11 +144,7 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.medication_outlined,
-            size: 120,
-            color: Colors.grey[300],
-          ),
+          Icon(Icons.medication_outlined, size: 120, color: Colors.grey[300]),
           const SizedBox(height: 24),
           Text(
             'No image selected',
@@ -159,10 +157,7 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
           const SizedBox(height: 8),
           Text(
             'Choose camera or gallery below',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -187,10 +182,7 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
           const SizedBox(height: 8),
           Text(
             'This may take a few moments',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -241,11 +233,7 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
                     medication.description,
                   ),
                   const Divider(height: 24),
-                  _buildInfoRow(
-                    Icons.medication,
-                    'Dosage',
-                    medication.dosage,
-                  ),
+                  _buildInfoRow(Icons.medication, 'Dosage', medication.dosage),
                   const Divider(height: 24),
                   _buildInfoRow(
                     Icons.schedule,
@@ -254,11 +242,7 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
                   ),
                   if (medication.notes.isNotEmpty) ...[
                     const Divider(height: 24),
-                    _buildInfoRow(
-                      Icons.note,
-                      'Notes',
-                      medication.notes,
-                    ),
+                    _buildInfoRow(Icons.note, 'Notes', medication.notes),
                   ],
                 ],
               ),
@@ -276,7 +260,9 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
                     // TODO: Navigate to add medication form with pre-filled data
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Add to medication list feature coming soon'),
+                        content: Text(
+                          'Adding medication to your list will be available soon.',
+                        ),
                       ),
                     );
                   },
@@ -347,14 +333,10 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 80,
-              color: Colors.red[300],
-            ),
+            Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
             const SizedBox(height: 24),
             Text(
-              'Scan Failed',
+              'Medication not identified',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -365,10 +347,7 @@ class _ScanMedicationScreenState extends ConsumerState<ScanMedicationScreen> {
             Text(
               errorMessage,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[700],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(

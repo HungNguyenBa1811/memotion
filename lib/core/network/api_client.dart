@@ -41,13 +41,13 @@ class ApiClient {
   Dio get dio => _dio;
 
   /// Set Authorization token (deprecated - sử dụng TokenStorage thay thế)
-  @Deprecated('Sử dụng TokenStorage.instance.saveAccessToken() thay thế')
+  @Deprecated('Use TokenStorage.instance.saveAccessToken() instead')
   void setAuthToken(String token) {
     _dio.options.headers['Authorization'] = 'Bearer $token';
   }
 
   /// Clear Authorization token (deprecated - sử dụng TokenStorage thay thế)
-  @Deprecated('Sử dụng TokenStorage.instance.clearAll() thay thế')
+  @Deprecated('Use TokenStorage.instance.clearAll() instead')
   void clearAuthToken() {
     _dio.options.headers.remove('Authorization');
   }

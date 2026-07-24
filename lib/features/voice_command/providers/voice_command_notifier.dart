@@ -33,7 +33,8 @@ class VoiceCommandNotifier extends StateNotifier<VoiceCommandState> {
       if (!hasPermission) {
         state = state.copyWith(
           status: VoiceCommandStatus.error,
-          errorMessage: 'Microphone permission denied.',
+          errorMessage:
+              'Microphone access is off. Please allow access and try again.',
           clearResponse: true,
           clearRecordedFilePath: true,
           waveformData: _buildInitialWaveform(),
@@ -76,7 +77,8 @@ class VoiceCommandNotifier extends StateNotifier<VoiceCommandState> {
 
       state = state.copyWith(
         status: VoiceCommandStatus.error,
-        errorMessage: 'Failed to start recording: $error',
+        errorMessage:
+            'We could not start listening. Please check microphone access and try again.',
         clearResponse: true,
         clearRecordedFilePath: true,
       );
@@ -100,7 +102,7 @@ class VoiceCommandNotifier extends StateNotifier<VoiceCommandState> {
       if (filePath == null || filePath.isEmpty) {
         state = state.copyWith(
           status: VoiceCommandStatus.error,
-          errorMessage: 'No recording file was generated.',
+          errorMessage: 'We did not hear a request. Please try again.',
           clearRecordedFilePath: true,
           waveformData: _buildInitialWaveform(),
         );
@@ -119,7 +121,7 @@ class VoiceCommandNotifier extends StateNotifier<VoiceCommandState> {
 
       state = state.copyWith(
         status: VoiceCommandStatus.error,
-        errorMessage: 'Failed to stop recording: $error',
+        errorMessage: 'We could not finish the recording. Please try again.',
         clearRecordedFilePath: true,
       );
       return null;
@@ -160,7 +162,8 @@ class VoiceCommandNotifier extends StateNotifier<VoiceCommandState> {
 
       state = state.copyWith(
         status: VoiceCommandStatus.error,
-        errorMessage: error.toString(),
+        errorMessage:
+            'We could not complete that request. Please check your connection and try again.',
         clearRecordedFilePath: true,
       );
     } finally {

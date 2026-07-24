@@ -75,8 +75,16 @@ class _PatientMedicationScreenContentState
     final isOffline = ref.watch(isOfflineProvider).valueOrNull ?? false;
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final calendarScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
-    final cardScale = isLarge ? 1.5 : isTablet ? 1.3 : 1.0;
+    final calendarScale = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
+    final cardScale = isLarge
+        ? 1.5
+        : isTablet
+        ? 1.3
+        : 1.0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -106,7 +114,7 @@ class _PatientMedicationScreenContentState
                         _resetSelection();
                       },
                     ),
-                    const SizedBox(height: 16)
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -136,11 +144,31 @@ class _PatientMedicationScreenContentState
     final textScale = ResponsiveUtils.textScaleFactor(context);
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
-    final qrBoxSize = isLarge ? 92.0 : isTablet ? 80.0 : 40.0;
-    final qrIconSize = isLarge ? 46.0 : isTablet ? 40.0 : 20.0;
-    final backBoxSize = isLarge ? 92.0 : isTablet ? 80.0 : 40.0;
-    final backIconSize = isLarge ? 36.0 : isTablet ? 32.0 : 18.0;
+    final fontScale = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
+    final qrBoxSize = isLarge
+        ? 92.0
+        : isTablet
+        ? 80.0
+        : 40.0;
+    final qrIconSize = isLarge
+        ? 46.0
+        : isTablet
+        ? 40.0
+        : 20.0;
+    final backBoxSize = isLarge
+        ? 92.0
+        : isTablet
+        ? 80.0
+        : 40.0;
+    final backIconSize = isLarge
+        ? 36.0
+        : isTablet
+        ? 32.0
+        : 18.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -202,8 +230,10 @@ class _PatientMedicationScreenContentState
   }
 
   // ─── PageView Slideshow (shared for mobile & tablet) ──────────────────────
-  Widget _buildPagedCards(List<Medication> medications,
-      {double cardScale = 1.0}) {
+  Widget _buildPagedCards(
+    List<Medication> medications, {
+    double cardScale = 1.0,
+  }) {
     if (medications.isEmpty) {
       return _buildEmptyState();
     }
@@ -229,13 +259,13 @@ class _PatientMedicationScreenContentState
                 scale: cardScale,
                 onTaken: () => ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Marked as taken!'),
+                    content: Text('Medication marked as taken.'),
                     backgroundColor: AppColors.primary,
                   ),
                 ),
                 onSkip: () => ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Dose skipped.'),
+                    content: Text('Dose marked as skipped.'),
                     backgroundColor: Color(0xFF6B7280),
                   ),
                 ),
@@ -251,17 +281,28 @@ class _PatientMedicationScreenContentState
   Widget _buildEmptyState() {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final scale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final scale = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.medication_outlined, size: 64 * scale, color: Colors.grey[400]),
+          Icon(
+            Icons.medication_outlined,
+            size: 64 * scale,
+            color: Colors.grey[400],
+          ),
           SizedBox(height: 16 * scale),
           Text(
-            'No medications found',
-            style: GoogleFonts.lexend(fontSize: 16 * scale, color: Colors.grey[600]),
+            'No medications scheduled for this day',
+            style: GoogleFonts.lexend(
+              fontSize: 16 * scale,
+              color: Colors.grey[600],
+            ),
           ),
         ],
       ),
@@ -272,7 +313,11 @@ class _PatientMedicationScreenContentState
   Widget _buildErrorWidget(Object error) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final scale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final scale = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
 
     return Center(
       child: Padding(
@@ -280,10 +325,14 @@ class _PatientMedicationScreenContentState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64 * scale, color: Colors.red.shade300),
+            Icon(
+              Icons.error_outline,
+              size: 64 * scale,
+              color: Colors.red.shade300,
+            ),
             SizedBox(height: 16 * scale),
             Text(
-              'Unable to load medication data',
+              'We could not load the medication schedule',
               style: GoogleFonts.lexend(
                 fontSize: 18 * scale,
                 fontWeight: FontWeight.w600,
@@ -291,9 +340,12 @@ class _PatientMedicationScreenContentState
             ),
             SizedBox(height: 8 * scale),
             Text(
-              error.toString(),
+              'Please check your connection and try again.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.lexend(fontSize: 14 * scale, color: Colors.grey),
+              style: GoogleFonts.lexend(
+                fontSize: 14 * scale,
+                color: Colors.grey,
+              ),
             ),
             SizedBox(height: 20 * scale),
             ElevatedButton.icon(

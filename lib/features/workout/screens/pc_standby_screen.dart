@@ -69,7 +69,8 @@ class _PcStandbyScreenState extends ConsumerState<PcStandbyScreen>
       }
     });
 
-    final isActive = session.status == PcSessionStatus.paired ||
+    final isActive =
+        session.status == PcSessionStatus.paired ||
         session.status == PcSessionStatus.sessionStarted;
 
     return PopScope(
@@ -168,7 +169,8 @@ class _PcStandbyScreenState extends ConsumerState<PcStandbyScreen>
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                          color: AppColors.error.withOpacity(0.5)),
+                        color: AppColors.error.withOpacity(0.5),
+                      ),
                     ),
                     child: Center(
                       child: Text(
@@ -193,36 +195,35 @@ class _PcStandbyScreenState extends ConsumerState<PcStandbyScreen>
   }
 
   String _statusTitle(PcSessionStatus status) => switch (status) {
-        PcSessionStatus.connecting => 'Connecting to PC...',
-        PcSessionStatus.paired => 'Connected to PC',
-        PcSessionStatus.sessionStarted => 'Session in Progress',
-        PcSessionStatus.sessionComplete => 'Session Complete!',
-        PcSessionStatus.sessionFailed => 'Session Failed',
-        PcSessionStatus.disconnected => 'Disconnected',
-        _ => 'Connecting...',
-      };
+    PcSessionStatus.connecting => 'Connecting to PC...',
+    PcSessionStatus.paired => 'Connected to PC',
+    PcSessionStatus.sessionStarted => 'Session in Progress',
+    PcSessionStatus.sessionComplete => 'Session Complete!',
+    PcSessionStatus.sessionFailed => 'Session Could Not Start',
+    PcSessionStatus.disconnected => 'Disconnected',
+    _ => 'Connecting...',
+  };
 
   String _statusSubtitle(PcSessionState session) => switch (session.status) {
-        PcSessionStatus.connecting =>
-          'Establishing connection with your PC...',
-        PcSessionStatus.paired =>
-          'Waiting for PC to start the exercise session...',
-        PcSessionStatus.sessionStarted =>
-          'Exercise session is running on your PC.\nYou can monitor progress here.',
-        PcSessionStatus.sessionComplete =>
-          'Your workout data has been saved.',
-        PcSessionStatus.sessionFailed ||
-        PcSessionStatus.disconnected =>
-          session.errorMessage ?? 'An error occurred.',
-        _ => '',
-      };
+    PcSessionStatus.connecting => 'Establishing connection with your PC...',
+    PcSessionStatus.paired => 'Waiting for PC to start the exercise session...',
+    PcSessionStatus.sessionStarted =>
+      'Exercise session is running on your PC.\nYou can monitor progress here.',
+    PcSessionStatus.sessionComplete => 'Your workout data has been saved.',
+    PcSessionStatus.sessionFailed || PcSessionStatus.disconnected =>
+      session.errorMessage ??
+          'We could not complete the exercise session. Please try again.',
+    _ => '',
+  };
 
   Future<bool?> _confirmDisconnect() {
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Disconnect from PC?',
-            style: GoogleFonts.lexend(fontWeight: FontWeight.w700)),
+        title: Text(
+          'Disconnect from PC?',
+          style: GoogleFonts.lexend(fontWeight: FontWeight.w700),
+        ),
         content: Text(
           'This will stop the active session on the PC.',
           style: GoogleFonts.lexend(),
@@ -234,8 +235,7 @@ class _PcStandbyScreenState extends ConsumerState<PcStandbyScreen>
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Disconnect',
-                style: TextStyle(color: AppColors.error)),
+            child: Text('Disconnect', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -243,12 +243,14 @@ class _PcStandbyScreenState extends ConsumerState<PcStandbyScreen>
   }
 
   void _showErrorAndPop(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message, style: GoogleFonts.lexend()),
-      backgroundColor: AppColors.error,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: GoogleFonts.lexend()),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted && context.canPop()) context.pop();
     });
@@ -262,12 +264,12 @@ class _StepList extends StatelessWidget {
   static const _steps = ['Paired', 'Session Started', 'Complete'];
 
   int get _currentIndex => switch (status) {
-        PcSessionStatus.connecting => 0,
-        PcSessionStatus.paired => 0,
-        PcSessionStatus.sessionStarted => 1,
-        PcSessionStatus.sessionComplete => 3, // all done
-        _ => 0,
-      };
+    PcSessionStatus.connecting => 0,
+    PcSessionStatus.paired => 0,
+    PcSessionStatus.sessionStarted => 1,
+    PcSessionStatus.sessionComplete => 3, // all done
+    _ => 0,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -289,26 +291,28 @@ class _StepList extends StatelessWidget {
                   color: isDone
                       ? AppColors.primary
                       : isCurrent
-                          ? AppColors.primary.withOpacity(0.2)
-                          : Colors.grey.withOpacity(0.15),
+                      ? AppColors.primary.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.15),
                 ),
                 child: Center(
                   child: isDone
                       ? const Icon(Icons.check, size: 14, color: Colors.white)
                       : isCurrent
-                          ? SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.primary,
-                              ),
-                            )
-                          : Text(
-                              '${i + 1}',
-                              style: GoogleFonts.lexend(
-                                  fontSize: 11, color: Colors.grey),
-                            ),
+                      ? SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      : Text(
+                          '${i + 1}',
+                          style: GoogleFonts.lexend(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(width: 14),
@@ -316,8 +320,7 @@ class _StepList extends StatelessWidget {
                 _steps[i],
                 style: GoogleFonts.lexend(
                   fontSize: 14,
-                  fontWeight:
-                      isCurrent ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w400,
                   color: isDone || isCurrent
                       ? AppColors.textPrimary
                       : AppColors.textSecondary,

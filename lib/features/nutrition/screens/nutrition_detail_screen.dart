@@ -14,10 +14,7 @@ const Color _subtitleOrange = Color(0xFFD87659);
 class NutritionDetailScreen extends ConsumerWidget {
   final String taskId;
 
-  const NutritionDetailScreen({
-    super.key,
-    required this.taskId,
-  });
+  const NutritionDetailScreen({super.key, required this.taskId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -76,9 +73,7 @@ class _NutritionDetailLoading extends StatelessWidget {
           ),
           const Expanded(
             child: Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary,
-              ),
+              child: CircularProgressIndicator(color: AppColors.primary),
             ),
           ),
         ],
@@ -92,10 +87,7 @@ class _NutritionDetailError extends StatelessWidget {
   final Object error;
   final VoidCallback onRetry;
 
-  const _NutritionDetailError({
-    required this.error,
-    required this.onRetry,
-  });
+  const _NutritionDetailError({required this.error, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +137,7 @@ class _NutritionDetailError extends StatelessWidget {
                     ),
                     SizedBox(height: 16 * scale),
                     Text(
-                      'Unable to load information',
+                      'We could not load this meal',
                       style: GoogleFonts.lexend(
                         fontSize: 18 * scale,
                         fontWeight: FontWeight.w600,
@@ -154,7 +146,7 @@ class _NutritionDetailError extends StatelessWidget {
                     ),
                     SizedBox(height: 8 * scale),
                     Text(
-                      error.toString(),
+                      'Please check your connection and try again.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.lexend(
                         fontSize: 14 * scale,
@@ -191,7 +183,7 @@ class _NutritionDetailContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scale = ResponsiveUtils.textScaleFactor(context);
-    
+
     return SafeArea(
       bottom: false,
       child: Stack(
@@ -431,14 +423,15 @@ class _NutritionDetailContent extends ConsumerWidget {
                 child: CircularProgressIndicator(
                   value: loadingProgress.expectedTotalBytes != null
                       ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
+                            loadingProgress.expectedTotalBytes!
                       : null,
                   color: AppColors.primary,
                 ),
               ),
             );
           },
-          errorBuilder: (context, error, stack) => _buildFallbackImage(scale: scale),
+          errorBuilder: (context, error, stack) =>
+              _buildFallbackImage(scale: scale),
         ),
       );
     }
@@ -465,12 +458,16 @@ class _NutritionDetailContent extends ConsumerWidget {
 
   Widget _buildStatusIndicator(WidgetRef ref, {required double scale}) {
     final isCompleted = task.status == NutritionStatus.completed;
-    debugPrint('┌─────────────────────────────────────────────────────────────');
+    debugPrint(
+      '┌─────────────────────────────────────────────────────────────',
+    );
     debugPrint('│ 🍽️ UI: Building status indicator');
     debugPrint('│   - Task ID: ${task.id}');
     debugPrint('│   - Status: ${task.status}');
     debugPrint('│   - isCompleted: $isCompleted');
-    debugPrint('└─────────────────────────────────────────────────────────────');
+    debugPrint(
+      '└─────────────────────────────────────────────────────────────',
+    );
 
     return GestureDetector(
       onTap: isCompleted
@@ -560,7 +557,11 @@ class _NutritionDetailContent extends ConsumerWidget {
     }
   }
 
-  Widget _buildNutritionBadge(String value, String label, {required double scale}) {
+  Widget _buildNutritionBadge(
+    String value,
+    String label, {
+    required double scale,
+  }) {
     return SizedBox(
       height: 62 * scale,
       width: 160 * scale,

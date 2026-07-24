@@ -106,7 +106,11 @@ class _CaretakerHealthReportScreenState
                 onTap: () => _showBleScanDialog(context),
                 child: Container(
                   padding: const EdgeInsets.all(8),
-                  child: Icon(Icons.bluetooth, color: AppColors.primary, size: 32),
+                  child: Icon(
+                    Icons.bluetooth,
+                    color: AppColors.primary,
+                    size: 32,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -137,9 +141,7 @@ class _CaretakerHealthReportScreenState
     final textScale = ResponsiveUtils.textScaleFactor(context);
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: padding,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: padding),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -259,11 +261,13 @@ class _CaretakerHealthReportScreenState
     );
   }
 
-  Widget _buildTodaysInfoSection(HealthData health, HrState hrState, {required double padding}) {
+  Widget _buildTodaysInfoSection(
+    HealthData health,
+    HrState hrState, {
+    required double padding,
+  }) {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: padding,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: padding),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -278,9 +282,7 @@ class _CaretakerHealthReportScreenState
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
-              child: _buildHeartCard(hrState),
-            ),
+            Expanded(child: _buildHeartCard(hrState)),
           ],
         ),
       ),
@@ -335,7 +337,7 @@ class _CaretakerHealthReportScreenState
           const SizedBox(height: 4),
           // Unit
           Text(
-            'Kcal',
+            'kcal',
             style: GoogleFonts.mavenPro(
               fontSize: 12 * textScale,
               fontWeight: FontWeight.w500,
@@ -375,7 +377,11 @@ class _CaretakerHealthReportScreenState
               ),
               const Spacer(),
               // Shoe icon
-              Icon(Icons.directions_run, color: Colors.blue.shade300, size: 24 * textScale),
+              Icon(
+                Icons.directions_run,
+                color: Colors.blue.shade300,
+                size: 24 * textScale,
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -433,7 +439,11 @@ class _CaretakerHealthReportScreenState
                 ),
               ),
               const Spacer(),
-              Icon(Icons.favorite, color: Colors.red.shade300, size: 24 * textScale),
+              Icon(
+                Icons.favorite,
+                color: Colors.red.shade300,
+                size: 24 * textScale,
+              ),
             ],
           ),
           // Source indicator
@@ -446,7 +456,9 @@ class _CaretakerHealthReportScreenState
                   height: 6,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isLive ? const Color(0xFF66BB6A) : const Color(0xFF9E9E9E),
+                    color: isLive
+                        ? const Color(0xFF66BB6A)
+                        : const Color(0xFF9E9E9E),
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -454,7 +466,9 @@ class _CaretakerHealthReportScreenState
                   hrState.sourceLabel,
                   style: GoogleFonts.mavenPro(
                     fontSize: 10 * textScale,
-                    color: isLive ? const Color(0xFF66BB6A) : const Color(0xFF9E9E9E),
+                    color: isLive
+                        ? const Color(0xFF66BB6A)
+                        : const Color(0xFF9E9E9E),
                   ),
                 ),
               ],
@@ -514,8 +528,11 @@ class _CaretakerHealthReportScreenState
           children: [
             Row(
               children: [
-                Icon(Icons.bar_chart_rounded,
-                    color: AppColors.primary, size: 22 * textScale),
+                Icon(
+                  Icons.bar_chart_rounded,
+                  color: AppColors.primary,
+                  size: 22 * textScale,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Weekly Activity',
@@ -619,8 +636,11 @@ class _CaretakerHealthReportScreenState
                         ),
                       ),
                       const Spacer(),
-                      Icon(Icons.bedtime_rounded,
-                          color: Colors.indigo.shade300, size: 24 * textScale),
+                      Icon(
+                        Icons.bedtime_rounded,
+                        color: Colors.indigo.shade300,
+                        size: 24 * textScale,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -644,8 +664,11 @@ class _CaretakerHealthReportScreenState
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.arrow_upward_rounded,
-                          color: const Color(0xFF66BB6A), size: 14 * textScale),
+                      Icon(
+                        Icons.arrow_upward_rounded,
+                        color: const Color(0xFF66BB6A),
+                        size: 14 * textScale,
+                      ),
                       Text(
                         '12% better',
                         style: GoogleFonts.mavenPro(
@@ -690,8 +713,11 @@ class _CaretakerHealthReportScreenState
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Icon(Icons.water_drop_rounded,
-                          color: Colors.red.shade300, size: 24 * textScale),
+                      Icon(
+                        Icons.water_drop_rounded,
+                        color: Colors.red.shade300,
+                        size: 24 * textScale,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -714,8 +740,10 @@ class _CaretakerHealthReportScreenState
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF66BB6A).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(8),
@@ -797,69 +825,71 @@ class _CaretakerHealthReportScreenState
             ],
           ),
           const SizedBox(height: 12),
-          ...activities.map((a) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFFBFBFBF).withOpacity(0.15),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 42 * textScale,
-                        height: 42 * textScale,
-                        decoration: BoxDecoration(
-                          color: (a['color'] as Color).withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          a['icon'] as IconData,
-                          color: a['color'] as Color,
-                          size: 22 * textScale,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              a['title'] as String,
-                              style: GoogleFonts.sourceSans3(
-                                fontSize: 14 * textScale,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF040415),
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              a['subtitle'] as String,
-                              style: GoogleFonts.mavenPro(
-                                fontSize: 12 * textScale,
-                                color: const Color(0xFF7F7F7F),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        a['time'] as String,
-                        style: GoogleFonts.mavenPro(
-                          fontSize: 11 * textScale,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF7F7F7F),
-                        ),
-                      ),
-                    ],
+          ...activities.map(
+            (a) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFBFBFBF).withOpacity(0.15),
+                    width: 1,
                   ),
                 ),
-              )),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 42 * textScale,
+                      height: 42 * textScale,
+                      decoration: BoxDecoration(
+                        color: (a['color'] as Color).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        a['icon'] as IconData,
+                        color: a['color'] as Color,
+                        size: 22 * textScale,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            a['title'] as String,
+                            style: GoogleFonts.sourceSans3(
+                              fontSize: 14 * textScale,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF040415),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            a['subtitle'] as String,
+                            style: GoogleFonts.mavenPro(
+                              fontSize: 12 * textScale,
+                              color: const Color(0xFF7F7F7F),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      a['time'] as String,
+                      style: GoogleFonts.mavenPro(
+                        fontSize: 11 * textScale,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF7F7F7F),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -988,14 +1018,11 @@ class _BleScanSheetState extends ConsumerState<_BleScanSheet> {
       _devices.clear();
       _scanning = true;
     });
-    _scanSub = widget.notifier.scanForDevices().listen(
-      (device) {
-        if (!_devices.any((d) => d.remoteId == device.remoteId)) {
-          setState(() => _devices.add(device));
-        }
-      },
-      onDone: () => setState(() => _scanning = false),
-    );
+    _scanSub = widget.notifier.scanForDevices().listen((device) {
+      if (!_devices.any((d) => d.remoteId == device.remoteId)) {
+        setState(() => _devices.add(device));
+      }
+    }, onDone: () => setState(() => _scanning = false));
   }
 
   @override
@@ -1014,7 +1041,8 @@ class _BleScanSheetState extends ConsumerState<_BleScanSheet> {
           // Handle
           Center(
             child: Container(
-              width: 40, height: 4,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
                 color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2),
@@ -1027,13 +1055,15 @@ class _BleScanSheetState extends ConsumerState<_BleScanSheet> {
               Text(
                 'Connect Watch',
                 style: GoogleFonts.lexend(
-                  fontSize: 16, fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const Spacer(),
               if (_scanning)
                 const SizedBox(
-                  width: 20, height: 20,
+                  width: 20,
+                  height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               else
@@ -1049,7 +1079,9 @@ class _BleScanSheetState extends ConsumerState<_BleScanSheet> {
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Center(
                 child: Text(
-                  _scanning ? 'Scanning for HR devices…' : 'No devices found.\nMake sure Memotion HR app is running on your watch.',
+                  _scanning
+                      ? 'Scanning for HR devices…'
+                      : 'No devices found.\nMake sure Memotion HR app is running on your watch.',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.lexend(color: Colors.grey, fontSize: 13),
                 ),
@@ -1070,8 +1102,10 @@ class _BleScanSheetState extends ConsumerState<_BleScanSheet> {
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.watch, color: AppColors.primary),
                   title: Text(name, style: GoogleFonts.lexend(fontSize: 14)),
-                  subtitle: Text(device.remoteId.str,
-                      style: GoogleFonts.lexend(fontSize: 11, color: Colors.grey)),
+                  subtitle: Text(
+                    device.remoteId.str,
+                    style: GoogleFonts.lexend(fontSize: 11, color: Colors.grey),
+                  ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     widget.notifier.connectToDevice(device);

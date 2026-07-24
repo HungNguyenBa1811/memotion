@@ -220,7 +220,7 @@ class _WorkoutTrainingScreenState extends ConsumerState<WorkoutTrainingScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'LIVE ANALYSIS',
+                  'MOVEMENT FEEDBACK',
                   style: GoogleFonts.lexend(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -268,8 +268,8 @@ class _WorkoutTrainingScreenState extends ConsumerState<WorkoutTrainingScreen> {
                       const SizedBox(height: 8),
                       Text(
                         widget.videoPath != null
-                            ? 'Đang tải video...'
-                            : 'Trainer View',
+                            ? 'Loading video...'
+                            : 'Exercise Guide',
                         style: GoogleFonts.lexend(
                           fontSize: 14,
                           color: Colors.white.withOpacity(0.7),
@@ -304,7 +304,7 @@ class _WorkoutTrainingScreenState extends ConsumerState<WorkoutTrainingScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Trainer View',
+                  'Exercise Guide',
                   style: GoogleFonts.lexend(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -383,7 +383,7 @@ class _WorkoutTrainingScreenState extends ConsumerState<WorkoutTrainingScreen> {
                       ),
                     ),
                     Text(
-                      'Hold your position steady',
+                      'Hold this position if it feels comfortable.',
                       style: GoogleFonts.lexend(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -426,7 +426,7 @@ class _WorkoutTrainingScreenState extends ConsumerState<WorkoutTrainingScreen> {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'End Session',
+                    'End exercise',
                     style: GoogleFonts.lexend(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -447,18 +447,18 @@ class _WorkoutTrainingScreenState extends ConsumerState<WorkoutTrainingScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'End Session?',
+          'End exercise?',
           style: GoogleFonts.lexend(fontWeight: FontWeight.w700),
         ),
         content: Text(
-          'Are you sure you want to end this training session? Your progress will be saved.',
+          'Would you like to end this exercise now? Your progress will be saved.',
           style: GoogleFonts.lexend(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Continue Training',
+              'Continue exercise',
               style: GoogleFonts.lexend(color: AppColors.primary),
             ),
           ),
@@ -471,7 +471,7 @@ class _WorkoutTrainingScreenState extends ConsumerState<WorkoutTrainingScreen> {
               backgroundColor: const Color(0xFFD67052),
             ),
             child: Text(
-              'End Session',
+              'End exercise',
               style: GoogleFonts.lexend(color: Colors.white),
             ),
           ),

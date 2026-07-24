@@ -64,7 +64,7 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
 
                 // Great Effort text
                 Text(
-                  'Great Effort!',
+                  'Well Done',
                   style: GoogleFonts.lexend(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
@@ -77,7 +77,7 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
-                    "You're making excellent progress on your daily posture goals.",
+                    'You completed this exercise. Take a moment to rest if you need it.',
                     style: GoogleFonts.lexend(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -94,7 +94,7 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
 
                 // What to improve section
                 Text(
-                  'What to improve',
+                  'Tips for next time',
                   style: GoogleFonts.lexend(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
@@ -112,7 +112,7 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 _buildImprovementCard(
-                  title: 'Good Knee alignment',
+                  title: 'Good knee alignment',
                   description: 'Perfect stability during squats',
                   isWarning: false,
                 ),
@@ -228,7 +228,7 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
         const SizedBox(width: 8),
 
         // Calories card
-        _buildStatCard(icon: _buildFireIcon(), value: '45', label: 'Kcal'),
+        _buildStatCard(icon: _buildFireIcon(), value: '45', label: 'kcal'),
       ],
     );
   }
@@ -443,7 +443,7 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
         ),
         child: Center(
           child: Text(
-            'To Homepage',
+            'Back to Home',
             style: GoogleFonts.lexend(
               fontSize: 24,
               fontWeight: FontWeight.w700,

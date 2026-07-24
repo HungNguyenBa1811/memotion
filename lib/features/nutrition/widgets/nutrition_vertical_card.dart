@@ -12,20 +12,13 @@ class NutritionVerticalCard extends StatelessWidget {
   final NutritionTask task;
   final VoidCallback? onFavorite;
 
-  const NutritionVerticalCard({
-    super.key,
-    required this.task,
-    this.onFavorite,
-  });
+  const NutritionVerticalCard({super.key, required this.task, this.onFavorite});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.push(
-          AppRoutes.nutritionDetail,
-          extra: {'taskId': task.id},
-        );
+        context.push(AppRoutes.nutritionDetail, extra: {'taskId': task.id});
       },
       child: SizedBox(
         // Card width 227px; image fills width-2px; total height gives room for text
@@ -68,9 +61,7 @@ class NutritionVerticalCard extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: Colors.white,
                     ),
-                    child: ClipOval(
-                      child: _buildImage(),
-                    ),
+                    child: ClipOval(child: _buildImage()),
                   ),
                 ),
               ),
@@ -114,7 +105,7 @@ class NutritionVerticalCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        task.calories != null ? '${task.calories} Kcal' : '',
+                        task.calories != null ? '${task.calories} kcal' : '',
                         style: GoogleFonts.lexend(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -158,7 +149,7 @@ class NutritionVerticalCard extends StatelessWidget {
               color: task.mealColor,
               value: loadingProgress.expectedTotalBytes != null
                   ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
+                        loadingProgress.expectedTotalBytes!
                   : null,
             ),
           );
@@ -173,11 +164,7 @@ class NutritionVerticalCard extends StatelessWidget {
       width: 160,
       height: 160,
       color: task.mealColor.withOpacity(0.1),
-      child: Icon(
-        task.mealIcon,
-        size: 60,
-        color: task.mealColor,
-      ),
+      child: Icon(task.mealIcon, size: 60, color: task.mealColor),
     );
   }
 }

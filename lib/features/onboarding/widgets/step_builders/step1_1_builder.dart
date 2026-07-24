@@ -47,7 +47,7 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
             padding: const EdgeInsets.symmetric(horizontal: 0),
             child: Center(
               child: Text(
-                'Please enter your email to\nlogin here',
+                'Enter your email or phone number\nto continue',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lexend(
                   fontSize: 22,
@@ -63,7 +63,7 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
 
           // Label - Lexend medium 16px
           Text(
-            'Email',
+            'Email or phone number',
             style: GoogleFonts.lexend(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -81,7 +81,7 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
               controller: _usernameController,
               onChanged: _onUsernameChanged,
               decoration: InputDecoration(
-                hintText: 'Username',
+                hintText: 'Email or phone number',
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(

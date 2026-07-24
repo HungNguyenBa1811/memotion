@@ -35,11 +35,12 @@ class CaretakerHomeScreen extends ConsumerWidget {
 
     // Hero + medication widgets
     final heroSection = GreetingHero(
-      userName: 'Sir/Madam',
+      userName: dashboardData?.userName ?? 'there',
       greeting: _getGreeting(),
       avatarUrl: dashboardData?.avatarUrl,
-      moodMessage: "Please pay attention to patient's mood",
-      actionButtonText: 'SITUATION HANDLING',
+      moodMessage:
+          'The person you care for may need a little extra support today.',
+      actionButtonText: 'GET HELP',
       onActionPressed: () {
         homeNotifier.triggerSOS();
         _showSituationHandlingDialog(context);
@@ -47,14 +48,22 @@ class CaretakerHomeScreen extends ConsumerWidget {
     );
 
     final medicationSection = UpcomingMedicationCard(
-      title: firstMed?.name ?? 'Remind to take medicine',
-      time: firstMed?.time ?? dashboardData?.upcomingMedication?.time ?? '10:00 AM',
-      dosage: firstMed?.dosage ?? dashboardData?.upcomingMedication?.dosage ?? 'Take 1 Vitamin C tablet after meal',
-      imageUrl: firstMed?.imageUrl.isNotEmpty == true ? firstMed!.imageUrl : dashboardData?.upcomingMedication?.imageUrl,
+      title: firstMed?.name ?? 'Next Medication',
+      time:
+          firstMed?.time ??
+          dashboardData?.upcomingMedication?.time ??
+          '10:00 AM',
+      dosage:
+          firstMed?.dosage ??
+          dashboardData?.upcomingMedication?.dosage ??
+          'Take 1 Vitamin C tablet after a meal',
+      imageUrl: firstMed?.imageUrl.isNotEmpty == true
+          ? firstMed!.imageUrl
+          : dashboardData?.upcomingMedication?.imageUrl,
       onTakenPressed: () {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Marked as taken!'),
+            content: Text('Medication marked as taken.'),
             backgroundColor: AppColors.primary,
           ),
         );
@@ -65,7 +74,7 @@ class CaretakerHomeScreen extends ConsumerWidget {
     );
 
     final titleSection = Text(
-      'For Caregiver',
+      'Care Tasks',
       style: AppTextStyles.headline1.copyWith(
         fontSize: 22 * ResponsiveUtils.textScaleFactor(context),
         fontWeight: FontWeight.w700,
@@ -140,8 +149,10 @@ class CaretakerHomeScreen extends ConsumerWidget {
                       const SizedBox(height: 16),
                       actionsGrid,
                       const SizedBox(height: 24),
-                      SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
-                      const SizedBox(height: 200)
+                      SizedBox(
+                        height: ResponsiveUtils.bottomNavPadding(context),
+                      ),
+                      const SizedBox(height: 200),
                     ],
                   ),
                 ),
@@ -170,12 +181,18 @@ class CaretakerHomeScreen extends ConsumerWidget {
       builder: (context) {
         final scale = ResponsiveUtils.textScaleFactor(context);
         return AlertDialog(
-          title: Text('Situation Handling', style: TextStyle(fontSize: 20 * scale)),
-          content: Text('Do you want to make an emergency call or contact family?', style: TextStyle(fontSize: 16 * scale)),
+          title: Text('Get help', style: TextStyle(fontSize: 20 * scale)),
+          content: Text(
+            'Would you like to call emergency services or contact a family member?',
+            style: TextStyle(fontSize: 16 * scale),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel', style: TextStyle(fontSize: 14 * scale)), // TODO: REVIEW_LAYOUT_RISK
+              child: Text(
+                'Cancel',
+                style: TextStyle(fontSize: 14 * scale),
+              ), // TODO: REVIEW_LAYOUT_RISK
             ),
             ElevatedButton(
               onPressed: () {
@@ -184,9 +201,15 @@ class CaretakerHomeScreen extends ConsumerWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
-                padding: EdgeInsets.symmetric(horizontal: 16 * scale, vertical: 8 * scale),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16 * scale,
+                  vertical: 8 * scale,
+                ),
               ),
-              child: Text('Emergency Call', style: TextStyle(fontSize: 14 * scale)),
+              child: Text(
+                'Call emergency services',
+                style: TextStyle(fontSize: 14 * scale),
+              ),
             ),
           ],
         );

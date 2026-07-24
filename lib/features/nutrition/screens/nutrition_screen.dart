@@ -26,12 +26,13 @@ class NutritionScreen extends ConsumerWidget {
     if (profileViewModel.isLoadingUserDetails) {
       return const Scaffold(
         backgroundColor: AppColors.background,
-        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
-    final role =
-        profileViewModel.userDetails?.role.toUpperCase() ?? 'PATIENT';
+    final role = profileViewModel.userDetails?.role.toUpperCase() ?? 'PATIENT';
 
     if (role == 'CARETAKER') {
       return const NutritionScreenContent();
@@ -50,7 +51,8 @@ class NutritionScreenContent extends ConsumerStatefulWidget {
       _NutritionScreenContentState();
 }
 
-class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent> {
+class _NutritionScreenContentState
+    extends ConsumerState<NutritionScreenContent> {
   late int _selectedDayIndex;
   late List<CalendarDay> _calendarDays;
 
@@ -85,7 +87,11 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
     final scale = ResponsiveUtils.textScaleFactor(context);
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final fontScale = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -106,8 +112,16 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
                   GestureDetector(
                     onTap: () => context.go(AppRoutes.home),
                     child: Container(
-                      width: isLarge ? 92.0 : isTablet ? 80.0 : 40.0,
-                      height: isLarge ? 92.0 : isTablet ? 80.0 : 40.0,
+                      width: isLarge
+                          ? 92.0
+                          : isTablet
+                          ? 80.0
+                          : 40.0,
+                      height: isLarge
+                          ? 92.0
+                          : isTablet
+                          ? 80.0
+                          : 40.0,
                       decoration: BoxDecoration(
                         color: const Color(0xFF00695C),
                         shape: BoxShape.circle,
@@ -116,7 +130,11 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
                         child: Icon(
                           Icons.arrow_back_ios_new,
                           color: Colors.white,
-                          size: isLarge ? 36.0 : isTablet ? 32.0 : 18.0,
+                          size: isLarge
+                              ? 36.0
+                              : isTablet
+                              ? 32.0
+                              : 18.0,
                         ),
                       ),
                     ),
@@ -166,7 +184,9 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
 
             // Title
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.horizontalPadding(context)),
+              padding: EdgeInsets.symmetric(
+                horizontal: ResponsiveUtils.horizontalPadding(context),
+              ),
               child: Text(
                 'Nutrition Plan',
                 style: GoogleFonts.lexend(
@@ -180,7 +200,9 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
 
             // Subtitle
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.horizontalPadding(context)),
+              padding: EdgeInsets.symmetric(
+                horizontal: ResponsiveUtils.horizontalPadding(context),
+              ),
               child: Text(
                 'Your daily meal tasks',
                 style: GoogleFonts.lexend(
@@ -194,7 +216,9 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
 
             // Category pills (filter by meal type)
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.horizontalPadding(context)),
+              padding: EdgeInsets.symmetric(
+                horizontal: ResponsiveUtils.horizontalPadding(context),
+              ),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -262,7 +286,11 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
   }) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final fs = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final fs = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
 
     return GestureDetector(
       onTap: () {
@@ -312,8 +340,16 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
     final bottomPad = ResponsiveUtils.bottomNavPadding(context) + 40;
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final fontScale = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
-    final cardScale = isLarge ? 1.6 : isTablet ? 1.4 : 1.0;
+    final fontScale = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
+    final cardScale = isLarge
+        ? 1.6
+        : isTablet
+        ? 1.4
+        : 1.0;
 
     return SingleChildScrollView(
       padding: EdgeInsets.only(bottom: bottomPad),
@@ -406,7 +442,9 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
                             child: SizedBox(
                               width: constraints.maxWidth / cardScale,
                               height: 147,
-                              child: NutritionHorizontalCard(task: tasks[index + 2]),
+                              child: NutritionHorizontalCard(
+                                task: tasks[index + 2],
+                              ),
                             ),
                           ),
                         ),
@@ -424,11 +462,18 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
   Widget _buildInlineApiError(BuildContext context, Object error) {
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
-    final fs = isLarge ? 2.3 : isTablet ? 2.0 : 1.0;
+    final fs = isLarge
+        ? 2.3
+        : isTablet
+        ? 2.0
+        : 1.0;
     final isPatientNotFound = error is PatientProfileNotFoundException;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.horizontalPadding(context), vertical: 8 * fs),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtils.horizontalPadding(context),
+        vertical: 8 * fs,
+      ),
       child: Row(
         children: [
           Icon(
@@ -440,19 +485,22 @@ class _NutritionScreenContentState extends ConsumerState<NutritionScreenContent>
           Expanded(
             child: Text(
               isPatientNotFound
-                  ? 'No patient profile — contact your doctor for a plan.'
-                  : 'Could not load tasks. Tap to retry.',
+                  ? 'No care profile is available yet. Please contact the care team for a meal plan.'
+                  : 'We could not load the meal plan. Tap to try again.',
               style: GoogleFonts.lexend(fontSize: 13 * fs, color: Colors.grey),
             ),
           ),
           if (!isPatientNotFound)
             GestureDetector(
               onTap: () => ref.invalidate(nutritionTasksProvider),
-              child: Icon(Icons.refresh, size: 20 * fs, color: AppColors.primary),
+              child: Icon(
+                Icons.refresh,
+                size: 20 * fs,
+                color: AppColors.primary,
+              ),
             ),
         ],
       ),
     );
   }
-
 }

@@ -2,8 +2,7 @@
 class ApiConstants {
   ApiConstants._();
 
-  // Base URL - Change this according to your environment
-  static const String baseUrl = 'http://100.27.167.208:8005';
+  static const String baseUrl = 'http://3.104.237.11:8005';
 
   // Auth Endpoints
   static const String login = '/api/auth/login';

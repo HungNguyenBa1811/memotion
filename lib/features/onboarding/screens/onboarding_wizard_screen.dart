@@ -10,17 +10,17 @@ import '../widgets/widgets.dart';
 /// Onboarding wizard with split layout:
 /// - Top half: PageView that slides content on 'Next'
 /// - Bottom half: Static image with crossfade (only animates when image changes)
-class OnboardingScreenNew extends ConsumerStatefulWidget {
+class OnboardingWizardScreen extends ConsumerStatefulWidget {
   final int initialStep;
 
-  const OnboardingScreenNew({super.key, this.initialStep = 1});
+  const OnboardingWizardScreen({super.key, this.initialStep = 1});
 
   @override
-  ConsumerState<OnboardingScreenNew> createState() =>
-      _OnboardingScreenNewState();
+  ConsumerState<OnboardingWizardScreen> createState() =>
+      _OnboardingWizardScreenState();
 }
 
-class _OnboardingScreenNewState extends ConsumerState<OnboardingScreenNew> {
+class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen> {
   late final PageController _pageController;
   int _currentPage = 0;
 

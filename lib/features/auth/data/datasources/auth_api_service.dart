@@ -56,7 +56,9 @@ class AuthApiService extends BaseApiService {
     );
 
     throw BadRequestException(
-      message: response.message.isNotEmpty ? response.message : 'Login failed',
+      message: response.message.isNotEmpty
+          ? response.message
+          : 'We could not sign you in. Please check your details and try again.',
     );
   }
 
@@ -110,7 +112,7 @@ class AuthApiService extends BaseApiService {
     throw BadRequestException(
       message: response.message.isNotEmpty
           ? response.message
-          : 'Registration failed',
+          : 'We could not create your account. Please try again.',
     );
   }
 
@@ -161,7 +163,7 @@ class AuthApiService extends BaseApiService {
     throw BadRequestException(
       message: response.message.isNotEmpty
           ? response.message
-          : 'Failed to fetch user details',
+          : 'We could not load your account information. Please try again.',
     );
   }
 }

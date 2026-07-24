@@ -78,7 +78,10 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
       final stateAfterSession = ref.read(poseSessionProvider);
       if (!stateAfterSession.isConnected) {
-        setState(() => _error = 'WebSocket failed to connect');
+        setState(
+          () => _error =
+              'We could not connect to the exercise guide. Please try again.',
+        );
         return;
       }
 
@@ -89,7 +92,10 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
       await _startStreaming();
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = e.toString());
+      setState(
+        () => _error =
+            'We could not start the exercise camera. Please try again.',
+      );
       PoseLogger.error('Failed to initialize session', e);
     }
   }
@@ -341,7 +347,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
             // Phase title
             Text(
-              isPhase1 ? 'USER DETECTION' : 'COLLECTING MEASUREMENTS',
+              isPhase1 ? 'GETTING YOU IN FRAME' : 'CHECKING YOUR MOVEMENT',
               style: GoogleFonts.lexend(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
@@ -408,7 +414,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            state.poseDetected ? '✓ Detected' : '⏳ Searching...',
+            state.poseDetected ? '✓ Ready' : 'Finding you...',
             style: GoogleFonts.lexend(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -503,7 +509,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             ),
             const SizedBox(width: 8),
             Text(
-              'current angle',
+              'Current angle',
               style: GoogleFonts.lexend(fontSize: 12, color: Colors.grey[600]),
             ),
             const SizedBox(width: 16),
@@ -671,7 +677,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
                         Container(width: 10, height: 10, color: Colors.white),
                         const SizedBox(width: 8),
                         Text(
-                          'End Session',
+                          'End exercise',
                           style: GoogleFonts.lexend(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
@@ -757,9 +763,9 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
   String _getDefaultMessage(PosePhase phase) {
     switch (phase) {
       case PosePhase.detection:
-        return 'Please stand in the frame to start';
+        return 'Stand where your full body is visible to begin.';
       case PosePhase.calibration:
-        return 'Collecting angle measurements...';
+        return 'Checking your comfortable range of motion...';
       default:
         return 'Processing...';
     }
@@ -770,11 +776,11 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Stop workout?',
+          'Stop exercise?',
           style: GoogleFonts.lexend(fontWeight: FontWeight.w700),
         ),
         content: Text(
-          'Are you sure you want to stop? Current progress will not be saved.',
+          'Would you like to stop now? Your current progress will not be saved.',
           style: GoogleFonts.lexend(),
         ),
         actions: [

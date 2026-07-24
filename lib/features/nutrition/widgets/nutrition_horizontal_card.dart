@@ -21,11 +21,16 @@ class NutritionHorizontalCard extends StatelessWidget {
     final description = task?.description?.isNotEmpty == true
         ? task!.description!
         : 'Cavolo nero & tomato';
-    final calories = task?.calories != null ? '${task!.calories} Kcal' : '230 Kcal';
+    final calories = task?.calories != null
+        ? '${task!.calories} kcal'
+        : '230 kcal';
 
     return GestureDetector(
       onTap: task != null
-          ? () => context.push(AppRoutes.nutritionDetail, extra: {'taskId': task!.id})
+          ? () => context.push(
+              AppRoutes.nutritionDetail,
+              extra: {'taskId': task!.id},
+            )
           : null,
       child: Container(
         height: 147,
@@ -152,7 +157,8 @@ class NutritionHorizontalCard extends StatelessWidget {
               strokeWidth: 2,
               color: task!.mealColor,
               value: progress.expectedTotalBytes != null
-                  ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
+                  ? progress.cumulativeBytesLoaded /
+                        progress.expectedTotalBytes!
                   : null,
             ),
           );
@@ -163,11 +169,8 @@ class NutritionHorizontalCard extends StatelessWidget {
     return Image.asset(
       'assets/images/salad_placeholder.png',
       fit: BoxFit.cover,
-      errorBuilder: (_, error, _) => const Icon(
-        Icons.restaurant,
-        size: 52,
-        color: Color(0xFF4DB6AC),
-      ),
+      errorBuilder: (_, error, _) =>
+          const Icon(Icons.restaurant, size: 52, color: Color(0xFF4DB6AC)),
     );
   }
 

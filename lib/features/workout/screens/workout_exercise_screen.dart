@@ -141,7 +141,7 @@ class _WorkoutExerciseScreenState extends ConsumerState<WorkoutExerciseScreen>
           children: [
             // Title
             Text(
-              'SAFE MAX CALIBRATION',
+              'SET A COMFORTABLE RANGE',
               style: GoogleFonts.lexend(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
@@ -287,7 +287,7 @@ class _WorkoutExerciseScreenState extends ConsumerState<WorkoutExerciseScreen>
           children: [
             // Status text
             Text(
-              _isCalibrating ? 'Calibrating...' : 'Complete!',
+              _isCalibrating ? 'Checking your movement...' : 'Ready',
               style: GoogleFonts.lexend(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -295,7 +295,7 @@ class _WorkoutExerciseScreenState extends ConsumerState<WorkoutExerciseScreen>
               ),
             ),
             Text(
-              'Hold your position steady',
+              'Hold this position if it feels comfortable.',
               style: GoogleFonts.lexend(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -332,7 +332,7 @@ class _WorkoutExerciseScreenState extends ConsumerState<WorkoutExerciseScreen>
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'End Session',
+                      'End exercise',
                       style: GoogleFonts.lexend(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -400,11 +400,11 @@ class _WorkoutExerciseScreenState extends ConsumerState<WorkoutExerciseScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'End Session?',
+          'End exercise?',
           style: GoogleFonts.lexend(fontWeight: FontWeight.w700),
         ),
         content: Text(
-          'Are you sure you want to end this workout session?',
+          'Would you like to end this exercise now?',
           style: GoogleFonts.lexend(),
         ),
         actions: [
@@ -424,7 +424,7 @@ class _WorkoutExerciseScreenState extends ConsumerState<WorkoutExerciseScreen>
               backgroundColor: const Color(0xFFD67052),
             ),
             child: Text(
-              'End Session',
+              'End exercise',
               style: GoogleFonts.lexend(color: Colors.white),
             ),
           ),

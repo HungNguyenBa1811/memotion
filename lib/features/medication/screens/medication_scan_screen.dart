@@ -77,13 +77,14 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen>
         });
       } else {
         setState(() {
-          _cameraError = 'No camera found';
+          _cameraError = 'No camera is available on this device.';
         });
       }
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _cameraError = 'Camera initialization error: $e';
+        _cameraError =
+            'We could not open the camera. Please check camera access and try again.';
       });
     }
   }
@@ -113,18 +114,22 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen>
       });
 
       if (scanState.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(scanState.errorMessage!)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(scanState.errorMessage!)));
       }
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _isScanning = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Scan error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'We could not scan the medication. Please use a clear photo and try again.',
+          ),
+        ),
+      );
     }
   }
 
@@ -197,7 +202,11 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen>
                   ),
                 ],
               ),
-              child: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.white),
+              child: const Icon(
+                Icons.arrow_back_ios_new,
+                size: 18,
+                color: Colors.white,
+              ),
             ),
           ),
           Text(
@@ -417,8 +426,9 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen>
     ];
     final imageIndex = medication.medicationId.hashCode % pillImages.length;
     final hasApiImage = medication.imagePath.isNotEmpty;
-    final fullImageUrl =
-        hasApiImage ? '${ApiConstants.baseUrl}${medication.imagePath}' : null;
+    final fullImageUrl = hasApiImage
+        ? '${ApiConstants.baseUrl}${medication.imagePath}'
+        : null;
 
     return Container(
       width: double.infinity,
@@ -463,8 +473,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen>
                           loadingBuilder: (context, child, loadingProgress) {
                             if (loadingProgress == null) return child;
                             return const Center(
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             );
                           },
                         )
@@ -525,11 +534,7 @@ class _MedicationScanScreenState extends ConsumerState<MedicationScanScreen>
         color: AppColors.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Icon(
-        Icons.medication,
-        size: 40,
-        color: AppColors.primary,
-      ),
+      child: const Icon(Icons.medication, size: 40, color: AppColors.primary),
     );
   }
 }

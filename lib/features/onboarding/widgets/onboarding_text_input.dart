@@ -13,7 +13,7 @@ class OnboardingTextInput extends StatelessWidget {
   const OnboardingTextInput({
     super.key,
     required this.controller,
-    this.hintText = 'Nhập lời khuyên từ bác sĩ...',
+    this.hintText = 'Add advice from the doctor or care team...',
     this.maxLines = 4,
     this.onChanged,
     this.focusNode,

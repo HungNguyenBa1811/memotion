@@ -75,7 +75,10 @@ class VoiceCommandNavigator {
     }
 
     if (workouts.isEmpty) {
-      _showUnknownCommand(messenger, message: 'No workout found to start.');
+      _showUnknownCommand(
+        messenger,
+        message: 'There is no exercise ready to start yet.',
+      );
       return;
     }
 
@@ -93,7 +96,7 @@ class VoiceCommandNavigator {
   static void _showUnknownCommand(
     ScaffoldMessengerState? messenger, {
     String message =
-        'Could not understand the voice command. Please try again.',
+        'We could not understand that request. Please try saying it again.',
   }) {
     if (messenger == null) {
       return;

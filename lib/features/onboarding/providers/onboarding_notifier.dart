@@ -146,7 +146,9 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
   Future<bool> scanMedicalRecord(List<File> files) async {
     state = state.copyWith(isLoading: true);
     try {
-      debugPrint('[NOTIFIER] scanMedicalRecord() sending ${files.length} files');
+      debugPrint(
+        '[NOTIFIER] scanMedicalRecord() sending ${files.length} files',
+      );
       final data = await _repo.scanMedicalRecord(files: files);
       debugPrint('[NOTIFIER] scanMedicalRecord() response: $data');
       if (data != null) {
@@ -297,10 +299,13 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       String mapLivingArrangement(String? v) {
         if (v == null) return 'ALONE';
         switch (v.trim()) {
+          case 'Lives alone':
           case 'Living alone':
             return 'ALONE';
+          case 'Lives with a spouse or partner':
           case 'Living with spouse':
             return 'WITH_SPOUSE';
+          case 'Lives with family':
           case 'Living with children/grandchildren':
             return 'WITH_CHILDREN';
           default:

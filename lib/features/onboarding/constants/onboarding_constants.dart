@@ -30,5 +30,5 @@ class OnboardingConstants {
   static const double inputBorderRadius = 16.0;
 
   // Text
-  static const String skipButtonText = 'Bỏ qua';
+  static const String skipButtonText = 'Skip for now';
 }

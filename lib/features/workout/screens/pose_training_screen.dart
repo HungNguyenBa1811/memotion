@@ -1,13 +1,13 @@
 // ignore: dangling_library_doc_comments
 /// Pose Training Screen - Real-time Analysis with Video Sync
-/// 
+///
 /// Phase 3 (Sync) screen showing:
 /// - User camera view with pose overlay
 /// - Trainer reference video synchronized with user frames
 /// - Real-time scoring and feedback
-/// 
+///
 /// Frame sync: User frames are matched with video frames for accurate comparison
-/// 
+///
 /// Author: MEMOTION Team
 /// Version: 1.0.0
 
@@ -45,19 +45,19 @@ class PoseTrainingScreen extends ConsumerStatefulWidget {
 
 class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
   final CameraService _cameraService = CameraService.instance;
-  
+
   // Video player for trainer reference
   VideoPlayerController? _videoController;
   bool _isVideoInitialized = false;
   bool _isCameraReady = false;
   bool _isInitialized = false;
   String? _error;
-  
+
   // Timing
   int _elapsedSeconds = 0;
   Timer? _timer;
   DateTime? _sessionStartTime;
-  
+
   // Frame sync tracking
   int _userFrameCount = 0;
   // ignore: unused_field
@@ -79,8 +79,12 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
       _sessionStartTime = DateTime.now();
 
       // 1. Reuse camera from Phase 2 if still alive, otherwise re-initialize
-      print('📷📷📷📷📷 Step 1: Camera check — isInitialized=${_cameraService.isInitialized}, controller=${_cameraService.controller != null}');
-      if (_cameraService.isInitialized && _cameraService.controller != null && _cameraService.controller!.value.isInitialized) {
+      print(
+        '📷📷📷📷📷 Step 1: Camera check — isInitialized=${_cameraService.isInitialized}, controller=${_cameraService.controller != null}',
+      );
+      if (_cameraService.isInitialized &&
+          _cameraService.controller != null &&
+          _cameraService.controller!.value.isInitialized) {
         print('📷📷📷📷📷 Step 1: Reusing existing camera from Phase 2');
       } else {
         print('📷📷📷📷📷 Step 1: Camera not alive, re-initializing...');
@@ -91,12 +95,16 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
 
       // 2. Check WebSocket connection
       final sessionState = ref.read(poseSessionProvider);
-      print('🌐🌐🌐🌐🌐 Step 2: WebSocket check — isConnected=${sessionState.isConnected}, isSessionActive=${sessionState.isSessionActive}');
+      print(
+        '🌐🌐🌐🌐🌐 Step 2: WebSocket check — isConnected=${sessionState.isConnected}, isSessionActive=${sessionState.isSessionActive}',
+      );
       if (!sessionState.isConnected) {
         print('🌐🌐🌐🌐🌐 Step 2: Reconnecting WebSocket...');
         await ref.read(poseSessionProvider.notifier).connectWebSocket();
         final afterReconnect = ref.read(poseSessionProvider);
-        print('🌐🌐🌐🌐🌐 Step 2: Reconnect DONE — isConnected=${afterReconnect.isConnected}');
+        print(
+          '🌐🌐🌐🌐🌐 Step 2: Reconnect DONE — isConnected=${afterReconnect.isConnected}',
+        );
       }
 
       // 3. Initialize video player (with timeout)
@@ -107,7 +115,9 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
           print('🎬🎬🎬🎬🎬 Step 3: Video init TIMED OUT after 8s');
         },
       );
-      print('🎬🎬🎬🎬🎬 Step 3: Video init DONE — _isVideoInitialized=$_isVideoInitialized');
+      print(
+        '🎬🎬🎬🎬🎬 Step 3: Video init DONE — _isVideoInitialized=$_isVideoInitialized',
+      );
 
       // 4. Start timer
       _startTimer();
@@ -115,14 +125,18 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
 
       // 5. Start camera streaming (with timeout)
       print('📡📡📡📡📡 Step 5: Frame streaming starting...');
-      print('📡📡📡📡📡 Step 5: cameraService.isStreaming=${_cameraService.isStreaming}, isInitialized=${_cameraService.isInitialized}');
+      print(
+        '📡📡📡📡📡 Step 5: cameraService.isStreaming=${_cameraService.isStreaming}, isInitialized=${_cameraService.isInitialized}',
+      );
       await _startFrameStreaming().timeout(
         const Duration(seconds: 5),
         onTimeout: () {
           print('📡📡📡📡📡 Step 5: Frame streaming TIMED OUT after 5s');
         },
       );
-      print('📡📡📡📡📡 Step 5: Frame streaming DONE — isStreaming=${_cameraService.isStreaming}');
+      print(
+        '📡📡📡📡📡 Step 5: Frame streaming DONE — isStreaming=${_cameraService.isStreaming}',
+      );
 
       // 6. Listen for phase changes
       ref.read(poseSessionProvider.notifier).onPhaseChange = _onPhaseChange;
@@ -133,7 +147,9 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
       print('💥💥💥💥💥 _initializeTraining CAUGHT ERROR: $e');
       print('💥💥💥💥💥 Stack: $stack');
     } finally {
-      print('🏁🏁🏁🏁🏁 _initializeTraining FINALLY — setting _isInitialized=true, mounted=$mounted');
+      print(
+        '🏁🏁🏁🏁🏁 _initializeTraining FINALLY — setting _isInitialized=true, mounted=$mounted',
+      );
       if (mounted) {
         setState(() => _isInitialized = true);
       }
@@ -207,59 +223,68 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
 
   Future<void> _startFrameStreaming() async {
     PoseLogger.info('Phase 3: Starting frame streaming...');
-    
+
     // Always start fresh streaming for Phase 3
     if (_cameraService.isStreaming) {
       await _cameraService.stopStreaming();
     }
-    
-    await _cameraService.startStreaming(
-      onFrame: _onCameraFrame,
-    );
-    
+
+    await _cameraService.startStreaming(onFrame: _onCameraFrame);
+
     PoseLogger.info('Phase 3: Frame streaming started');
   }
 
   void _onCameraFrame(dynamic frameBytes, int timestamp) {
     _userFrameCount++;
-    
+
     // Log every 30 frames (1 second at 30fps)
     if (_userFrameCount % 30 == 0) {
       final state = ref.read(poseSessionProvider);
-      PoseLogger.phase(3, 'Frame #$_userFrameCount sent, connected=${state.isConnected}, '
-          'score=${state.syncScore.toStringAsFixed(1)}, reps=${state.repCount}');
+      PoseLogger.phase(
+        3,
+        'Frame #$_userFrameCount sent, connected=${state.isConnected}, '
+        'score=${state.syncScore.toStringAsFixed(1)}, reps=${state.repCount}',
+      );
     }
-    
+
     // Calculate sync with video
     if (_videoController != null && _isVideoInitialized) {
       final videoPosition = _videoController!.value.position.inMilliseconds;
-      final userTime = timestamp - (_sessionStartTime?.millisecondsSinceEpoch ?? timestamp);
+      final userTime =
+          timestamp - (_sessionStartTime?.millisecondsSinceEpoch ?? timestamp);
       _syncOffset = (userTime - videoPosition).toDouble();
-      
+
       // Update video frame number for backend
-      _videoFrameNumber = (videoPosition / 33.33).round(); // 30fps = 33.33ms per frame
+      _videoFrameNumber = (videoPosition / 33.33)
+          .round(); // 30fps = 33.33ms per frame
     }
-    
+
     // Send frame with video sync info
-    ref.read(poseSessionProvider.notifier).sendFrame(
-      frameBytes,
-      timestampMs: timestamp,
-    );
+    ref
+        .read(poseSessionProvider.notifier)
+        .sendFrame(frameBytes, timestampMs: timestamp);
   }
 
   void _onPhaseChange(PosePhase phase) {
     final state = ref.read(poseSessionProvider);
-    
-    PoseLogger.info('Training _onPhaseChange: phase=${phase.displayName}, '
-        'sessionActive=${state.isSessionActive}, repCount=${state.repCount}');
-    
+
+    PoseLogger.info(
+      'Training _onPhaseChange: phase=${phase.displayName}, '
+      'sessionActive=${state.isSessionActive}, repCount=${state.repCount}',
+    );
+
     // Only navigate to results if we actually completed training
     if (phase == PosePhase.completed || phase == PosePhase.scoring) {
       if (state.isSessionActive && state.repCount > 0) {
-        PoseLogger.phaseComplete(3, 'Training complete - navigating to results');
+        PoseLogger.phaseComplete(
+          3,
+          'Training complete - navigating to results',
+        );
         _navigateToResults();
       } else {
-        PoseLogger.warning('Ignoring completed phase in training - no reps yet');
+        PoseLogger.warning(
+          'Ignoring completed phase in training - no reps yet',
+        );
       }
     }
   }
@@ -268,9 +293,9 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
     _timer?.cancel();
     _videoController?.pause();
     await _cameraService.stopStreaming();
-    
+
     final results = await ref.read(poseSessionProvider.notifier).endSession();
-    
+
     if (mounted && results != null) {
       context.pushReplacement(
         '/workout-training-complete',
@@ -324,7 +349,10 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
                     '✓ Camera ready',
-                    style: GoogleFonts.lexend(fontSize: 14, color: Colors.green),
+                    style: GoogleFonts.lexend(
+                      fontSize: 14,
+                      color: Colors.green,
+                    ),
                   ),
                 ),
             ],
@@ -365,7 +393,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
               children: [
                 // User camera section (top half)
                 Expanded(flex: 1, child: _buildUserCameraSection(state)),
-                
+
                 // Trainer video section (bottom half)
                 Expanded(flex: 1, child: _buildTrainerVideoSection()),
               ],
@@ -404,16 +432,21 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
             ),
           ],
         ),
-        child: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 18),
+        child: const Icon(
+          Icons.arrow_back_ios_new,
+          color: Colors.black,
+          size: 18,
+        ),
       ),
     );
   }
 
   Widget _buildUserCameraSection(PoseSessionState state) {
-    final hasCamera = _isCameraReady && 
-                      _cameraService.controller != null && 
-                      _cameraService.controller!.value.isInitialized;
-    
+    final hasCamera =
+        _isCameraReady &&
+        _cameraService.controller != null &&
+        _cameraService.controller!.value.isInitialized;
+
     return Stack(
       children: [
         // Camera preview
@@ -426,7 +459,11 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.videocam_off, size: 64, color: Colors.white54),
+                      const Icon(
+                        Icons.videocam_off,
+                        size: 64,
+                        color: Colors.white54,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         'Camera initializing...',
@@ -484,7 +521,10 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
               children: [
                 Text(
                   'Score',
-                  style: GoogleFonts.lexend(fontSize: 10, color: Colors.white70),
+                  style: GoogleFonts.lexend(
+                    fontSize: 10,
+                    color: Colors.white70,
+                  ),
                 ),
                 Text(
                   '${state.syncScore.toStringAsFixed(1)}',
@@ -506,10 +546,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
           bottom: 8,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildLiveAnalysisBadge(state),
-              _buildSyncIndicator(),
-            ],
+            children: [_buildLiveAnalysisBadge(state), _buildSyncIndicator()],
           ),
         ),
       ],
@@ -532,10 +569,14 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.person, size: 64, color: Colors.white.withOpacity(0.5)),
+                      Icon(
+                        Icons.person,
+                        size: 64,
+                        color: Colors.white.withOpacity(0.5),
+                      ),
                       const SizedBox(height: 8),
                       Text(
-                        'Reference Video',
+                        'Exercise Guide',
                         style: GoogleFonts.lexend(color: Colors.white70),
                       ),
                     ],
@@ -559,7 +600,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                 const Icon(Icons.play_circle, color: Colors.white, size: 16),
                 const SizedBox(width: 6),
                 Text(
-                  'Trainer View',
+                  'Your Camera',
                   style: GoogleFonts.lexend(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -596,7 +637,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
           ),
           const SizedBox(width: 6),
           Text(
-            'LIVE ANALYSIS',
+            'MOVEMENT FEEDBACK',
             style: GoogleFonts.lexend(
               fontSize: 10,
               fontWeight: FontWeight.w800,
@@ -684,7 +725,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'Fatigue Level: ${state.fatigueLevel}',
+                      'Effort level: ${state.fatigueLevel}',
                       style: GoogleFonts.lexend(
                         fontSize: 10,
                         color: _getFatigueColor(state.fatigueLevel),
@@ -749,10 +790,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
           ),
           Text(
             label,
-            style: GoogleFonts.lexend(
-              fontSize: 9,
-              color: Colors.grey[600],
-            ),
+            style: GoogleFonts.lexend(fontSize: 9, color: Colors.grey[600]),
           ),
         ],
       ),
@@ -767,11 +805,16 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
 
   Color _getFatigueColor(String level) {
     switch (level.toUpperCase()) {
-      case 'FRESH': return Colors.green;
-      case 'MILD': return Colors.lightGreen;
-      case 'MODERATE': return Colors.orange;
-      case 'HIGH': return Colors.red;
-      default: return Colors.grey;
+      case 'FRESH':
+        return Colors.green;
+      case 'MILD':
+        return Colors.lightGreen;
+      case 'MODERATE':
+        return Colors.orange;
+      case 'HIGH':
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -779,19 +822,30 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('End Session?', style: GoogleFonts.lexend(fontWeight: FontWeight.bold)),
-        content: Text('Are you sure you want to end the workout?', style: GoogleFonts.lexend()),
+        title: Text(
+          'End exercise?',
+          style: GoogleFonts.lexend(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Would you like to end this exercise now?',
+          style: GoogleFonts.lexend(),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Continue', style: GoogleFonts.lexend(color: AppColors.primary)),
+            child: Text(
+              'Continue',
+              style: GoogleFonts.lexend(color: AppColors.primary),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               _endSession();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD67052)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD67052),
+            ),
             child: Text('End', style: GoogleFonts.lexend(color: Colors.white)),
           ),
         ],
@@ -824,13 +878,9 @@ class PoseLandmarkPainter extends CustomPainter {
         final x = (landmark['x'] as num?)?.toDouble() ?? 0;
         final y = (landmark['y'] as num?)?.toDouble() ?? 0;
         final visibility = (landmark['visibility'] as num?)?.toDouble() ?? 0;
-        
+
         if (visibility > 0.5) {
-          canvas.drawCircle(
-            Offset(x * size.width, y * size.height),
-            5,
-            paint,
-          );
+          canvas.drawCircle(Offset(x * size.width, y * size.height), 5, paint);
         }
       }
     }

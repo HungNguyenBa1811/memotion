@@ -32,7 +32,11 @@ class _Step16BuilderState extends ConsumerState<Step16Builder> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking image: $e')),
+          const SnackBar(
+            content: Text(
+              'We could not open that photo. Please check photo access and try again.',
+            ),
+          ),
         );
       }
     }
@@ -54,7 +58,9 @@ class _Step16BuilderState extends ConsumerState<Step16Builder> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to scan medical record. Please try again.'),
+          content: Text(
+            'We could not read the medical document. Please use a clear photo and try again.',
+          ),
         ),
       );
     }
@@ -171,9 +177,7 @@ class _Step16BuilderState extends ConsumerState<Step16Builder> {
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF00695C),
           padding: const EdgeInsets.symmetric(vertical: 13),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
         child: Text(
           hasImages ? 'Take another photo' : 'Take photo',
@@ -196,9 +200,7 @@ class _Step16BuilderState extends ConsumerState<Step16Builder> {
           backgroundColor: Colors.white,
           side: const BorderSide(color: Color(0xFF1B4332), width: 1),
           padding: const EdgeInsets.symmetric(vertical: 13),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
         child: Text(
           hasImages ? 'Choose more from gallery' : 'Choose from gallery',

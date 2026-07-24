@@ -42,8 +42,7 @@ class OnboardingStep1Config extends OnboardingStepConfig {
   const OnboardingStep1Config()
     : super(
         step: 1,
-        title:
-            'Monitoring and building a comprehensive rehabilitation journey app',
+        title: 'Let’s build a care plan for safer, healthier days.',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly_couple.png',
         extraImagePath: 'assets/images/onboarding/onboarding_logo.png',
@@ -57,7 +56,7 @@ class OnboardingStep1_1Config extends OnboardingStepConfig {
   const OnboardingStep1_1Config()
     : super(
         step: 2,
-        title: 'Please enter your login information here',
+        title: 'Enter your sign-in information',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly4.png',
         titleAlignment: TitleAlignment.center,
@@ -68,7 +67,7 @@ class OnboardingStep2Config extends OnboardingStepConfig {
   const OnboardingStep2Config()
     : super(
         step: 3,
-        title: 'Basic information of the care recipient',
+        title: 'Tell us about the person receiving care',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly4.png',
         titleAlignment: TitleAlignment.center,
@@ -79,8 +78,8 @@ class OnboardingStep3Config extends OnboardingStepConfig {
   const OnboardingStep3Config()
     : super(
         step: 3,
-        title: 'What is the main recovery goal currently?',
-        subtitle: 'Choose the most appropriate goal for the current condition.',
+        title: 'What is the main care or recovery goal?',
+        subtitle: 'Choose the option that best matches their current needs.',
         imagePath: 'assets/images/onboarding/elderly1.png',
       );
 }
@@ -89,7 +88,7 @@ class OnboardingStep4Config extends OnboardingStepConfig {
   const OnboardingStep4Config()
     : super(
         step: 4,
-        title: 'Currently, where do you feel the most pain or discomfort?',
+        title: 'Where do they feel the most pain or discomfort?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -99,8 +98,7 @@ class OnboardingStep5Config extends OnboardingStepConfig {
   const OnboardingStep5Config()
     : super(
         step: 5,
-        title:
-            'If 0 is no pain and 10 is unbearable pain, what is your current pain level?',
+        title: 'On a scale from 0 to 10, how strong is the pain right now?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -110,8 +108,7 @@ class OnboardingStep6Config extends OnboardingStepConfig {
   const OnboardingStep6Config()
     : super(
         step: 6,
-        title:
-            'How would you describe this pain? Sharp for a while then gone, or a dull ache all day?',
+        title: 'How would they describe the pain?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -122,7 +119,7 @@ class OnboardingStep7Config extends OnboardingStepConfig {
     : super(
         step: 7,
         title:
-            'Do you feel any weakness in your limbs or any stiffness or difficulty moving?',
+            'Do they have weakness, stiffness, or difficulty moving their arms or legs?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -133,7 +130,7 @@ class OnboardingStep8Config extends OnboardingStepConfig {
     : super(
         step: 8,
         title:
-            'Can you stand up from a chair without using your hands or needing support?',
+            'Can they stand up from a chair without using their hands or another person’s support?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -144,7 +141,7 @@ class OnboardingStep9Config extends OnboardingStepConfig {
     : super(
         step: 9,
         title:
-            'Do you feel steady when walking? Do you ever feel slightly dizzy or fear falling?',
+            'Do they feel steady while walking, or do they feel dizzy or worried about falling?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly3.png',
       );
@@ -154,13 +151,13 @@ class OnboardingStep10Config extends OnboardingStepConfig {
   const OnboardingStep10Config()
     : super(
         step: 10,
-        title: 'Who are you currently living with?',
+        title: 'Who do they currently live with?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly_couple2.png',
         options: const [
-          'Living alone',
-          'Living with spouse',
-          'Living with children/grandchildren',
+          'Lives alone',
+          'Lives with a spouse or partner',
+          'Lives with family',
         ],
       );
 }
@@ -170,7 +167,7 @@ class OnboardingStep11Config extends OnboardingStepConfig {
     : super(
         step: 11,
         title:
-            'What is your typical blood pressure level? If you have a monitor, please provide the numbers.',
+            'What is their usual blood pressure? Enter the latest reading if available.',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly5.png',
       );
@@ -180,8 +177,7 @@ class OnboardingStep12Config extends OnboardingStepConfig {
   const OnboardingStep12Config()
     : super(
         step: 12,
-        title:
-            'When resting, do you feel your heart beat regularly? What is your typical heart rate?',
+        title: 'What is their usual resting heart rate?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly5.png',
       );
@@ -191,8 +187,7 @@ class OnboardingStep13Config extends OnboardingStepConfig {
   const OnboardingStep13Config()
     : super(
         step: 13,
-        title:
-            'What was the most recent blood glucose level reported by your doctor?',
+        title: 'What was their most recent blood glucose reading?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly5.png',
       );
@@ -202,14 +197,13 @@ class OnboardingStep14Config extends OnboardingStepConfig {
   const OnboardingStep14Config()
     : super(
         step: 14,
-        title:
-            'Do you need any help with daily activities like personal hygiene, dressing, or eating?',
+        title: 'How much help do they need with bathing, dressing, or eating?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly_couple3.png',
         options: const [
-          'Completely independent',
-          'Need a little support.',
-          'Need full assistance.',
+          'Independent without help',
+          'Needs some support',
+          'Needs full support',
         ],
       );
 }
@@ -219,13 +213,13 @@ class OnboardingStep15Config extends OnboardingStepConfig {
     : super(
         step: 15,
         title:
-            'Can you go shopping, cook, or use the phone to call your children/grandchildren by yourself?',
+            'How much help do they need with shopping, cooking, or using the phone?',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly_couple3.png',
         options: const [
-          'Completely independent',
-          'Need a little support.',
-          'Need full assistance.',
+          'Independent without help',
+          'Needs some support',
+          'Needs full support',
         ],
       );
 }
@@ -234,7 +228,7 @@ class OnboardingStep16Config extends OnboardingStepConfig {
   const OnboardingStep16Config()
     : super(
         step: 16,
-        title: 'Take a photo of discharge summary / prescription',
+        title: 'Add a photo of the discharge summary or prescription',
         subtitle: null,
         imagePath: null,
         titleAlignment: TitleAlignment.center,
@@ -245,7 +239,7 @@ class OnboardingStep17Config extends OnboardingStepConfig {
   const OnboardingStep17Config()
     : super(
         step: 17,
-        title: 'Completed',
+        title: 'Your care profile is ready',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly2.png',
       );
@@ -330,7 +324,7 @@ class OnboardingData {
   // Step 8 - Functional: stand from chair
   final StandAbility? standAbility;
 
-  // Step 10 - Living arrangement (UI choices: 'Sống một mình', 'Sống cùng vợ/chồng', 'Sống cùng con cháu')
+  // Step 10 - Living arrangement
   final String? livingArrangement;
 
   // Optional doctor advice
@@ -476,11 +470,11 @@ extension HealthObjectiveDisplay on HealthObjective {
   String get displayNameVi {
     switch (this) {
       case HealthObjective.movement:
-        return 'Vận động - đi lại';
+        return 'Improve daily movement';
       case HealthObjective.lifeActivities:
-        return 'Sinh hoạt hàng ngày';
+        return 'Support daily activities';
       case HealthObjective.pain:
-        return 'Giảm đau - cải thiện thể lực';
+        return 'Reduce pain and improve fitness';
     }
   }
 
@@ -500,11 +494,11 @@ extension PainLocationDisplay on PainLocation {
   String get displayName {
     switch (this) {
       case PainLocation.shoulder:
-        return 'Shoulder Joint';
+        return 'Shoulder';
       case PainLocation.back:
-        return 'Lower Back';
+        return 'Lower back';
       case PainLocation.knee:
-        return 'Knee Joint';
+        return 'Knee';
       case PainLocation.hip:
         return 'Hip';
       case PainLocation.neck:

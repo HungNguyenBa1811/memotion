@@ -17,7 +17,7 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
   late TextEditingController _weightController;
   late FocusNode _nameFocus;
   late FocusNode _heightFocus;
-  late FocusNode _weightFocus; 
+  late FocusNode _weightFocus;
 
   @override
   void initState() {
@@ -104,7 +104,7 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Care recipient name',
+          'Name of the person receiving care',
           style: GoogleFonts.lexend(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -148,7 +148,7 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Birth Year',
+          'Birth year',
           style: GoogleFonts.lexend(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -179,7 +179,9 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  state.birthYear != null ? state.birthYear.toString() : 'Select',
+                  state.birthYear != null
+                      ? state.birthYear.toString()
+                      : 'Select',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Icon(Icons.calendar_today, size: 18, color: Colors.grey[600]),
@@ -335,7 +337,6 @@ class _Step2BuilderState extends ConsumerState<Step2Builder> {
       ],
     );
   }
-
 }
 
 /// Dialog picker cho chọn năm sinh
@@ -380,7 +381,7 @@ class _BirthYearPickerState extends State<_BirthYearPicker> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'Select Birth Year',
+                'Select birth year',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
