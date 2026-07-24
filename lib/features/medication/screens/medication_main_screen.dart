@@ -215,7 +215,7 @@ class _MedicationMainScreenContentState
                   const SizedBox(height: 12),
                   _buildDebugSection(context),
                 ],
-                SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 2),
+                SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 20),
               ],
             ),
           ),

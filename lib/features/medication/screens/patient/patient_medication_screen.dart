@@ -122,7 +122,7 @@ class _PatientMedicationScreenContentState
                   error: (error, _) => _buildErrorWidget(error),
                 ),
               ),
-              SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 2),
+              SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 20),
             ],
           ),
         ),

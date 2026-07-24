@@ -74,41 +74,69 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
   /// Camera session continues from Phase 1-2, just need to restart streaming
   Future<void> _initializeTraining() async {
     try {
-      PoseLogger.phaseStart(3, 'Initializing training screen with video sync');
-      
+      print('🔥🔥🔥🔥🔥 _initializeTraining START');
+
       _sessionStartTime = DateTime.now();
 
-      // 1. Re-initialize camera (always re-init to ensure it's fresh)
-      PoseLogger.info('Phase 3: Initializing camera...');
-      await _cameraService.initialize(useFrontCamera: true);
+      // 1. Reuse camera from Phase 2 if still alive, otherwise re-initialize
+      print('📷📷📷📷📷 Step 1: Camera check — isInitialized=${_cameraService.isInitialized}, controller=${_cameraService.controller != null}');
+      if (_cameraService.isInitialized && _cameraService.controller != null && _cameraService.controller!.value.isInitialized) {
+        print('📷📷📷📷📷 Step 1: Reusing existing camera from Phase 2');
+      } else {
+        print('📷📷📷📷📷 Step 1: Camera not alive, re-initializing...');
+        await _cameraService.initialize(useFrontCamera: true);
+        print('📷📷📷📷📷 Step 1: Camera init DONE');
+      }
       setState(() => _isCameraReady = true);
-      PoseLogger.info('Phase 3: Camera initialized');
 
-      // 2. Check WebSocket connection - reconnect if needed
+      // 2. Check WebSocket connection
       final sessionState = ref.read(poseSessionProvider);
+      print('🌐🌐🌐🌐🌐 Step 2: WebSocket check — isConnected=${sessionState.isConnected}, isSessionActive=${sessionState.isSessionActive}');
       if (!sessionState.isConnected) {
-        PoseLogger.info('Phase 3: WebSocket not connected, reconnecting...');
+        print('🌐🌐🌐🌐🌐 Step 2: Reconnecting WebSocket...');
         await ref.read(poseSessionProvider.notifier).connectWebSocket();
-        PoseLogger.info('Phase 3: WebSocket reconnected');
+        final afterReconnect = ref.read(poseSessionProvider);
+        print('🌐🌐🌐🌐🌐 Step 2: Reconnect DONE — isConnected=${afterReconnect.isConnected}');
       }
 
-      // 3. Initialize video player (trainer reference video)
-      await _initializeVideo();
-      
+      // 3. Initialize video player (with timeout)
+      print('🎬🎬🎬🎬🎬 Step 3: Video init starting...');
+      await _initializeVideo().timeout(
+        const Duration(seconds: 8),
+        onTimeout: () {
+          print('🎬🎬🎬🎬🎬 Step 3: Video init TIMED OUT after 8s');
+        },
+      );
+      print('🎬🎬🎬🎬🎬 Step 3: Video init DONE — _isVideoInitialized=$_isVideoInitialized');
+
       // 4. Start timer
       _startTimer();
-      
-      // 5. Start camera streaming
-      await _startFrameStreaming();
-      
+      print('⏱️⏱️⏱️⏱️⏱️ Step 4: Timer started');
+
+      // 5. Start camera streaming (with timeout)
+      print('📡📡📡📡📡 Step 5: Frame streaming starting...');
+      print('📡📡📡📡📡 Step 5: cameraService.isStreaming=${_cameraService.isStreaming}, isInitialized=${_cameraService.isInitialized}');
+      await _startFrameStreaming().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          print('📡📡📡📡📡 Step 5: Frame streaming TIMED OUT after 5s');
+        },
+      );
+      print('📡📡📡📡📡 Step 5: Frame streaming DONE — isStreaming=${_cameraService.isStreaming}');
+
       // 6. Listen for phase changes
       ref.read(poseSessionProvider.notifier).onPhaseChange = _onPhaseChange;
+      print('👂👂👂👂👂 Step 6: Phase change listener attached');
 
-      setState(() => _isInitialized = true);
-      PoseLogger.info('Phase 3: Training screen ready - streaming frames');
-    } catch (e) {
-      PoseLogger.error('Phase 3: Initialization failed', e);
-      setState(() => _error = e.toString());
+      print('✅✅✅✅✅ _initializeTraining COMPLETE — all steps passed');
+    } catch (e, stack) {
+      print('💥💥💥💥💥 _initializeTraining CAUGHT ERROR: $e');
+      print('💥💥💥💥💥 Stack: $stack');
+    } finally {
+      print('🏁🏁🏁🏁🏁 _initializeTraining FINALLY — setting _isInitialized=true, mounted=$mounted');
+      if (mounted) {
+        setState(() => _isInitialized = true);
+      }
     }
   }
 

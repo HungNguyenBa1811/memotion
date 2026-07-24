@@ -49,6 +49,7 @@ class PoseDetectionScreen extends ConsumerStatefulWidget {
 class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
   final CameraService _cameraService = CameraService.instance;
   bool _isCameraInitialized = false;
+  bool _handingOffToTraining = false;
   String? _error;
 
   @override
@@ -158,8 +159,9 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
   void _navigateToTraining() {
     PoseLogger.phaseStart(3, 'Navigating to training screen');
 
-    // Stop streaming on this screen (training screen will restart)
+    // Stop streaming but keep camera alive — Phase 3 will reuse it
     _cameraService.stopStreaming();
+    _handingOffToTraining = true;
 
     context.pushReplacement(
       '/pose-training',
@@ -194,7 +196,10 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
   @override
   void dispose() {
-    _cameraService.dispose();
+    // Don't dispose camera if handing off to Phase 3 — it will manage the camera
+    if (!_handingOffToTraining) {
+      _cameraService.dispose();
+    }
     super.dispose();
   }
 

@@ -122,25 +122,29 @@ class CameraService {
   Future<void> startStreaming({
     required void Function(Uint8List frameBytes, int timestamp) onFrame,
   }) async {
+    print('🚀🚀🚀🚀🚀 startStreaming: _isInitialized=$_isInitialized, controller=${_controller != null}, _isStreaming=$_isStreaming');
+
     if (!_isInitialized || _controller == null) {
+      print('🚀🚀🚀🚀🚀 startStreaming: THROWING — camera not initialized');
       throw Exception('Camera not initialized');
     }
 
     if (_isStreaming) {
-      CameraLogger.info('Already streaming');
+      print('🚀🚀🚀🚀🚀 startStreaming: already streaming, returning early');
       return;
     }
-
-    CameraLogger.info('Starting image stream (target ~${targetFps}fps)');
 
     _onFrame = onFrame;
     _frameCount = 0;
     _isStreaming = true;
 
     // Spawn persistent encoder isolate
+    print('🚀🚀🚀🚀🚀 startStreaming: spawning encoder isolate...');
     await _spawnEncoderIsolate();
+    print('🚀🚀🚀🚀🚀 startStreaming: encoder isolate ready, starting image stream...');
 
     _controller!.startImageStream(_onImageAvailable);
+    print('🚀🚀🚀🚀🚀 startStreaming: image stream started!');
   }
 
   /// Stop streaming
@@ -179,29 +183,40 @@ class CameraService {
 
   /// Spawn a long-lived isolate for JPEG encoding
   Future<void> _spawnEncoderIsolate() async {
+    print('🧬🧬🧬🧬🧬 _spawnEncoderIsolate: killing old isolate...');
     _killEncoderIsolate(); // Clean up any existing one
 
     _encoderReceivePort = ReceivePort();
 
+    print('🧬🧬🧬🧬🧬 _spawnEncoderIsolate: calling Isolate.spawn...');
     _encoderIsolate = await Isolate.spawn(
       _encoderEntryPoint,
       _encoderReceivePort!.sendPort,
     );
+    print('🧬🧬🧬🧬🧬 _spawnEncoderIsolate: Isolate.spawn returned OK');
 
     final completer = Completer<SendPort>();
 
     _encoderReceivePort!.listen((message) {
+      print('🧬🧬🧬🧬🧬 _spawnEncoderIsolate: received message type=${message.runtimeType}');
       if (message is SendPort) {
-        // First message: isolate's SendPort for us to send frames to
         completer.complete(message);
       } else if (message is Uint8List) {
-        // Encoded JPEG bytes received back
         _onEncodedFrame(message);
       }
     });
 
-    _encoderSendPort = await completer.future;
-    CameraLogger.info('Encoder isolate spawned');
+    print('🧬🧬🧬🧬🧬 _spawnEncoderIsolate: awaiting SendPort from isolate...');
+    _encoderSendPort = await completer.future.timeout(
+      const Duration(seconds: 3),
+      onTimeout: () {
+        print('🧬🧬🧬🧬🧬 _spawnEncoderIsolate: TIMED OUT waiting for SendPort!');
+        CameraLogger.error('Encoder isolate handshake timed out');
+        _killEncoderIsolate();
+        throw TimeoutException('Encoder isolate did not respond');
+      },
+    );
+    print('🧬🧬🧬🧬🧬 _spawnEncoderIsolate: got SendPort, isolate ready!');
   }
 
   /// Kill the encoder isolate

@@ -99,7 +99,7 @@ class _PatientNutritionScreenContentState
                       : null,
                 ),
               ),
-              SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 2),
+              SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 20),
             ],
           ),
         ),
@@ -272,8 +272,11 @@ class _PatientNutritionCard extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final scale = ResponsiveUtils.textScaleFactor(context);
-          // Image fills ~60% of card width
-          final imageSize = constraints.maxWidth * 0.75;
+          // Image fills ~75% of card width, but capped so the card
+          // never exceeds the available height (prevents bottom clipping).
+          final contentReserve = 130 * scale; // text + paddings below image
+          final maxByHeight = constraints.maxHeight - contentReserve;
+          final imageSize = (constraints.maxWidth * 0.75).clamp(0.0, maxByHeight.clamp(120.0, double.infinity));
           // Image overlaps ~45% above the card top edge
           final imageOverlap = imageSize * 0.45;
 
