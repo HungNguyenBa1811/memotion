@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/onboarding_data.dart';
@@ -62,6 +63,8 @@ class _Step12BuilderState extends ConsumerState<Step12Builder> {
                 controller: _controller,
                 maxLines: 1,
                 hintText: 'RHR Score',
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (v) {
                   final parsed = int.tryParse(v);
                   ref.read(onboardingProvider.notifier).setHeartRate(parsed);

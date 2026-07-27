@@ -8,6 +8,7 @@ import '../../../core/theme/theme.dart';
 import '../../../core/utils/responsive_utils.dart';
 import '../models/nutrition_task.dart';
 import '../providers/nutrition_provider.dart';
+import '../widgets/nutrition_empty_state.dart';
 import '../widgets/nutrition_vertical_card.dart';
 import '../widgets/nutrition_horizontal_card.dart';
 import '../../../features/profile/providers/profile_provider.dart';
@@ -260,11 +261,12 @@ class _NutritionScreenContentState
             ),
             SizedBox(height: 20 * fontScale),
 
-            // Content — demo card always visible; API tasks appended when available
+            // Content
             Expanded(
               child: _buildTasksList(
                 context,
                 nutritionTasksAsync.valueOrNull ?? [],
+                selectedFilter: selectedFilter,
                 isLoading: nutritionTasksAsync.isLoading,
                 apiError: nutritionTasksAsync.hasError
                     ? nutritionTasksAsync.error
@@ -331,10 +333,15 @@ class _NutritionScreenContentState
   Widget _buildTasksList(
     BuildContext context,
     List<NutritionTask> tasks, {
+    required NutritionFilter selectedFilter,
     bool isLoading = false,
     Object? apiError,
   }) {
     final displayTasks = tasks;
+
+    if (!isLoading && apiError == null && displayTasks.isEmpty) {
+      return NutritionEmptyState(filter: selectedFilter);
+    }
 
     final hPad = ResponsiveUtils.horizontalPadding(context);
     final bottomPad = ResponsiveUtils.bottomNavPadding(context) + 40;
@@ -356,7 +363,7 @@ class _NutritionScreenContentState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Featured vertical cards — demo card always visible
+          // Featured vertical cards
           SizedBox(
             height: 335 * cardScale,
             child: ListView.builder(

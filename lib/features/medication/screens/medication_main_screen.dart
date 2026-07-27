@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/providers/developer_mode_provider.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/network/api_exceptions.dart';
 import '../../../core/theme/theme.dart';
@@ -44,7 +45,6 @@ class MedicationMainScreenContent extends ConsumerStatefulWidget {
 class _MedicationMainScreenContentState
     extends ConsumerState<MedicationMainScreenContent> {
   int _selectedIndex = 0;
-  bool _showDebug = false;
   late int _selectedDayIndex;
   late List<CalendarDay> _calendarDays;
 
@@ -134,6 +134,7 @@ class _MedicationMainScreenContentState
     );
     final selectedDate = ref.watch(selectedDateProvider);
     final isOffline = ref.watch(isOfflineProvider).valueOrNull ?? false;
+    final isDeveloperMode = ref.watch(developerModeProvider).isEnabled;
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
 
     return Scaffold(
@@ -146,12 +147,14 @@ class _MedicationMainScreenContentState
                 selectedDate,
                 selectedFilter,
                 isOffline,
+                isDeveloperMode,
               )
             : _buildMobileLayout(
                 medicationsAsync,
                 selectedDate,
                 selectedFilter,
                 isOffline,
+                isDeveloperMode,
               ),
       ),
     );
@@ -162,6 +165,7 @@ class _MedicationMainScreenContentState
     DateTime selectedDate,
     MedicationFilter selectedFilter,
     bool isOffline,
+    bool isDeveloperMode,
   ) {
     return SingleChildScrollView(
       child: Center(
@@ -199,32 +203,8 @@ class _MedicationMainScreenContentState
                   ),
                   error: (error, _) => _buildErrorWidget(error),
                 ),
-                const SizedBox(height: 24),
-                GestureDetector(
-                  onTap: () => setState(() => _showDebug = !_showDebug),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        _showDebug
-                            ? Icons.bug_report
-                            : Icons.bug_report_outlined,
-                        size: 16,
-                        color: Colors.grey,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _showDebug ? 'Hide Debug' : 'Show Debug',
-                        style: GoogleFonts.lexend(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (_showDebug) ...[
-                  const SizedBox(height: 12),
+                if (isDeveloperMode) ...[
+                  const SizedBox(height: 24),
                   _buildDebugSection(context),
                 ],
                 SizedBox(
@@ -243,6 +223,7 @@ class _MedicationMainScreenContentState
     DateTime selectedDate,
     MedicationFilter selectedFilter,
     bool isOffline,
+    bool isDeveloperMode,
   ) {
     final hPad = ResponsiveUtils.horizontalPadding(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
@@ -277,6 +258,11 @@ class _MedicationMainScreenContentState
               error: (error, _) => _buildErrorWidget(error),
             ),
           ),
+          if (isDeveloperMode) ...[
+            const SizedBox(height: 12),
+            _buildDebugSection(context),
+            SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
+          ],
         ],
       ),
     );

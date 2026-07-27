@@ -19,9 +19,20 @@ class RouteConfig {
     '/caretaker-health-report',
   };
 
+  /// Onboarding wizard flow — được phép ở lại khi is_first_login = true
+  static const Set<String> onboardingRoutes = {
+    '/onboarding/1',
+    '/onboarding/loading',
+  };
+
   /// Check if route is public
   static bool isPublicRoute(String path) {
     return publicRoutes.contains(path);
+  }
+
+  /// Check if route thuộc onboarding wizard
+  static bool isOnboardingRoute(String path) {
+    return onboardingRoutes.contains(path);
   }
 
   /// Check if route is protected (requires authentication)
@@ -35,6 +46,9 @@ class RouteConfig {
 
   /// Route mặc định khi đã authenticated
   static const String authenticatedRedirect = '/onboarding/1';
+
+  /// Route bắt đầu onboarding wizard (dùng khi is_first_login = true)
+  static const String onboardingRedirect = '/onboarding/1';
 
   /// Route home chính
   static const String homeRoute = '/home';

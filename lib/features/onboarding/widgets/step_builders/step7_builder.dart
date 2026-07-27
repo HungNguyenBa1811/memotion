@@ -3,36 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/onboarding_data.dart';
 import '../../providers/onboarding_provider.dart';
+import '../onboarding_choice_group.dart';
 
-class Step7Builder extends ConsumerStatefulWidget {
+/// Builder cho Step 7: Weakness / stiffness question
+class Step7Builder extends ConsumerWidget {
   const Step7Builder({super.key});
 
   @override
-  ConsumerState<Step7Builder> createState() => _Step7BuilderState();
-}
-
-class _Step7BuilderState extends ConsumerState<Step7Builder> {
-  late TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    final state = ref.read(onboardingProvider);
-    // Initialize with existing value if any (using weaknessType displayName or empty)
-    _controller = TextEditingController(
-      text: state.weaknessType?.displayName ?? '',
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     const config = OnboardingStep7Config();
+    final state = ref.watch(onboardingProvider);
+    final notifier = ref.read(onboardingProvider.notifier);
 
     return SingleChildScrollView(
       child: Padding(
@@ -54,50 +35,19 @@ class _Step7BuilderState extends ConsumerState<Step7Builder> {
             ),
             const SizedBox(height: 24),
 
-            // Text field - single line, 54px height, white bg, border #BEBAB3, radius 16
-            SizedBox(
-              height: 54,
-              child: TextField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  hintText: 'Enter description...',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                ),
-                onChanged: (value) {
-                  // Map text to WeaknessType or store as custom
-                  if (value.toLowerCase().contains('yếu') || value.toLowerCase().contains('weak')) {
-                    ref
-                        .read(onboardingProvider.notifier)
-                        .setWeaknessType(WeaknessType.weakness);
-                  } else if (value.toLowerCase().contains('cứng') || value.toLowerCase().contains('stiff')) {
-                    ref
-                        .read(onboardingProvider.notifier)
-                        .setWeaknessType(WeaknessType.stiffness);
-                  } else if (value.isEmpty ||
-                      value.toLowerCase().contains('không') || value.toLowerCase().contains('none')) {
-                    ref
-                        .read(onboardingProvider.notifier)
-                        .setWeaknessType(WeaknessType.none);
-                  }
-                },
-              ),
+            OnboardingChoiceGroup<WeaknessType>(
+              choices: WeaknessType.values
+                  .where((t) => t != WeaknessType.other)
+                  .map((t) => OnboardingChoice(value: t, label: t.displayName))
+                  .toList(),
+              selected: state.weaknessType,
+              isOtherSelected: state.weaknessType == WeaknessType.other,
+              otherText: state.weaknessOther ?? '',
+              onSelected: notifier.setWeaknessType,
+              onOtherSelected: () =>
+                  notifier.setWeaknessType(WeaknessType.other),
+              onOtherTextChanged: notifier.setWeaknessOther,
+              otherHint: 'Describe what they struggle with',
             ),
 
             const SizedBox(height: 24),

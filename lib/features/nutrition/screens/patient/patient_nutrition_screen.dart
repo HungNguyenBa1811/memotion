@@ -9,6 +9,7 @@ import '../../../../core/theme/theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../models/nutrition_task.dart';
 import '../../providers/nutrition_provider.dart';
+import '../../widgets/nutrition_empty_state.dart';
 import '../../../workout/widgets/calendar_day_picker.dart';
 import '../../../workout/models/workout_model.dart';
 import '../../../voice_command/widgets/voice_command_fab.dart';
@@ -262,27 +263,29 @@ class _PatientNutritionScreenContentState
             ),
           ),
 
-        // PageView with large cards
+        // PageView with large cards, or a successful empty result.
         Expanded(
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: tasks.length,
-            onPageChanged: (_) {},
-            itemBuilder: (context, index) => Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: ResponsiveUtils.horizontalPadding(context),
-                ),
-                child: _PatientNutritionCard(
-                  task: tasks[index],
-                  onTap: () => context.push(
-                    AppRoutes.nutritionDetail,
-                    extra: {'taskId': tasks[index].id},
+          child: !isLoading && apiError == null && tasks.isEmpty
+              ? const NutritionEmptyState()
+              : PageView.builder(
+                  controller: _pageController,
+                  itemCount: tasks.length,
+                  onPageChanged: (_) {},
+                  itemBuilder: (context, index) => Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: ResponsiveUtils.horizontalPadding(context),
+                      ),
+                      child: _PatientNutritionCard(
+                        task: tasks[index],
+                        onTap: () => context.push(
+                          AppRoutes.nutritionDetail,
+                          extra: {'taskId': tasks[index].id},
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ),
         ),
       ],
     );

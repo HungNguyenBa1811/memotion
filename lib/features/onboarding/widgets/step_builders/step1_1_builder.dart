@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../providers/onboarding_provider.dart';
 
-/// Builder cho Step 1.1: Username/Phone Number input screen
+/// Builder cho Step 1.1: Phone Number input screen
 /// Figma design: Bxer3DnXLQcxg5HSArHa8w node 453:1691
 class Step1_1Builder extends ConsumerStatefulWidget {
   const Step1_1Builder({super.key});
@@ -13,24 +14,22 @@ class Step1_1Builder extends ConsumerStatefulWidget {
 }
 
 class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
-  late TextEditingController _usernameController;
+  late TextEditingController _phoneController;
 
   @override
   void initState() {
     super.initState();
     final state = ref.read(onboardingProvider);
-    _usernameController = TextEditingController(
-      text: state.usernameOrPhone ?? '',
-    );
+    _phoneController = TextEditingController(text: state.usernameOrPhone ?? '');
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
-  void _onUsernameChanged(String value) {
+  void _onPhoneChanged(String value) {
     ref.read(onboardingProvider.notifier).setUsernameOrPhone(value);
   }
 
@@ -47,7 +46,7 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
             padding: const EdgeInsets.symmetric(horizontal: 0),
             child: Center(
               child: Text(
-                'Enter your email or phone number\nto continue',
+                'Enter your phone number\nto continue',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lexend(
                   fontSize: 22,
@@ -63,7 +62,7 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
 
           // Label - Lexend medium 16px
           Text(
-            'Email or phone number',
+            'Phone number',
             style: GoogleFonts.lexend(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -78,10 +77,15 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
           SizedBox(
             height: 54,
             child: TextField(
-              controller: _usernameController,
-              onChanged: _onUsernameChanged,
+              controller: _phoneController,
+              onChanged: _onPhoneChanged,
+              keyboardType: TextInputType.phone,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(15),
+              ],
               decoration: InputDecoration(
-                hintText: 'Email or phone number',
+                hintText: 'Phone number',
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(

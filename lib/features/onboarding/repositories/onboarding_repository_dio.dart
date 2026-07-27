@@ -56,16 +56,9 @@ class OnboardingRepositoryDio {
       }
       return null;
     } on DioError catch (e) {
-      final status = e.response?.statusCode;
-      // If status is 400 or 500, skip this API (treat as success)
-      if (status == 400 || status == 500) {
-        debugPrint(
-          '[API] POST /api/users/patients/create-by-caretaker - $status received, skipping',
-        );
-        return <String, dynamic>{'skipped': true};
-      }
       debugPrint(
-        '[API] POST /api/users/patients/create-by-caretaker - error: ${e.message}',
+        '[API] POST /api/users/patients/create-by-caretaker - '
+        '${e.response?.statusCode ?? 'network error'}: ${e.message}',
       );
       rethrow;
     }

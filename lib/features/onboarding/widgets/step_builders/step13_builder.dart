@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/onboarding_data.dart';
@@ -61,6 +62,8 @@ class _Step13BuilderState extends ConsumerState<Step13Builder> {
                 controller: _controller,
                 maxLines: 1,
                 hintText: 'Blood Glucose Level',
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (v) {
                   final parsed = int.tryParse(v);
                   ref.read(onboardingProvider.notifier).setBloodSugar(parsed);

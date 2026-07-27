@@ -14,6 +14,7 @@ _$UserDetailDtoImpl _$$UserDetailDtoImplFromJson(Map<String, dynamic> json) =>
       role: json['role'] as String,
       userId: json['user_id'] as String,
       phone: json['phone'] as String,
+      isFirstLogin: json['is_first_login'] as bool?,
       patient: json['patient'] == null
           ? null
           : PatientDto.fromJson(json['patient'] as Map<String, dynamic>),
@@ -27,5 +28,6 @@ Map<String, dynamic> _$$UserDetailDtoImplToJson(_$UserDetailDtoImpl instance) =>
       'role': instance.role,
       'user_id': instance.userId,
       'phone': instance.phone,
+      'is_first_login': instance.isFirstLogin,
       'patient': instance.patient,
     };

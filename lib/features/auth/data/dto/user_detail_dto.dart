@@ -15,6 +15,7 @@ class UserDetailDto with _$UserDetailDto {
     required String role,
     @JsonKey(name: 'user_id') required String userId,
     required String phone,
+    @JsonKey(name: 'is_first_login') bool? isFirstLogin,
     PatientDto? patient,
   }) = _UserDetailDto;
 

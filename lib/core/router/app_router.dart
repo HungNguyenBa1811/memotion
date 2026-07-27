@@ -101,12 +101,20 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final isAuthenticated = status == AuthStatus.authenticated;
 
-      // Case 1: Đã authenticated nhưng đang ở public route -> về home
+      // Case 1: Lần đăng nhập đầu tiên (is_first_login = true) -> ép vào
+      // onboarding wizard, kể cả khi đang ở public route hay /home.
+      // Phải check TRƯỚC case public->home, nếu không sẽ bị nuốt mất.
+      if (authState.needsOnboarding &&
+          !RouteConfig.isOnboardingRoute(currentPath)) {
+        return RouteConfig.onboardingRedirect;
+      }
+
+      // Case 2: Đã authenticated nhưng đang ở public route -> về home
       if (isAuthenticated && isPublicRoute) {
         return RouteConfig.homeRoute;
       }
 
-      // Case 2: Chưa authenticated nhưng đang ở protected route
+      // Case 3: Chưa authenticated nhưng đang ở protected route
       // -> Redirect về public landing page
       // CHÚ Ý: Chỉ redirect khi KHÔNG ở public route
       if (!isAuthenticated && !isPublicRoute) {

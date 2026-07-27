@@ -395,7 +395,7 @@ class _BirthYearPickerState extends State<_BirthYearPicker> {
                   });
                 },
                 children: List.generate(
-                  endYear - 1920,
+                  endYear - 1920 + 1, // inclusive of the current year
                   (index) => Center(child: Text('${1920 + index}')),
                 ),
               ),

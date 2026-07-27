@@ -50,13 +50,13 @@ class OnboardingStep1Config extends OnboardingStepConfig {
       );
 }
 
-/// Step 1.1 (becomes Step 2): Username/Phone Number input
+/// Step 1.1 (becomes Step 2): Phone Number input
 /// Figma: Bxer3DnXLQcxg5HSArHa8w node 453:1691
 class OnboardingStep1_1Config extends OnboardingStepConfig {
   const OnboardingStep1_1Config()
     : super(
         step: 2,
-        title: 'Enter your sign-in information',
+        title: 'Enter your phone number to continue',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly4.png',
         titleAlignment: TitleAlignment.center,
@@ -318,11 +318,23 @@ class OnboardingData {
   // Step 6 - Pain type
   final PainType? painType;
 
+  // Step 6 - Free text when PainType.other is selected
+  final String? painTypeOther;
+
   // Step 7 - Weakness/stiffness
   final WeaknessType? weaknessType;
 
+  // Step 7 - Free text when WeaknessType.other is selected
+  final String? weaknessOther;
+
   // Step 8 - Functional: stand from chair
   final StandAbility? standAbility;
+
+  // Step 9 - Balance / fear of falling
+  final BalanceStatus? balanceStatus;
+
+  // Step 9 - Free text when BalanceStatus.other is selected
+  final String? balanceOther;
 
   // Step 10 - Living arrangement
   final String? livingArrangement;
@@ -352,8 +364,12 @@ class OnboardingData {
     this.heartRate,
     this.bloodSugar,
     this.painType,
+    this.painTypeOther,
     this.weaknessType,
+    this.weaknessOther,
     this.standAbility,
+    this.balanceStatus,
+    this.balanceOther,
     this.doctorAdvice,
     this.isCompleted = false,
   });
@@ -377,8 +393,12 @@ class OnboardingData {
     int? heartRate,
     int? bloodSugar,
     PainType? painType,
+    String? painTypeOther,
     WeaknessType? weaknessType,
+    String? weaknessOther,
     StandAbility? standAbility,
+    BalanceStatus? balanceStatus,
+    String? balanceOther,
     String? doctorAdvice,
     bool? isCompleted,
   }) {
@@ -402,8 +422,12 @@ class OnboardingData {
       heartRate: heartRate ?? this.heartRate,
       bloodSugar: bloodSugar ?? this.bloodSugar,
       painType: painType ?? this.painType,
+      painTypeOther: painTypeOther ?? this.painTypeOther,
       weaknessType: weaknessType ?? this.weaknessType,
+      weaknessOther: weaknessOther ?? this.weaknessOther,
       standAbility: standAbility ?? this.standAbility,
+      balanceStatus: balanceStatus ?? this.balanceStatus,
+      balanceOther: balanceOther ?? this.balanceOther,
       doctorAdvice: doctorAdvice ?? this.doctorAdvice,
       isCompleted: isCompleted ?? this.isCompleted,
     );
@@ -431,8 +455,12 @@ class OnboardingData {
       'heartRate': heartRate,
       'bloodSugar': bloodSugar,
       'painType': painType?.name,
+      'painTypeOther': painTypeOther,
       'weaknessType': weaknessType?.name,
+      'weaknessOther': weaknessOther,
       'standAbility': standAbility?.name,
+      'balanceStatus': balanceStatus?.name,
+      'balanceOther': balanceOther,
       'doctorAdvice': doctorAdvice,
       'isCompleted': isCompleted,
     };
@@ -448,9 +476,12 @@ enum PainLocation { shoulder, back, knee, hip, neck }
 
 enum PainType { sharp, aching, burning, other }
 
-enum WeaknessType { none, weakness, stiffness }
+enum WeaknessType { none, weakness, stiffness, other }
 
 enum StandAbility { veryEasy, normal, difficult }
+
+/// Step 9 - Cảm giác thăng bằng khi đi lại
+enum BalanceStatus { steady, occasionallyDizzy, afraidOfFalling, other }
 
 // --- Display extensions used by UI builders ---
 extension GenderDisplay on Gender {
@@ -531,6 +562,23 @@ extension WeaknessTypeDisplay on WeaknessType {
         return 'Weakness';
       case WeaknessType.stiffness:
         return 'Stiffness';
+      case WeaknessType.other:
+        return 'Other';
+    }
+  }
+}
+
+extension BalanceStatusDisplay on BalanceStatus {
+  String get displayName {
+    switch (this) {
+      case BalanceStatus.steady:
+        return 'Steady while walking';
+      case BalanceStatus.occasionallyDizzy:
+        return 'Sometimes dizzy or lightheaded';
+      case BalanceStatus.afraidOfFalling:
+        return 'Unsteady or worried about falling';
+      case BalanceStatus.other:
+        return 'Other';
     }
   }
 }

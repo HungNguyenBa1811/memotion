@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/providers/developer_mode_provider.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/utils/responsive_utils.dart';
@@ -37,6 +38,26 @@ class ProfileScreenContent extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
+  void _handleHelpTap() {
+    final previousState = ref.read(developerModeProvider);
+    final nextState = ref
+        .read(developerModeProvider.notifier)
+        .registerHelpTap();
+    final remainingTaps = nextState.remainingTaps;
+    final didToggle = previousState.isEnabled != nextState.isEnabled;
+
+    if (!didToggle && remainingTaps > 3) return;
+
+    final message = didToggle
+        ? nextState.isEnabled
+              ? 'You are a developer!'
+              : 'You are no longer a developer!'
+        : '$remainingTaps click${remainingTaps == 1 ? '' : 's'} left to ${nextState.isEnabled ? 'turn off developer mode' : 'become a developer'}.';
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.removeCurrentSnackBar();
+    messenger.showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -458,7 +479,7 @@ class _ProfileScreenContentState extends ConsumerState<ProfileScreenContent> {
       {
         'title': 'Help',
         'iconAssetSvg': 'assets/images/chat_icon.svg',
-        'action': () {},
+        'action': _handleHelpTap,
       },
       {
         'title': 'Log out',

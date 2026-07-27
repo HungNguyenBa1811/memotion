@@ -52,6 +52,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
   bool _isVideoInitialized = false;
   bool _isCameraReady = false;
   bool _isInitialized = false;
+  bool _isEndingSession = false;
   String? _error;
 
   // Timing
@@ -266,22 +267,47 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
   }
 
   Future<void> _navigateToResults() async {
+    if (_isEndingSession || !mounted) return;
+
+    setState(() => _isEndingSession = true);
+
     _timer?.cancel();
-    _videoController?.pause();
-    await _cameraService.stopStreaming();
+    final duration = _formatTime(_elapsedSeconds);
+    final durationSeconds = _elapsedSeconds;
 
-    final results = await ref.read(poseSessionProvider.notifier).endSession();
-
-    if (mounted && results != null) {
-      context.pushReplacement(
-        '/workout-training-complete',
-        extra: {
-          'workoutId': widget.workoutId,
-          'results': results,
-          'duration': _formatTime(_elapsedSeconds),
-        },
-      );
+    try {
+      await _videoController?.pause();
+    } catch (error) {
+      PoseLogger.warning('Unable to pause training video: $error');
     }
+
+    try {
+      await _cameraService.stopStreaming().timeout(const Duration(seconds: 3));
+    } catch (error) {
+      PoseLogger.warning('Unable to stop camera streaming cleanly: $error');
+    }
+
+    PoseSessionResults? results;
+    try {
+      results = await ref
+          .read(poseSessionProvider.notifier)
+          .endSession()
+          .timeout(const Duration(seconds: 10));
+    } catch (error) {
+      PoseLogger.warning('Unable to save final session results: $error');
+    }
+
+    if (!mounted) return;
+
+    context.pushReplacement(
+      '/workout-training-complete',
+      extra: {
+        'workoutId': widget.workoutId,
+        'results': results,
+        'duration': duration,
+        'durationSeconds': durationSeconds,
+      },
+    );
   }
 
   Future<void> _endSession() async {
@@ -754,29 +780,35 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
           const Spacer(),
 
           // End button
-          GestureDetector(
-            onTap: _endSession,
-            child: Container(
-              width: 160,
-              height: 36,
-              decoration: BoxDecoration(
-                color: const Color(0xFF00695C),
-                borderRadius: BorderRadius.circular(18),
+          SizedBox(
+            width: 160,
+            height: 36,
+            child: ElevatedButton.icon(
+              onPressed: _isEndingSession ? null : _endSession,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00695C),
+                disabledBackgroundColor: const Color(0xFF00695C),
+                foregroundColor: Colors.white,
+                disabledForegroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                shape: const StadiumBorder(),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.stop, color: Colors.white, size: 16),
-                  const SizedBox(width: 6),
-                  Text(
-                    'End',
-                    style: GoogleFonts.lexend(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
+              icon: _isEndingSession
+                  ? const SizedBox.square(
+                      dimension: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.stop, size: 16),
+              label: Text(
+                _isEndingSession ? 'Ending...' : 'End',
+                style: GoogleFonts.lexend(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),

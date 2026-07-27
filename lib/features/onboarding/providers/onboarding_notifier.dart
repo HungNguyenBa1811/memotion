@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import 'package:memotion/core/router/app_router.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../models/patient_creation_payload.dart';
 import '../models/onboarding_state.dart';
 import '../models/onboarding_data.dart';
 import '../repositories/onboarding_repository_dio.dart';
@@ -197,18 +199,16 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     try {
       // Read data from onboardingProvider (where step builders save data)
       final uiData = ref.read(onboardingProvider);
+      final caretakerEmail = ref.read(authProvider).user?.email;
 
-      // Build payload from UI data
-      // usernameOrPhone is used for email; fullName is the patient's name
-      final body = {
-        'full_name': uiData.fullName ?? 'none',
-        'email': uiData.usernameOrPhone ?? 'user',
-        'phone': uiData.usernameOrPhone ?? 'none',
-        'role': 'PATIENT',
-        'patient_full_name': uiData.fullName ?? 'none',
-        'patient_email': uiData.usernameOrPhone ?? 'user',
-        'patient_phone': uiData.usernameOrPhone ?? 'none',
-      };
+      // The endpoint requires a unique patient email. Derive a distinct alias
+      // from the authenticated caretaker's email while keeping the phone in
+      // phone-only fields.
+      final body = PatientCreationPayload.fromCaretaker(
+        patientFullName: uiData.fullName ?? '',
+        patientPhone: uiData.usernameOrPhone ?? '',
+        caretakerEmail: caretakerEmail ?? '',
+      ).toJson();
       debugPrint('[NOTIFIER] createPatient() payload: $body');
       final resp = await _repo.createPatient(body: body);
       debugPrint('[NOTIFIER] createPatient() response: $resp');
@@ -241,12 +241,17 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     }
   }
 
-  /// Submit final profile sequentially. Navigates to `/profile` on success.
+  /// Submit final profile sequentially and return whether every call succeeded.
   /// Reads data from onboardingProvider and converts to API format.
-  Future<bool> submitFinalProfile(BuildContext context, WidgetRef ref) async {
+  Future<bool> submitFinalProfile(
+    BuildContext context,
+    WidgetRef ref, {
+    ValueChanged<int>? onProgress,
+  }) async {
     state = state.copyWith(isLoading: true);
     try {
       debugPrint('[NOTIFIER] submitFinalProfile() start');
+      onProgress?.call(0);
 
       // Ensure patient exists: if not created yet, create now.
       if (state.createdPatientId == null) {
@@ -258,6 +263,7 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
           debugPrint(
             '[NOTIFIER] submitFinalProfile() failed to create patient',
           );
+          if (context.mounted) _navigateToOnboardingStep1(context);
           return false;
         }
       }
@@ -277,16 +283,36 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       final painCharacterStr = uiData.painType?.name.toUpperCase();
       final genderStr = uiData.gender?.name.toUpperCase() ?? 'MALE';
       final selfStandAbilityStr = uiData.standAbility?.name.toUpperCase();
-      final balancedValuationStr = uiData.weaknessType?.name.toUpperCase();
+      // Step 9 answer khi có; nếu chưa trả lời thì giữ hành vi cũ (weaknessType)
+      final balancedValuationStr =
+          uiData.balanceStatus?.name.toUpperCase() ??
+          uiData.weaknessType?.name.toUpperCase();
+      final muscleToneStr = uiData.weaknessType?.name.toUpperCase();
+
+      // Với lựa chọn "Other", gửi phần mô tả người dùng tự nhập
+      String? otherOr(String? custom, String? fallback) {
+        final trimmed = custom?.trim();
+        return (trimmed != null && trimmed.isNotEmpty) ? trimmed : fallback;
+      }
+
+      final painAssessmentStr = uiData.painType == PainType.other
+          ? otherOr(uiData.painTypeOther, uiData.painType?.displayName)
+          : uiData.painType?.displayName;
+      final muscleDescriptionStr = uiData.weaknessType == WeaknessType.other
+          ? otherOr(uiData.weaknessOther, muscleToneStr)
+          : muscleToneStr;
+      final balanceDescriptionStr = uiData.balanceStatus == BalanceStatus.other
+          ? otherOr(uiData.balanceOther, balancedValuationStr)
+          : balancedValuationStr;
 
       // Helper to apply defaults: strings -> 'none', numbers -> 0.1
-      String _strOrNone(dynamic v) {
+      String strOrNone(dynamic v) {
         final s = v?.toString();
         if (s == null || s.isEmpty) return 'none';
         return s;
       }
 
-      double _numOrDefault(dynamic v) {
+      double numOrDefault(dynamic v) {
         if (v == null) return 0.1;
         try {
           return (v is num) ? v.toDouble() : double.parse(v.toString());
@@ -314,16 +340,16 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       }
 
       final generalBody = {
-        'gender': _strOrNone(genderStr),
-        'living_arrangement': _strOrNone(
+        'gender': strOrNone(genderStr),
+        'living_arrangement': strOrNone(
           mapLivingArrangement(uiData.livingArrangement),
         ),
-        'bmi_score': _numOrDefault(uiData.bmi ?? 0.0),
-        'map_score': _numOrDefault(uiData.mapScore ?? 0),
-        'rhr_score': _numOrDefault(uiData.heartRate ?? 0),
-        'blood_glucose_level': _numOrDefault(uiData.bloodSugar ?? 0),
-        'adl_score': _numOrDefault(uiData.adlScore ?? 0),
-        'iadl_score': _numOrDefault(uiData.iadlScore ?? 0),
+        'bmi_score': numOrDefault(uiData.bmi ?? 0.0),
+        'map_score': numOrDefault(uiData.mapScore ?? 0),
+        'rhr_score': numOrDefault(uiData.heartRate ?? 0),
+        'blood_glucose_level': numOrDefault(uiData.bloodSugar ?? 0),
+        'adl_score': numOrDefault(uiData.adlScore ?? 0),
+        'iadl_score': numOrDefault(uiData.iadlScore ?? 0),
         'disease_type': 'PHYSICAL_THERAPY',
         // Per spec: set conditionNote to "None"
         'condition_note': 'None',
@@ -337,34 +363,31 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       if (!genOk) {
         debugPrint('[NOTIFIER] submitFinalProfile() general POST failed');
         // Navigate back to onboarding step 1
-        _navigateToOnboardingStep1(context);
+        if (context.mounted) _navigateToOnboardingStep1(context);
         return false;
       }
       debugPrint('[NOTIFIER] submitFinalProfile() general POST succeeded');
 
+      onProgress?.call(1);
       final physBody = {
-        'pain_location': _strOrNone(painLocationStr),
-        'pain_scale_score': _numOrDefault(uiData.painLevel),
-        'pain_character': _strOrNone(painCharacterStr),
-        'pain_assessment': _strOrNone(uiData.painType?.displayName),
-        'muscle_tone': _strOrNone(
-          balancedValuationStr ?? uiData.weaknessType?.name,
-        ),
-        'muscle_strength': _strOrNone(
-          balancedValuationStr ?? uiData.weaknessType?.name,
-        ),
-        'balanced_valuation': _strOrNone(balancedValuationStr),
-        'fall_risk': _strOrNone(uiData.standAbility?.name ?? 'Low'),
-        'self_stand_ability': _strOrNone(selfStandAbilityStr),
+        'pain_location': strOrNone(painLocationStr),
+        'pain_scale_score': numOrDefault(uiData.painLevel),
+        'pain_character': strOrNone(painCharacterStr),
+        'pain_assessment': strOrNone(painAssessmentStr),
+        'muscle_tone': strOrNone(muscleDescriptionStr),
+        'muscle_strength': strOrNone(muscleDescriptionStr),
+        'balanced_valuation': strOrNone(balanceDescriptionStr),
+        'fall_risk': strOrNone(uiData.standAbility?.name ?? 'Low'),
+        'self_stand_ability': strOrNone(selfStandAbilityStr),
         // Per spec: use fixed defaults for these fields
         'tug_time': 0,
         'previous_illness': 'None',
         'previous_treatments': 'None',
         'daily_activities': 'None',
-        'doctor_recommended': _strOrNone(uiData.doctorAdvice),
+        'doctor_recommended': strOrNone(uiData.doctorAdvice),
         'doctor_treatment_plan': 'None',
         'note': 'None',
-        'living_arrangement': _strOrNone(
+        'living_arrangement': strOrNone(
           mapLivingArrangement(uiData.livingArrangement),
         ),
       };
@@ -374,12 +397,13 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       if (!physOk) {
         debugPrint('[NOTIFIER] submitFinalProfile() physical POST failed');
         // Navigate back to onboarding step 1
-        _navigateToOnboardingStep1(context);
+        if (context.mounted) _navigateToOnboardingStep1(context);
         return false;
       }
       debugPrint('[NOTIFIER] submitFinalProfile() physical POST succeeded');
 
       // Step 3: Generate AI care plan
+      onProgress?.call(2);
       debugPrint('[NOTIFIER] submitFinalProfile() generating care plan...');
       final carePlanResult = await _repo.generateCarePlan(
         planDurationDays: 7,
@@ -390,28 +414,18 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
           '[NOTIFIER] submitFinalProfile() care plan generation failed',
         );
         // Navigate back to onboarding step 1
-        _navigateToOnboardingStep1(context);
+        if (context.mounted) _navigateToOnboardingStep1(context);
         return false;
       }
       debugPrint(
         '[NOTIFIER] submitFinalProfile() care plan generated: $carePlanResult',
       );
 
-      // Completed all 3 API calls successfully
-      debugPrint(
-        '[NOTIFIER] submitFinalProfile() Completed - navigating to /profile',
-      );
-
-      // On success navigate to profile
-      try {
-        GoRouter.of(context).go('/profile');
-      } catch (e) {
-        debugPrint('[NOTIFIER] submitFinalProfile() navigation error: $e');
-      }
-
+      debugPrint('[NOTIFIER] submitFinalProfile() completed successfully');
       return true;
     } catch (e, st) {
       // If the API returned 403, clear stored access token and redirect to landing
+      var redirectedToRegistration = false;
       if (e is DioException) {
         final status = e.response?.statusCode;
         if (status == 403) {
@@ -424,6 +438,7 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
             // Navigate to landing page after token is cleared
             if (context.mounted) {
               GoRouter.of(context).go(AppRoutes.registration);
+              redirectedToRegistration = true;
               debugPrint('[NOTIFIER] Redirected to / after 403');
             }
           } catch (err) {
@@ -434,7 +449,9 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       debugPrint('[NOTIFIER] submitFinalProfile() exception: $e');
       debugPrint(st.toString());
       // On any exception, navigate back to onboarding step 1
-      _navigateToOnboardingStep1(context);
+      if (!redirectedToRegistration) {
+        if (context.mounted) _navigateToOnboardingStep1(context);
+      }
       return false;
     } finally {
       state = state.copyWith(isLoading: false);

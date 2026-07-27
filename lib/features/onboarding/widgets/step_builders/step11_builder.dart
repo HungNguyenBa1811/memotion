@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
 import '../../models/onboarding_data.dart';
@@ -59,6 +60,8 @@ class _Step11BuilderState extends ConsumerState<Step11Builder> {
                 controller: _controller,
                 hintText: 'Enter blood pressure',
                 maxLines: 1,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (v) {
                   final parsed = double.tryParse(v);
                   if (parsed != null) {

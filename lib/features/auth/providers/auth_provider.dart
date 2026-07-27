@@ -17,16 +17,25 @@ class AuthState {
   final String? error;
   final String? role;
 
+  /// Backend báo đây là lần đăng nhập đầu tiên -> phải chạy onboarding wizard.
+  final bool isFirstLogin;
+
   const AuthState({
     this.status = AuthStatus.initial,
     this.user,
     this.accessToken,
     this.error,
     this.role,
+    this.isFirstLogin = false,
   });
 
   /// Check if user is a patient (skip onboarding)
   bool get isPatient => role?.toUpperCase() == 'PATIENT';
+
+  /// Cần ép về onboarding wizard hay không.
+  /// Patient không chạy onboarding — wizard này dành cho caretaker khai hộ.
+  bool get needsOnboarding =>
+      status == AuthStatus.authenticated && isFirstLogin && !isPatient;
 
   AuthState copyWith({
     AuthStatus? status,
@@ -34,6 +43,7 @@ class AuthState {
     String? accessToken,
     String? error,
     String? role,
+    bool? isFirstLogin,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -41,6 +51,7 @@ class AuthState {
       accessToken: accessToken ?? this.accessToken,
       error: error,
       role: role ?? this.role,
+      isFirstLogin: isFirstLogin ?? this.isFirstLogin,
     );
   }
 }
@@ -84,6 +95,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         case Success(:final data):
           debugPrint('🔐 AuthNotifier: Session restored successfully');
           debugPrint('🔐 AuthNotifier: role = ${data.role}');
+          debugPrint('🔐 AuthNotifier: is_first_login = ${data.isFirstLogin}');
 
           final user = User(
             id: data.userId,
@@ -97,6 +109,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
             user: user,
             accessToken: token,
             role: data.role,
+            isFirstLogin: data.isFirstLogin ?? false,
           );
 
         case Failure(:final exception):
@@ -180,11 +193,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     String? role;
     User user;
+    // /api/users/me là nguồn chính; login response chỉ là fallback.
+    bool isFirstLogin = data.isFirstLogin ?? false;
 
     switch (userDetailResult) {
       case Success(:final data):
         debugPrint('🔐 AuthNotifier: Got user details - role: ${data.role}');
+        debugPrint(
+          '🔐 AuthNotifier: is_first_login: ${data.isFirstLogin}',
+        );
         role = data.role;
+        isFirstLogin = data.isFirstLogin ?? isFirstLogin;
         user = User(
           id: data.userId,
           email: data.email,
@@ -209,8 +228,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
       user: user,
       accessToken: accessToken,
       role: role,
+      isFirstLogin: isFirstLogin,
     );
     return true;
+  }
+
+  /// Đánh dấu đã xong onboarding để router thôi ép về wizard.
+  /// Chỉ ảnh hưởng state phía client — backend vẫn là nguồn sự thật ở lần login sau.
+  void markOnboardingComplete() {
+    if (!state.isFirstLogin) return;
+    debugPrint('🔐 AuthNotifier: Onboarding completed, clearing isFirstLogin');
+    state = state.copyWith(isFirstLogin: false);
   }
 
   Future<bool> _handleRegisterSuccess(RegisterResponseDto data) async {

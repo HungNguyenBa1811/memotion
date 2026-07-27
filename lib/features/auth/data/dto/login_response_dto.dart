@@ -8,7 +8,8 @@ part 'login_response_dto.g.dart';
 /// ```json
 /// {
 ///   "access_token": "string",
-///   "token_type": "bearer"
+///   "token_type": "bearer",
+///   "is_first_login": true
 /// }
 /// ```
 @JsonSerializable()
@@ -19,9 +20,15 @@ class LoginResponseDto {
   @JsonKey(name: 'token_type')
   final String tokenType;
 
+  /// Backend cờ báo lần đăng nhập đầu tiên -> cần chạy onboarding.
+  /// Nullable vì không phải môi trường nào cũng trả field này.
+  @JsonKey(name: 'is_first_login')
+  final bool? isFirstLogin;
+
   const LoginResponseDto({
     required this.accessToken,
     required this.tokenType,
+    this.isFirstLogin,
   });
 
   factory LoginResponseDto.fromJson(Map<String, dynamic> json) =>

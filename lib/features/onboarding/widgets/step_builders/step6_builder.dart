@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/onboarding_data.dart';
 import '../../providers/onboarding_provider.dart';
-import '../onboarding_option_cell.dart';
+import '../onboarding_choice_group.dart';
 
 class Step6Builder extends ConsumerWidget {
   const Step6Builder({super.key});
@@ -45,18 +45,19 @@ class Step6Builder extends ConsumerWidget {
     WidgetRef ref,
     OnboardingData state,
   ) {
-    return Column(
-      children: PainType.values.take(3).map((t) {
-        final isSelected = state.painType == t;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: OnboardingOptionCell(
-            text: t.displayName,
-            isSelected: isSelected,
-            onTap: () => ref.read(onboardingProvider.notifier).setPainType(t),
-          ),
-        );
-      }).toList(),
+    final notifier = ref.read(onboardingProvider.notifier);
+    return OnboardingChoiceGroup<PainType>(
+      choices: PainType.values
+          .where((t) => t != PainType.other)
+          .map((t) => OnboardingChoice(value: t, label: t.displayName))
+          .toList(),
+      selected: state.painType,
+      isOtherSelected: state.painType == PainType.other,
+      otherText: state.painTypeOther ?? '',
+      onSelected: notifier.setPainType,
+      onOtherSelected: () => notifier.setPainType(PainType.other),
+      onOtherTextChanged: notifier.setPainTypeOther,
+      otherHint: 'Describe the pain',
     );
   }
 }

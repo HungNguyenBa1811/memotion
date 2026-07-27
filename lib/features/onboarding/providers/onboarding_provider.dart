@@ -137,17 +137,47 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
 
   /// Set pain type (step 6)
   void setPainType(PainType type) {
-    state = state.copyWith(painType: type);
+    // Chọn lại phương án có sẵn thì bỏ nội dung "Other" cũ
+    state = state.copyWith(
+      painType: type,
+      painTypeOther: type == PainType.other ? state.painTypeOther : '',
+    );
+  }
+
+  /// Set free text for "Other" pain type (step 6)
+  void setPainTypeOther(String value) {
+    state = state.copyWith(painTypeOther: value.trim());
   }
 
   /// Set weakness/stiffness selection (step 7)
   void setWeaknessType(WeaknessType type) {
-    state = state.copyWith(weaknessType: type);
+    state = state.copyWith(
+      weaknessType: type,
+      weaknessOther: type == WeaknessType.other ? state.weaknessOther : '',
+    );
+  }
+
+  /// Set free text for "Other" weakness description (step 7)
+  void setWeaknessOther(String value) {
+    state = state.copyWith(weaknessOther: value.trim());
   }
 
   /// Set ability to stand from chair (step 8)
   void setStandAbility(StandAbility ability) {
     state = state.copyWith(standAbility: ability);
+  }
+
+  /// Set balance/dizziness answer (step 9)
+  void setBalanceStatus(BalanceStatus status) {
+    state = state.copyWith(
+      balanceStatus: status,
+      balanceOther: status == BalanceStatus.other ? state.balanceOther : '',
+    );
+  }
+
+  /// Set free text for "Other" balance answer (step 9)
+  void setBalanceOther(String value) {
+    state = state.copyWith(balanceOther: value.trim());
   }
 
   /// ========== Step 10: Living Arrangement ==========
@@ -430,7 +460,7 @@ final validationErrorProvider = Provider<String?>((ref) {
     case 2:
       // Step 2 (1.1): Username/Phone - bắt buộc nhập
       if (state.usernameOrPhone == null || state.usernameOrPhone!.isEmpty) {
-        return 'Please enter an email address or phone number.';
+        return 'Please enter a phone number.';
       }
       return null;
 

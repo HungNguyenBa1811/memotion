@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -9,6 +10,8 @@ class OnboardingTextInput extends StatelessWidget {
   final int maxLines;
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const OnboardingTextInput({
     super.key,
@@ -17,6 +20,8 @@ class OnboardingTextInput extends StatelessWidget {
     this.maxLines = 4,
     this.onChanged,
     this.focusNode,
+    this.keyboardType,
+    this.inputFormatters,
   });
 
   @override
@@ -37,6 +42,8 @@ class OnboardingTextInput extends StatelessWidget {
         controller: controller,
         focusNode: focusNode,
         maxLines: maxLines,
+        keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         onChanged: onChanged,
         style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
         decoration: InputDecoration(

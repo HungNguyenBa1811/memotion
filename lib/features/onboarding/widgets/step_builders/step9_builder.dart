@@ -2,33 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/onboarding_data.dart';
+import '../../providers/onboarding_provider.dart';
+import '../onboarding_choice_group.dart';
 
 /// Builder cho Step 9: Balance/dizziness question
-class Step9Builder extends ConsumerStatefulWidget {
+class Step9Builder extends ConsumerWidget {
   const Step9Builder({super.key});
 
   @override
-  ConsumerState<Step9Builder> createState() => _Step9BuilderState();
-}
-
-class _Step9BuilderState extends ConsumerState<Step9Builder> {
-  final TextEditingController _controller = TextEditingController();
-  bool _initialized = false;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_initialized) {
-      // Initialize from state if needed
-      _initialized = true;
-    }
-
+  Widget build(BuildContext context, WidgetRef ref) {
     const config = OnboardingStep9Config();
+    final state = ref.watch(onboardingProvider);
 
     return SingleChildScrollView(
       child: Column(
@@ -37,7 +21,7 @@ class _Step9BuilderState extends ConsumerState<Step9Builder> {
           const SizedBox(height: 24),
           _buildHeader(context, config),
           const SizedBox(height: 24),
-          _buildInput(context),
+          _buildOptions(context, ref, state),
           const SizedBox(height: 24),
         ],
       ),
@@ -57,36 +41,24 @@ class _Step9BuilderState extends ConsumerState<Step9Builder> {
     );
   }
 
-  Widget _buildInput(BuildContext context) {
-    return SizedBox(
-      height: 54,
-      child: TextField(
-        controller: _controller,
-        decoration: InputDecoration(
-          hintText: 'Enter your answer',
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFFBEBAB3)),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-        ),
-        onChanged: (value) {
-          // Save to provider if needed
-        },
-      ),
+  Widget _buildOptions(
+    BuildContext context,
+    WidgetRef ref,
+    OnboardingData state,
+  ) {
+    final notifier = ref.read(onboardingProvider.notifier);
+    return OnboardingChoiceGroup<BalanceStatus>(
+      choices: BalanceStatus.values
+          .where((s) => s != BalanceStatus.other)
+          .map((s) => OnboardingChoice(value: s, label: s.displayName))
+          .toList(),
+      selected: state.balanceStatus,
+      isOtherSelected: state.balanceStatus == BalanceStatus.other,
+      otherText: state.balanceOther ?? '',
+      onSelected: notifier.setBalanceStatus,
+      onOtherSelected: () => notifier.setBalanceStatus(BalanceStatus.other),
+      onOtherTextChanged: notifier.setBalanceOther,
+      otherHint: 'Describe how they feel when walking',
     );
   }
 }

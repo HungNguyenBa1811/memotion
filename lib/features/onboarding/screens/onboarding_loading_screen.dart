@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../providers/onboarding_notifier.dart';
 import '../providers/onboarding_provider.dart';
 
 /// Loading screen shown while submitting onboarding data (3 API calls)
@@ -60,27 +62,37 @@ class _OnboardingLoadingScreenState
   }
 
   Future<void> _submitOnboardingData() async {
-    // Step 0: Creating health profile — 3 s mock
-    setState(() => _currentStep = 0);
-    await Future.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
+    final notifier = ref.read(onboardingNotifierProvider.notifier);
 
-    // Step 1: Analyzing physical therapy — 3 s mock
-    setState(() => _currentStep = 1);
-    await Future.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
+    try {
+      final success = await notifier.submitFinalProfile(
+        context,
+        ref,
+        onProgress: (step) {
+          if (mounted) setState(() => _currentStep = step);
+        },
+      );
 
-    // Step 2: Generating AI care plan — 15 s mock
-    setState(() => _currentStep = 2);
-    await Future.delayed(const Duration(seconds: 15));
-    if (!mounted) return;
+      if (!success) {
+        // The notifier routes retryable failures back to the wizard and
+        // authentication failures back to registration.
+        return;
+      }
+      if (!mounted) return;
 
-    // Step 3: Completed
-    setState(() => _currentStep = 3);
-    await Future.delayed(const Duration(milliseconds: 800));
+      setState(() => _currentStep = 3);
+      await Future.delayed(const Duration(milliseconds: 800));
+      if (!mounted) return;
 
-    ref.read(onboardingProvider.notifier).completeOnboarding();
-    if (mounted) context.go(AppRoutes.profile);
+      ref.read(onboardingProvider.notifier).completeOnboarding();
+      // Clear the client-side first-login flag only after every API succeeds.
+      ref.read(authProvider.notifier).markOnboardingComplete();
+      context.go(AppRoutes.profile);
+    } catch (error, stackTrace) {
+      debugPrint('[OnboardingLoadingScreen] Submission failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (mounted) context.go(AppRoutes.onboardingStep1);
+    }
   }
 
   @override
