@@ -1,13 +1,15 @@
 /// Pose Detection Service - Real-time WebSocket Integration
-/// 
+///
 /// Manages connection to backend pose detection API with:
 /// - Session lifecycle (start, stream, end)
 /// - WebSocket real-time frame streaming
 /// - Clean logging by phase
 /// - Auto phase transition handling
-/// 
+///
 /// Author: MEMOTION Team
 /// Version: 1.0.0
+
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -19,11 +21,12 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_constants.dart';
 import '../models/pose_detection_model.dart';
+import 'pose_result_decoder.dart';
 
 /// Logger for pose detection with phase-based tagging
 class PoseLogger {
   static const String _tag = '🎯 PoseDetection';
-  
+
   static void phase(int phase, String message) {
     developer.log('[$_tag][Phase $phase] $message');
   }
@@ -35,19 +38,19 @@ class PoseLogger {
   static void phaseComplete(int phase, String message) {
     developer.log('[$_tag][Phase $phase][COMPLETE] $message');
   }
-  
+
   static void info(String message) {
     developer.log('[$_tag] $message');
   }
-  
+
   static void warning(String message) {
     developer.log('[$_tag][WARNING] $message');
   }
-  
+
   static void error(String message, [Object? error]) {
     developer.log('[$_tag][ERROR] $message', error: error);
   }
-  
+
   static void ws(String message) {
     developer.log('[$_tag][WS] $message');
   }
@@ -64,6 +67,8 @@ class PoseDetectionService {
 
   PoseDetectionService._();
 
+  final PoseResultDecoder _resultDecoder = const PoseResultDecoder();
+
   // State
   String? _sessionId;
   String? _websocketUrl;
@@ -71,7 +76,6 @@ class PoseDetectionService {
   bool _isConnected = false;
   int _currentPhase = 1;
   int _frameCount = 0;
-  DateTime? _sessionStartTime;
 
   // Stream controllers
   final _frameResultController = StreamController<PoseFrameResult>.broadcast();
@@ -120,7 +124,6 @@ class PoseDetectionService {
       _websocketUrl = sessionResponse.websocketUrl;
       _currentPhase = 1;
       _frameCount = 0;
-      _sessionStartTime = DateTime.now();
 
       PoseLogger.info('Session started: $_sessionId');
       PoseLogger.info('WebSocket URL: $_websocketUrl');
@@ -279,15 +282,17 @@ class PoseDetectionService {
       }
 
       // Parse frame result
-      final result = PoseFrameResult.fromJson(json);
+      final result = _resultDecoder.decode(json);
 
       // Check for phase change
       if (result.phase != _currentPhase) {
         final oldPhase = _currentPhase;
         _currentPhase = result.phase;
 
-        PoseLogger.phase(_currentPhase,
-          'Phase changed: ${PosePhase.fromValue(oldPhase).displayName} → ${result.posePhase.displayName}');
+        PoseLogger.phase(
+          _currentPhase,
+          'Phase changed: ${PosePhase.fromValue(oldPhase).displayName} → ${result.posePhase.displayName}',
+        );
 
         _phaseChangeController.add(result.posePhase);
       }
@@ -308,20 +313,28 @@ class PoseDetectionService {
 
     switch (result.phase) {
       case 1:
-        PoseLogger.phase(1, 
-          'Detection: detected=${result.poseDetected}, stable=${result.stableCount}, progress=${(result.progress * 100).toStringAsFixed(1)}%');
+        PoseLogger.phase(
+          1,
+          'Detection: detected=${result.poseDetected}, stable=${result.stableCount}, progress=${(result.progress * 100).toStringAsFixed(1)}%',
+        );
         break;
       case 2:
-        PoseLogger.phase(2, 
-          'Calibration: joint=${result.currentJointName}, angle=${result.currentAngle.toStringAsFixed(1)}°, max=${result.maxAngle.toStringAsFixed(1)}°');
+        PoseLogger.phase(
+          2,
+          'Calibration: joint=${result.currentJointName}, angle=${result.currentAngle.toStringAsFixed(1)}°, max=${result.maxAngle.toStringAsFixed(1)}°',
+        );
         break;
       case 3:
-        PoseLogger.phase(3, 
-          'Sync: score=${result.currentScore.toStringAsFixed(1)}, reps=${result.repCount}, fatigue=${result.fatigueLevel}');
+        PoseLogger.phase(
+          3,
+          'Sync: score=${result.currentScore.toStringAsFixed(1)}, reps=${result.repCount}, fatigue=${result.fatigueLevel}',
+        );
         break;
       case 4:
-        PoseLogger.phase(4, 
-          'Scoring: total=${result.totalScore.toStringAsFixed(1)}, grade=${result.grade}');
+        PoseLogger.phase(
+          4,
+          'Scoring: total=${result.totalScore.toStringAsFixed(1)}, grade=${result.grade}',
+        );
         break;
     }
   }
@@ -330,10 +343,9 @@ class PoseDetectionService {
     PoseLogger.error('WebSocket error', error);
     _isConnected = false;
     _connectionStateController.add(false);
-    _errorController.add(PoseWebSocketError(
-      error: error.toString(),
-      code: '500',
-    ));
+    _errorController.add(
+      PoseWebSocketError(error: error.toString(), code: '500'),
+    );
   }
 
   void _onDone() {
@@ -357,6 +369,5 @@ class PoseDetectionService {
     _websocketUrl = null;
     _currentPhase = 1;
     _frameCount = 0;
-    _sessionStartTime = null;
   }
 }

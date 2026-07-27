@@ -9,8 +9,9 @@
 /// Author: MEMOTION Team
 /// Version: 2.0.0
 
+library;
+
 import 'dart:async';
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,6 +22,8 @@ import '../data/camera_service.dart';
 import '../data/pose_detection_service.dart';
 import '../models/pose_detection_model.dart';
 import '../providers/pose_detection_provider.dart';
+import '../providers/pose_runtime_provider.dart';
+import '../widgets/pose_camera_viewport.dart';
 
 /// Screen 1: Pose Detection & Calibration (Phase 1 & 2)
 ///
@@ -211,16 +214,20 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(poseSessionProvider);
+    final sessionStatus = ref.watch(
+      poseSessionProvider.select(
+        (state) => (isLoading: state.isLoading, error: state.error),
+      ),
+    );
 
     // Loading state
-    if (!_isCameraInitialized || state.isLoading) {
+    if (!_isCameraInitialized || sessionStatus.isLoading) {
       return _buildLoadingScreen();
     }
 
     // Error state
-    if (_error != null || state.error != null) {
-      return _buildErrorScreen(_error ?? state.error!);
+    if (_error != null || sessionStatus.error != null) {
+      return _buildErrorScreen(_error ?? sessionStatus.error!);
     }
 
     // Main content: Camera with phase overlay
@@ -230,16 +237,31 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
         child: Stack(
           children: [
             // Top panel with phase info
-            _buildTopPanel(state),
+            Consumer(
+              builder: (context, ref, _) {
+                final state = ref.watch(poseSessionProvider);
+                return _buildTopPanel(state);
+              },
+            ),
 
             // Camera preview (full area)
             _buildCameraPreview(),
 
             // Connection status indicator
-            _buildConnectionIndicator(state),
+            Consumer(
+              builder: (context, ref, _) {
+                final isConnected = ref.watch(poseConnectionStatusProvider);
+                return _buildConnectionIndicator(isConnected);
+              },
+            ),
 
             // Bottom panel with status and controls
-            _buildBottomPanel(state),
+            Consumer(
+              builder: (context, ref, _) {
+                final state = ref.watch(poseSessionProvider);
+                return _buildBottomPanel(state);
+              },
+            ),
           ],
         ),
       ),
@@ -545,7 +567,12 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
       bottom: 110,
       child: ClipRRect(
         child: _cameraService.controller != null
-            ? CameraPreview(_cameraService.controller!)
+            ? PoseCameraViewport(
+                cameraController: _cameraService.controller!,
+                overlayController: ref.read(poseOverlayControllerProvider),
+                fit: BoxFit.contain,
+                backgroundColor: Colors.grey.shade400,
+              )
             : Container(
                 color: Colors.grey[400],
                 child: const Center(
@@ -561,14 +588,14 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
   }
 
   /// Connection status indicator (top-right corner)
-  Widget _buildConnectionIndicator(PoseSessionState state) {
+  Widget _buildConnectionIndicator(bool isConnected) {
     return Positioned(
       top: 130,
       right: 16,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: state.isConnected ? Colors.green : Colors.red,
+          color: isConnected ? Colors.green : Colors.red,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -584,7 +611,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
             ),
             const SizedBox(width: 6),
             Text(
-              state.isConnected ? 'LIVE' : 'OFFLINE',
+              isConnected ? 'LIVE' : 'OFFLINE',
               style: GoogleFonts.lexend(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
@@ -636,8 +663,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
                   const SizedBox(height: 2),
                   // Gray instruction text from backend
                   Text(
-                    state.lastResult?.message ??
-                        _getDefaultMessage(state.currentPhase),
+                    state.message ?? _getDefaultMessage(state.currentPhase),
                     style: GoogleFonts.lexend(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -698,7 +724,7 @@ class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
 
   /// Circular timer widget for calibration hold countdown
   Widget _buildCircularTimer(PoseSessionState state) {
-    final countdown = state.lastResult?.countdownRemaining ?? 3.0;
+    final countdown = state.countdownRemaining ?? 3.0;
     final progress = countdown / 3.0; // Assuming 3 second hold
 
     return SizedBox(

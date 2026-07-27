@@ -1,16 +1,20 @@
 /// Pose Detection Provider - State Management
-/// 
+///
 /// Riverpod provider for managing pose detection state across workout screens
 /// Handles phase transitions and auto screen navigation
-/// 
+///
 /// Author: MEMOTION Team
 /// Version: 1.0.0
+
+library;
 
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/pose_detection_service.dart';
+import '../data/pose_overlay_controller.dart';
 import '../models/pose_detection_model.dart';
+import 'pose_runtime_provider.dart';
 
 /// Provider for PoseDetectionService singleton
 final poseDetectionServiceProvider = Provider<PoseDetectionService>((ref) {
@@ -24,26 +28,27 @@ class PoseSessionState {
   final String? sessionId;
   final PosePhase currentPhase;
   final String? error;
-  final PoseFrameResult? lastResult;
   final PoseSessionResults? finalResults;
   final bool isSessionActive;
-  
+  final String? message;
+  final double? countdownRemaining;
+
   // Phase-specific data
   final double detectionProgress;
   final int stableCount;
   final bool poseDetected;
-  
+
   final String? calibrationJoint;
   final double calibrationAngle;
   final double calibrationMaxAngle;
   final double calibrationProgress;
   final int calibrationQueueIndex;
   final int calibrationTotalJoints;
-  
+
   final double syncScore;
   final int repCount;
   final String fatigueLevel;
-  
+
   final double totalScore;
   final String grade;
 
@@ -53,9 +58,10 @@ class PoseSessionState {
     this.sessionId,
     this.currentPhase = PosePhase.detection,
     this.error,
-    this.lastResult,
     this.finalResults,
     this.isSessionActive = false,
+    this.message,
+    this.countdownRemaining,
     // Detection
     this.detectionProgress = 0.0,
     this.stableCount = 0,
@@ -82,9 +88,10 @@ class PoseSessionState {
     String? sessionId,
     PosePhase? currentPhase,
     String? error,
-    PoseFrameResult? lastResult,
     PoseSessionResults? finalResults,
     bool? isSessionActive,
+    String? message,
+    double? countdownRemaining,
     double? detectionProgress,
     int? stableCount,
     bool? poseDetected,
@@ -106,9 +113,10 @@ class PoseSessionState {
       sessionId: sessionId ?? this.sessionId,
       currentPhase: currentPhase ?? this.currentPhase,
       error: error,
-      lastResult: lastResult ?? this.lastResult,
       finalResults: finalResults ?? this.finalResults,
       isSessionActive: isSessionActive ?? this.isSessionActive,
+      message: message ?? this.message,
+      countdownRemaining: countdownRemaining ?? this.countdownRemaining,
       detectionProgress: detectionProgress ?? this.detectionProgress,
       stableCount: stableCount ?? this.stableCount,
       poseDetected: poseDetected ?? this.poseDetected,
@@ -116,8 +124,10 @@ class PoseSessionState {
       calibrationAngle: calibrationAngle ?? this.calibrationAngle,
       calibrationMaxAngle: calibrationMaxAngle ?? this.calibrationMaxAngle,
       calibrationProgress: calibrationProgress ?? this.calibrationProgress,
-      calibrationQueueIndex: calibrationQueueIndex ?? this.calibrationQueueIndex,
-      calibrationTotalJoints: calibrationTotalJoints ?? this.calibrationTotalJoints,
+      calibrationQueueIndex:
+          calibrationQueueIndex ?? this.calibrationQueueIndex,
+      calibrationTotalJoints:
+          calibrationTotalJoints ?? this.calibrationTotalJoints,
       syncScore: syncScore ?? this.syncScore,
       repCount: repCount ?? this.repCount,
       fatigueLevel: fatigueLevel ?? this.fatigueLevel,
@@ -130,6 +140,7 @@ class PoseSessionState {
 /// Notifier for pose session state
 class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
   final PoseDetectionService _service;
+  final PoseOverlayController _overlayController;
   StreamSubscription<PoseFrameResult>? _frameSubscription;
   StreamSubscription<PosePhase>? _phaseSubscription;
   StreamSubscription<PoseWebSocketError>? _errorSubscription;
@@ -138,7 +149,8 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
   // Callback for phase changes (for screen navigation)
   void Function(PosePhase phase)? onPhaseChange;
 
-  PoseSessionNotifier(this._service) : super(const PoseSessionState());
+  PoseSessionNotifier(this._service, this._overlayController)
+    : super(const PoseSessionState());
 
   /// Start a new pose detection session
   Future<void> startSession({
@@ -147,6 +159,7 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
     String defaultJoint = 'left_shoulder',
     String? refVideoPath,
   }) async {
+    _overlayController.clear();
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -167,10 +180,7 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
       // Connect WebSocket
       await connectWebSocket();
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -199,7 +209,7 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
 
     try {
       final results = await _service.endSession();
-      
+
       state = state.copyWith(
         isLoading: false,
         isSessionActive: false,
@@ -210,12 +220,10 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
       );
 
       _cancelSubscriptions();
+      _overlayController.clear();
       return results;
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
       return null;
     }
   }
@@ -246,26 +254,36 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
 
   /// Update state from frame result based on current phase
   void _updateStateFromResult(PoseFrameResult result) {
+    if (result.hasPosePayload && !result.isPoseDetected) {
+      _overlayController.clear();
+    } else if (result.landmarks.isNotEmpty) {
+      _overlayController.ingest(
+        result.landmarks,
+        connections: result.poseConnections,
+      );
+    }
+
     final oldPhase = state.currentPhase;
     PosePhase newPhase;
-    
+
     switch (result.phase) {
       case 1: // Detection
         newPhase = PosePhase.detection;
         state = state.copyWith(
-          lastResult: result,
           currentPhase: newPhase,
+          message: result.message,
           poseDetected: result.poseDetected,
           stableCount: result.stableCount,
           detectionProgress: result.progress,
         );
         break;
-        
+
       case 2: // Calibration
         newPhase = PosePhase.calibration;
         state = state.copyWith(
-          lastResult: result,
           currentPhase: newPhase,
+          message: result.message,
+          countdownRemaining: result.countdownRemaining,
           calibrationJoint: result.currentJointName,
           calibrationAngle: result.currentAngle,
           calibrationMaxAngle: result.maxAngle,
@@ -274,43 +292,42 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
           calibrationTotalJoints: result.totalJoints,
         );
         break;
-        
+
       case 3: // Sync
         newPhase = PosePhase.sync;
         state = state.copyWith(
-          lastResult: result,
           currentPhase: newPhase,
+          message: result.message,
           syncScore: result.currentScore,
           repCount: result.repCount,
           fatigueLevel: result.fatigueLevel,
         );
         break;
-        
+
       case 4: // Scoring
         newPhase = PosePhase.scoring;
         state = state.copyWith(
-          lastResult: result,
           currentPhase: newPhase,
+          message: result.message,
           totalScore: result.totalScore,
           grade: result.grade,
         );
         break;
-        
+
       case 5: // Completed
         newPhase = PosePhase.completed;
-        state = state.copyWith(
-          lastResult: result,
-          currentPhase: newPhase,
-        );
+        state = state.copyWith(currentPhase: newPhase, message: result.message);
         break;
-        
+
       default:
         return;
     }
-    
+
     // Trigger callback when phase changes (also from frame result)
     if (oldPhase != newPhase) {
-      PoseLogger.info('Phase change detected from frame: ${oldPhase.displayName} → ${newPhase.displayName}');
+      PoseLogger.info(
+        'Phase change detected from frame: ${oldPhase.displayName} → ${newPhase.displayName}',
+      );
       onPhaseChange?.call(newPhase);
     }
   }
@@ -330,10 +347,12 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
 }
 
 /// Provider for pose session state
-final poseSessionProvider = StateNotifierProvider<PoseSessionNotifier, PoseSessionState>((ref) {
-  final service = ref.watch(poseDetectionServiceProvider);
-  return PoseSessionNotifier(service);
-});
+final poseSessionProvider =
+    StateNotifierProvider<PoseSessionNotifier, PoseSessionState>((ref) {
+      final service = ref.watch(poseDetectionServiceProvider);
+      final overlayController = ref.watch(poseOverlayControllerProvider);
+      return PoseSessionNotifier(service, overlayController);
+    });
 
 /// Provider for current phase (for conditional UI rendering)
 final currentPosePhaseProvider = Provider<PosePhase>((ref) {
@@ -343,9 +362,4 @@ final currentPosePhaseProvider = Provider<PosePhase>((ref) {
 /// Provider for connection status
 final poseConnectionStatusProvider = Provider<bool>((ref) {
   return ref.watch(poseSessionProvider.select((state) => state.isConnected));
-});
-
-/// Provider for last frame result
-final lastFrameResultProvider = Provider<PoseFrameResult?>((ref) {
-  return ref.watch(poseSessionProvider.select((state) => state.lastResult));
 });

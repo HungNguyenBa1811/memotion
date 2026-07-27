@@ -12,7 +12,6 @@
 /// Version: 1.0.0
 
 import 'dart:async';
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +24,8 @@ import '../data/camera_service.dart';
 import '../data/pose_detection_service.dart';
 import '../models/pose_detection_model.dart';
 import '../providers/pose_detection_provider.dart';
+import '../providers/pose_runtime_provider.dart';
+import '../widgets/pose_camera_viewport.dart';
 
 /// Training screen with video synchronization
 class PoseTrainingScreen extends ConsumerStatefulWidget {
@@ -55,6 +56,8 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
 
   // Timing
   int _elapsedSeconds = 0;
+  final ValueNotifier<int> _elapsedSecondsNotifier = ValueNotifier(0);
+  final ValueNotifier<double> _syncOffsetNotifier = ValueNotifier(0);
   Timer? _timer;
   DateTime? _sessionStartTime;
 
@@ -74,84 +77,67 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
   /// Camera session continues from Phase 1-2, just need to restart streaming
   Future<void> _initializeTraining() async {
     try {
-      print('🔥🔥🔥🔥🔥 _initializeTraining START');
+      PoseLogger.info('Initializing phase 3 training');
 
       _sessionStartTime = DateTime.now();
 
       // 1. Reuse camera from Phase 2 if still alive, otherwise re-initialize
-      print(
-        '📷📷📷📷📷 Step 1: Camera check — isInitialized=${_cameraService.isInitialized}, controller=${_cameraService.controller != null}',
-      );
       if (_cameraService.isInitialized &&
           _cameraService.controller != null &&
           _cameraService.controller!.value.isInitialized) {
-        print('📷📷📷📷📷 Step 1: Reusing existing camera from Phase 2');
+        PoseLogger.info('Reusing camera from calibration');
       } else {
-        print('📷📷📷📷📷 Step 1: Camera not alive, re-initializing...');
+        PoseLogger.info('Reinitializing camera for training');
         await _cameraService.initialize(useFrontCamera: true);
-        print('📷📷📷📷📷 Step 1: Camera init DONE');
       }
+      if (!mounted) return;
       setState(() => _isCameraReady = true);
 
       // 2. Check WebSocket connection
       final sessionState = ref.read(poseSessionProvider);
-      print(
-        '🌐🌐🌐🌐🌐 Step 2: WebSocket check — isConnected=${sessionState.isConnected}, isSessionActive=${sessionState.isSessionActive}',
-      );
       if (!sessionState.isConnected) {
-        print('🌐🌐🌐🌐🌐 Step 2: Reconnecting WebSocket...');
+        PoseLogger.info('Reconnecting pose transport for training');
         await ref.read(poseSessionProvider.notifier).connectWebSocket();
-        final afterReconnect = ref.read(poseSessionProvider);
-        print(
-          '🌐🌐🌐🌐🌐 Step 2: Reconnect DONE — isConnected=${afterReconnect.isConnected}',
-        );
+        if (!ref.read(poseSessionProvider).isConnected) {
+          throw StateError('Pose transport did not reconnect.');
+        }
       }
 
       // 3. Initialize video player (with timeout)
-      print('🎬🎬🎬🎬🎬 Step 3: Video init starting...');
       await _initializeVideo().timeout(
         const Duration(seconds: 8),
         onTimeout: () {
-          print('🎬🎬🎬🎬🎬 Step 3: Video init TIMED OUT after 8s');
+          PoseLogger.warning('Training video initialization timed out');
         },
-      );
-      print(
-        '🎬🎬🎬🎬🎬 Step 3: Video init DONE — _isVideoInitialized=$_isVideoInitialized',
       );
 
       // 4. Start timer
       _startTimer();
-      print('⏱️⏱️⏱️⏱️⏱️ Step 4: Timer started');
 
       // 5. Start camera streaming (with timeout)
-      print('📡📡📡📡📡 Step 5: Frame streaming starting...');
-      print(
-        '📡📡📡📡📡 Step 5: cameraService.isStreaming=${_cameraService.isStreaming}, isInitialized=${_cameraService.isInitialized}',
-      );
       await _startFrameStreaming().timeout(
         const Duration(seconds: 5),
         onTimeout: () {
-          print('📡📡📡📡📡 Step 5: Frame streaming TIMED OUT after 5s');
+          PoseLogger.warning('Camera frame streaming startup timed out');
+          throw TimeoutException('Camera frame streaming did not start.');
         },
-      );
-      print(
-        '📡📡📡📡📡 Step 5: Frame streaming DONE — isStreaming=${_cameraService.isStreaming}',
       );
 
       // 6. Listen for phase changes
       ref.read(poseSessionProvider.notifier).onPhaseChange = _onPhaseChange;
-      print('👂👂👂👂👂 Step 6: Phase change listener attached');
 
-      print('✅✅✅✅✅ _initializeTraining COMPLETE — all steps passed');
-    } catch (e, stack) {
-      print('💥💥💥💥💥 _initializeTraining CAUGHT ERROR: $e');
-      print('💥💥💥💥💥 Stack: $stack');
-    } finally {
-      print(
-        '🏁🏁🏁🏁🏁 _initializeTraining FINALLY — setting _isInitialized=true, mounted=$mounted',
-      );
+      PoseLogger.info('Phase 3 training initialized');
       if (mounted) {
         setState(() => _isInitialized = true);
+      }
+    } catch (e, stack) {
+      PoseLogger.error('Failed to initialize phase 3 training', e);
+      PoseLogger.error('Phase 3 initialization stack', stack);
+      if (mounted) {
+        setState(() {
+          _error = 'We could not start movement analysis. Please try again.';
+          _isInitialized = true;
+        });
       }
     }
   }
@@ -171,41 +157,31 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
     try {
       final videoUrl = _getVideoUrl();
 
-      print('🎬🎬🎬 VIDEO PLAYER INIT 🎬🎬🎬');
-      print('📹 Video URL: $videoUrl');
-      print('🔗 Is network URL: ${videoUrl.startsWith('http')}');
-
       // Use network URL or asset path
       if (videoUrl.startsWith('http')) {
-        print('🌐 Creating NetworkUrl controller...');
         _videoController = VideoPlayerController.networkUrl(
           Uri.parse(videoUrl),
         );
       } else {
-        print('📁 Creating Asset controller...');
         _videoController = VideoPlayerController.asset(videoUrl);
       }
 
-      print('⏳ Initializing video controller...');
       await _videoController!.initialize();
-      print('✅ Video controller initialized!');
-      print('📐 Video size: ${_videoController!.value.size}');
-      print('⏱️ Duration: ${_videoController!.value.duration}');
 
       await _videoController!.setLooping(true);
       await _videoController!.play();
 
+      if (!mounted) return;
       setState(() => _isVideoInitialized = true);
 
-      print('🎉 VIDEO READY TO PLAY! 🎉');
       PoseLogger.info('Video initialized: $videoUrl');
     } catch (e, stackTrace) {
-      print('💀💀💀 VIDEO INIT FAILED 💀💀💀');
-      print('❌ Error: $e');
-      print('📜 Stack trace: $stackTrace');
       PoseLogger.error('Failed to initialize video', e);
+      PoseLogger.error('Video initialization stack', stackTrace);
       // Continue without video - still allow training
-      setState(() => _isVideoInitialized = false);
+      if (mounted) {
+        setState(() => _isVideoInitialized = false);
+      }
     }
   }
 
@@ -215,9 +191,8 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
         timer.cancel();
         return;
       }
-      setState(() {
-        _elapsedSeconds++;
-      });
+      _elapsedSeconds++;
+      _elapsedSecondsNotifier.value = _elapsedSeconds;
     });
   }
 
@@ -253,6 +228,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
       final userTime =
           timestamp - (_sessionStartTime?.millisecondsSinceEpoch ?? timestamp);
       _syncOffset = (userTime - videoPosition).toDouble();
+      _syncOffsetNotifier.value = _syncOffset;
 
       // Update video frame number for backend
       _videoFrameNumber = (videoPosition / 33.33)
@@ -322,13 +298,17 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
   void dispose() {
     _timer?.cancel();
     _videoController?.dispose();
+    _elapsedSecondsNotifier.dispose();
+    _syncOffsetNotifier.dispose();
     _cameraService.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(poseSessionProvider);
+    final sessionError = ref.watch(
+      poseSessionProvider.select((state) => state.error),
+    );
 
     // Show loading while initializing
     if (!_isInitialized) {
@@ -362,7 +342,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
     }
 
     // Show error if any
-    if (_error != null) {
+    if (_error != null || sessionError != null) {
       return Scaffold(
         backgroundColor: const Color(0xFFF1F7E8),
         body: Center(
@@ -371,7 +351,10 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error: $_error', style: GoogleFonts.lexend(fontSize: 16)),
+              Text(
+                'Error: ${_error ?? sessionError}',
+                style: GoogleFonts.lexend(fontSize: 16),
+              ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => context.pop(),
@@ -392,7 +375,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
             Column(
               children: [
                 // User camera section (top half)
-                Expanded(flex: 1, child: _buildUserCameraSection(state)),
+                Expanded(flex: 1, child: _buildUserCameraSection()),
 
                 // Trainer video section (bottom half)
                 Expanded(flex: 1, child: _buildTrainerVideoSection()),
@@ -407,7 +390,12 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
               bottom: 0,
               left: 0,
               right: 0,
-              child: _buildBottomPanel(state),
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final state = ref.watch(poseSessionProvider);
+                  return _buildBottomPanel(state);
+                },
+              ),
             ),
           ],
         ),
@@ -441,7 +429,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
     );
   }
 
-  Widget _buildUserCameraSection(PoseSessionState state) {
+  Widget _buildUserCameraSection() {
     final hasCamera =
         _isCameraReady &&
         _cameraService.controller != null &&
@@ -454,7 +442,12 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
           width: double.infinity,
           color: Colors.grey[800],
           child: hasCamera
-              ? CameraPreview(_cameraService.controller!)
+              ? PoseCameraViewport(
+                  cameraController: _cameraService.controller!,
+                  overlayController: ref.read(poseOverlayControllerProvider),
+                  fit: BoxFit.contain,
+                  backgroundColor: Colors.grey.shade800,
+                )
               : Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -478,75 +471,93 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
         Positioned(
           left: 16,
           top: 16,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: state.isConnected ? Colors.green : Colors.red,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  state.isConnected ? Icons.wifi : Icons.wifi_off,
-                  size: 12,
-                  color: AppColors.primary,
+          child: Consumer(
+            builder: (context, ref, _) {
+              final isConnected = ref.watch(poseConnectionStatusProvider);
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isConnected ? Colors.green : Colors.red,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
-            ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isConnected ? Icons.wifi : Icons.wifi_off,
+                      size: 12,
+                      color: AppColors.primary,
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
-
-        // Pose overlay (if landmarks available)
-        if (state.lastResult?.landmarks.isNotEmpty ?? false)
-          CustomPaint(
-            painter: PoseLandmarkPainter(
-              landmarks: state.lastResult!.landmarks,
-            ),
-            size: Size.infinite,
-          ),
 
         // Score overlay
         Positioned(
           right: 16,
           top: 16,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'Score',
-                  style: GoogleFonts.lexend(
-                    fontSize: 10,
-                    color: Colors.white70,
-                  ),
+          child: Consumer(
+            builder: (context, ref, _) {
+              final syncScore = ref.watch(
+                poseSessionProvider.select((state) => state.syncScore),
+              );
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
                 ),
-                Text(
-                  '${state.syncScore.toStringAsFixed(1)}',
-                  style: GoogleFonts.lexend(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: _getScoreColor(state.syncScore),
-                  ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
-            ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Score',
+                      style: GoogleFonts.lexend(
+                        fontSize: 10,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    Text(
+                      syncScore.toStringAsFixed(1),
+                      style: GoogleFonts.lexend(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: _getScoreColor(syncScore),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
 
-        // Live Analysis and Synced badges at bottom of camera
+        // Live Analysis and freshness badges at bottom of camera
         Positioned(
           left: 12,
           right: 12,
           bottom: 8,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [_buildLiveAnalysisBadge(state), _buildSyncIndicator()],
+            children: [
+              Consumer(
+                builder: (context, ref, _) {
+                  final isConnected = ref.watch(poseConnectionStatusProvider);
+                  return _buildLiveAnalysisBadge(isConnected);
+                },
+              ),
+              ValueListenableBuilder<double>(
+                valueListenable: _syncOffsetNotifier,
+                builder: (context, syncOffset, _) =>
+                    _buildSyncIndicator(syncOffset),
+              ),
+            ],
           ),
         ),
       ],
@@ -615,7 +626,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
     );
   }
 
-  Widget _buildLiveAnalysisBadge(PoseSessionState state) {
+  Widget _buildLiveAnalysisBadge(bool isConnected) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -631,7 +642,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
             width: 8,
             height: 8,
             decoration: BoxDecoration(
-              color: state.isConnected ? Colors.red : Colors.grey,
+              color: isConnected ? Colors.red : Colors.grey,
               shape: BoxShape.circle,
             ),
           ),
@@ -649,9 +660,9 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
     );
   }
 
-  Widget _buildSyncIndicator() {
-    final syncStatus = _syncOffset.abs() < 100 ? 'SYNCED' : 'SYNCING';
-    final syncColor = _syncOffset.abs() < 100 ? Colors.green : Colors.orange;
+  Widget _buildSyncIndicator(double syncOffset) {
+    final syncStatus = syncOffset.abs() < 100 ? 'SYNCED' : 'SYNCING';
+    final syncColor = syncOffset.abs() < 100 ? Colors.green : Colors.orange;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -695,10 +706,13 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
           Row(
             children: [
               // Duration
-              _buildStatBox(
-                _formatTime(_elapsedSeconds),
-                'Duration',
-                const Color(0xFFD67052),
+              ValueListenableBuilder<int>(
+                valueListenable: _elapsedSecondsNotifier,
+                builder: (context, elapsedSeconds, _) => _buildStatBox(
+                  _formatTime(elapsedSeconds),
+                  'Duration',
+                  const Color(0xFFD67052),
+                ),
               ),
               const SizedBox(width: 8),
 
@@ -716,7 +730,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      state.lastResult?.message ?? 'Analyzing...',
+                      state.message ?? 'Analyzing...',
                       style: GoogleFonts.lexend(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -851,45 +865,5 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
         ],
       ),
     );
-  }
-}
-
-/// Custom painter for pose landmarks overlay
-class PoseLandmarkPainter extends CustomPainter {
-  final List<dynamic> landmarks;
-
-  PoseLandmarkPainter({required this.landmarks});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.green
-      ..strokeWidth = 3
-      ..style = PaintingStyle.fill;
-
-    final linePaint = Paint()
-      ..color = Colors.green.withOpacity(0.7)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-
-    // Draw landmarks
-    for (final landmark in landmarks) {
-      if (landmark is Map) {
-        final x = (landmark['x'] as num?)?.toDouble() ?? 0;
-        final y = (landmark['y'] as num?)?.toDouble() ?? 0;
-        final visibility = (landmark['visibility'] as num?)?.toDouble() ?? 0;
-
-        if (visibility > 0.5) {
-          canvas.drawCircle(Offset(x * size.width, y * size.height), 5, paint);
-        }
-      }
-    }
-
-    // TODO: Draw skeleton connections
-  }
-
-  @override
-  bool shouldRepaint(covariant PoseLandmarkPainter oldDelegate) {
-    return oldDelegate.landmarks != landmarks;
   }
 }

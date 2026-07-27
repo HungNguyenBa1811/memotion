@@ -2,7 +2,9 @@
 ///
 /// These models match the backend API responses for pose detection
 
-import 'dart:convert';
+library;
+
+import 'pose_landmark_model.dart';
 
 /// Phases in pose detection flow
 enum PosePhase {
@@ -81,6 +83,17 @@ class PoseFrameResult {
   final int phase;
   final String phaseName;
   final Map<String, dynamic> data;
+  final bool hasPosePayload;
+  final bool isPoseDetected;
+  final int landmarkCount;
+  final List<NormalizedPoseLandmark> landmarks;
+  final List<PoseSkeletonEdge> poseConnections;
+  final String coordinateSystem;
+  final int frameWidth;
+  final int frameHeight;
+  final int poseTimestampMs;
+  final int frameTimestampMs;
+  final String? poseError;
   final String? message;
   final String? warning;
   final double timestamp;
@@ -91,6 +104,17 @@ class PoseFrameResult {
     required this.phase,
     required this.phaseName,
     required this.data,
+    required this.hasPosePayload,
+    required this.isPoseDetected,
+    required this.landmarkCount,
+    required this.landmarks,
+    required this.poseConnections,
+    required this.coordinateSystem,
+    required this.frameWidth,
+    required this.frameHeight,
+    required this.poseTimestampMs,
+    required this.frameTimestampMs,
+    this.poseError,
     this.message,
     this.warning,
     required this.timestamp,
@@ -100,31 +124,10 @@ class PoseFrameResult {
 
   PosePhase get posePhase => PosePhase.fromValue(phase);
 
-  factory PoseFrameResult.fromJson(Map<String, dynamic> json) {
-    final phaseNum = json['phase'] as int? ?? 1;
-
-    // Backend wraps all phase data in the 'data' key
-    final Map<String, dynamic> phaseData =
-        json['data'] as Map<String, dynamic>? ?? {};
-
-    return PoseFrameResult(
-      phase: phaseNum,
-      phaseName: json['phase_name'] as String? ?? 'detection',
-      data: phaseData,
-      message: json['message'] as String?,
-      warning: json['warning'] as String?,
-      timestamp: (json['timestamp'] as num?)?.toDouble() ?? 0.0,
-      frameNumber: json['frame_number'] as int? ?? 0,
-      fps: (json['fps'] as num?)?.toDouble() ?? 0.0,
-    );
-  }
-
   // ==================== Phase 1: Detection Data ====================
   bool get poseDetected => data['pose_detected'] as bool? ?? false;
   int get stableCount => data['stable_count'] as int? ?? 0;
   double get progress => (data['progress'] as num?)?.toDouble() ?? 0.0;
-  List<dynamic> get landmarks => data['landmarks'] as List<dynamic>? ?? [];
-
   // ==================== Phase 2: Calibration Data ====================
   String? get currentJoint => data['current_joint'] as String?;
   String? get currentJointName => data['current_joint_name'] as String?;
