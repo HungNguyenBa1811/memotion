@@ -8,53 +8,53 @@ class Step17Builder extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Stack(
-      children: [
-        SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 40),
-
-              // Green badge with target icon image
-              Container(
-                width: 81,
-                height: 78,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF42D599),
-                  borderRadius: BorderRadius.circular(40),
-                ),
-                child: Center(
-                  child: Image.asset(
-                    'assets/images/onboarding/onboarding17_target.png',
-                    width: 43,
-                    height: 43,
-                    fit: BoxFit.contain,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Green badge with target icon image
+                  Container(
+                    width: 81,
+                    height: 78,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF42D599),
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/onboarding/onboarding17_target.png',
+                        width: 43,
+                        height: 43,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Title - centered, Lexend bold 22px, color #00695C
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 26),
-                child: Text(
-                  'Recovery profile completed',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.lexend(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF00695C),
-                    height: 1.35,
+                  const SizedBox(height: 24),
+                  // Title - centered, Lexend bold 22px, color #00695C
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 26),
+                    child: Text(
+                      'Recovery profile completed',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.lexend(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF00695C),
+                        height: 1.35,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-
-              const SizedBox(height: 24),
-            ],
+            ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

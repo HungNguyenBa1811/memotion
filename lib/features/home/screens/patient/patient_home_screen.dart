@@ -39,7 +39,7 @@ class PatientHomeScreen extends ConsumerWidget {
       userName: dashboardData?.userName ?? 'there',
       greeting: _getGreeting(),
       avatarUrl: dashboardData?.avatarUrl,
-      moodMessage: 'How are you feeling today?',
+      moodMessage: 'Your health is great today',
       actionButtonText: 'GET HELP',
       onActionPressed: () {
         homeNotifier.triggerSOS();

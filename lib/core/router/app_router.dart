@@ -17,6 +17,7 @@ import '../../features/workout/screens/workout_exercise_screen.dart';
 import '../../features/workout/screens/workout_calibration_complete_screen.dart';
 import '../../features/workout/screens/workout_training_screen.dart';
 import '../../features/workout/screens/workout_training_complete_screen.dart';
+import '../../features/workout/models/pose_detection_model.dart';
 import '../../features/workout/screens/pose_detection_screen.dart';
 import '../../features/workout/screens/pose_training_screen.dart';
 import '../../features/workout/screens/qr_scan_screen.dart';
@@ -201,14 +202,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/workout-training-complete',
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
+          final rawResults = extra?['results'];
           return WorkoutTrainingCompleteScreen(
             workoutId: extra?['workoutId'] ?? '',
-            duration: extra?['duration'] ?? '12:30',
-            durationSeconds: extra?['durationSeconds'] ?? 750,
+            duration: extra?['duration'] ?? '00:00',
+            durationSeconds: extra?['durationSeconds'] ?? 0,
+            results: rawResults is PoseSessionResults ? rawResults : null,
           );
         },
       ),
-      
+
       // Pose Detection routes - Real-time AI pose analysis
       GoRoute(
         path: '/pose-detection',
@@ -348,4 +351,3 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-

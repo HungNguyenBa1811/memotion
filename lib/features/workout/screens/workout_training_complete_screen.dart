@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../models/pose_detection_model.dart';
 import '../providers/workout_provider.dart';
 
 /// Workout Training Complete Screen (Workout2 Done from Figma)
@@ -11,16 +12,23 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
   final String workoutId;
   final String duration;
   final int durationSeconds;
+  final PoseSessionResults? results;
 
   const WorkoutTrainingCompleteScreen({
     super.key,
     required this.workoutId,
-    this.duration = '12:30',
-    this.durationSeconds = 750,
+    this.duration = '00:00',
+    this.durationSeconds = 0,
+    this.results,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final score = results?.totalScore;
+    final scoreColor = _gradeColor(results?.gradeColor);
+    final exerciseName = results?.exerciseName.trim();
+    final recommendations = results?.recommendations ?? const <String>[];
+
     return Scaffold(
       backgroundColor: const Color(0xFFF1F7E8),
       body: SafeArea(
@@ -48,7 +56,9 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
 
                 // Exercise name
                 Text(
-                  'Knee Extension',
+                  exerciseName == null || exerciseName.isEmpty
+                      ? 'Exercise complete'
+                      : exerciseName,
                   style: GoogleFonts.lexend(
                     fontSize: 30,
                     fontWeight: FontWeight.w700,
@@ -59,12 +69,14 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 // Circular score
-                _buildCircularScore(),
+                _buildCircularScore(score, scoreColor),
                 const SizedBox(height: 32),
 
                 // Great Effort text
                 Text(
-                  'Well Done',
+                  results?.grade.isNotEmpty == true
+                      ? results!.grade
+                      : 'Well Done',
                   style: GoogleFonts.lexend(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
@@ -77,7 +89,9 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
-                    'You completed this exercise. Take a moment to rest if you need it.',
+                    results == null
+                        ? 'The session ended, but the server did not return final scores.'
+                        : 'You completed this exercise. Take a moment to rest if you need it.',
                     style: GoogleFonts.lexend(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -103,19 +117,25 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Improvement cards
-                _buildImprovementCard(
-                  title: 'Lower shoulders',
-                  description: 'Relax your upper back to avoid tension',
-                  isWarning: true,
-                ),
-                const SizedBox(height: 16),
-
-                _buildImprovementCard(
-                  title: 'Good knee alignment',
-                  description: 'Perfect stability during squats',
-                  isWarning: false,
-                ),
+                if (recommendations.isEmpty)
+                  _buildImprovementCard(
+                    title: 'No server recommendations',
+                    description: results == null
+                        ? 'Final scoring data was unavailable.'
+                        : 'The server returned no recommendations for this session.',
+                    isWarning: false,
+                  )
+                else
+                  ...recommendations.map(
+                    (recommendation) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _buildImprovementCard(
+                        title: 'Recommendation',
+                        description: recommendation,
+                        isWarning: false,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 32),
 
                 // Done button
@@ -164,7 +184,8 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCircularScore() {
+  Widget _buildCircularScore(double? score, Color scoreColor) {
+    final progress = ((score ?? 0) / 100).clamp(0.0, 1.0);
     return SizedBox(
       width: 300,
       height: 300,
@@ -175,9 +196,9 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
           CustomPaint(
             size: const Size(300, 300),
             painter: _ScoreCirclePainter(
-              progress: 0.85, // 85% progress
+              progress: progress,
               backgroundColor: Colors.white,
-              progressColor: const Color(0xFF00695C),
+              progressColor: scoreColor,
               strokeWidth: 14,
             ),
           ),
@@ -187,19 +208,19 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                '85',
+                score == null ? '—' : _formatScore(score),
                 style: GoogleFonts.lexend(
                   fontSize: 60,
                   fontWeight: FontWeight.w900,
-                  color: const Color(0xFF00695C),
+                  color: scoreColor,
                 ),
               ),
               Text(
-                'Score',
+                score == null ? 'Unavailable' : 'Score',
                 style: GoogleFonts.lexend(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
-                  color: const Color(0xFF00695C),
+                  color: scoreColor,
                 ),
               ),
             ],
@@ -210,25 +231,39 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
   }
 
   Widget _buildStatsRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    final result = results;
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
       children: [
-        // Duration card
-        _buildStatCard(icon: _buildClockIcon(), value: duration, label: 'Min'),
-
-        const SizedBox(width: 8),
-
-        // Accuracy card
         _buildStatCard(
-          icon: _buildChartIcon(),
-          value: '92%',
-          label: 'Accuracy',
+          icon: _buildMetricIcon(Icons.access_time),
+          value: _resolvedDuration,
+          label: 'Duration',
         ),
-
-        const SizedBox(width: 8),
-
-        // Calories card
-        _buildStatCard(icon: _buildFireIcon(), value: '45', label: 'kcal'),
+        _buildStatCard(
+          icon: _buildMetricIcon(Icons.repeat),
+          value: result == null ? '—' : '${result.totalReps}',
+          label: 'Reps',
+        ),
+        _buildStatCard(
+          icon: _buildMetricIcon(Icons.accessibility_new),
+          value: result == null ? '—' : '${_formatScore(result.romScore)}%',
+          label: 'ROM',
+        ),
+        _buildStatCard(
+          icon: _buildMetricIcon(Icons.balance),
+          value: result == null
+              ? '—'
+              : '${_formatScore(result.stabilityScore)}%',
+          label: 'Stability',
+        ),
+        _buildStatCard(
+          icon: _buildMetricIcon(Icons.waves),
+          value: result == null ? '—' : '${_formatScore(result.flowScore)}%',
+          label: 'Flow',
+        ),
       ],
     );
   }
@@ -279,7 +314,7 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildClockIcon() {
+  Widget _buildMetricIcon(IconData icon) {
     return Container(
       width: 47,
       height: 46,
@@ -287,28 +322,36 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
         color: const Color(0xFF57C091).withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Icon(Icons.access_time, color: Color(0xFF00695C), size: 28),
+      child: Icon(icon, color: const Color(0xFF00695C), size: 28),
     );
   }
 
-  Widget _buildChartIcon() {
-    return const SizedBox(
-      width: 36,
-      height: 36,
-      child: Icon(Icons.pie_chart, color: Color(0xFF00695C), size: 32),
-    );
+  String get _resolvedDuration {
+    final resultDuration = results?.durationSeconds ?? 0;
+    if (resultDuration > 0) return _formatDuration(resultDuration);
+    if (duration.isNotEmpty && duration != '00:00') return duration;
+    return _formatDuration(durationSeconds);
   }
 
-  Widget _buildFireIcon() {
-    return const SizedBox(
-      width: 32,
-      height: 46,
-      child: Icon(
-        Icons.local_fire_department,
-        color: Color(0xFFFF6B35),
-        size: 36,
-      ),
-    );
+  String _formatDuration(int seconds) {
+    final minutes = seconds ~/ 60;
+    final remainder = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${remainder.toString().padLeft(2, '0')}';
+  }
+
+  String _formatScore(double value) {
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toStringAsFixed(1);
+  }
+
+  Color _gradeColor(String? value) {
+    return switch (value?.toLowerCase()) {
+      'green' => const Color(0xFF00695C),
+      'red' => const Color(0xFFB50000),
+      'yellow' => const Color(0xFFD28B00),
+      _ => const Color(0xFF00695C),
+    };
   }
 
   Widget _buildImprovementCard({

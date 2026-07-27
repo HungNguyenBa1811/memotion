@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 /// Immutable visual configuration for the live pose overlay.
 final class PoseOverlayStyle {
   const PoseOverlayStyle({
-    this.highConfidenceColor = const Color(0xFF65E572),
-    this.mediumConfidenceColor = const Color(0xFFFFC857),
-    this.boneColor = const Color(0xCC65E572),
+    this.highConfidenceColor = const Color(0xFFFFF59D),
+    this.mediumConfidenceColor = const Color(0xFFFFE082),
+    this.boneColor = const Color(0xE6FFF59D),
     this.highConfidenceDiameterPx = 9,
     this.mediumConfidenceDiameterPx = 7,
-    this.boneWidthPx = 3,
+    this.boneWidthPx = 5,
   });
 
   final Color highConfidenceColor;

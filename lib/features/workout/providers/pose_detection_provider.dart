@@ -50,7 +50,12 @@ class PoseSessionState {
   final String fatigueLevel;
 
   final double totalScore;
+  final double romScore;
+  final double stabilityScore;
+  final double flowScore;
   final String grade;
+  final String gradeColor;
+  final List<String> recommendations;
 
   const PoseSessionState({
     this.isLoading = false,
@@ -79,7 +84,12 @@ class PoseSessionState {
     this.fatigueLevel = 'FRESH',
     // Scoring
     this.totalScore = 0.0,
+    this.romScore = 0.0,
+    this.stabilityScore = 0.0,
+    this.flowScore = 0.0,
     this.grade = '',
+    this.gradeColor = 'yellow',
+    this.recommendations = const [],
   });
 
   PoseSessionState copyWith({
@@ -105,7 +115,12 @@ class PoseSessionState {
     int? repCount,
     String? fatigueLevel,
     double? totalScore,
+    double? romScore,
+    double? stabilityScore,
+    double? flowScore,
     String? grade,
+    String? gradeColor,
+    List<String>? recommendations,
   }) {
     return PoseSessionState(
       isLoading: isLoading ?? this.isLoading,
@@ -132,7 +147,12 @@ class PoseSessionState {
       repCount: repCount ?? this.repCount,
       fatigueLevel: fatigueLevel ?? this.fatigueLevel,
       totalScore: totalScore ?? this.totalScore,
+      romScore: romScore ?? this.romScore,
+      stabilityScore: stabilityScore ?? this.stabilityScore,
+      flowScore: flowScore ?? this.flowScore,
       grade: grade ?? this.grade,
+      gradeColor: gradeColor ?? this.gradeColor,
+      recommendations: recommendations ?? this.recommendations,
     );
   }
 }
@@ -295,12 +315,18 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
 
       case 3: // Sync
         newPhase = PosePhase.sync;
+        // The backend's phase-3 completion frame currently resets rep_count to
+        // zero and does not forward its `status` field. Repetitions are
+        // monotonic, so a regression identifies a transition/default payload.
+        final didRepCountRegress = result.repCount < state.repCount;
         state = state.copyWith(
           currentPhase: newPhase,
           message: result.message,
-          syncScore: result.currentScore,
-          repCount: result.repCount,
-          fatigueLevel: result.fatigueLevel,
+          syncScore: didRepCountRegress ? state.syncScore : result.currentScore,
+          repCount: didRepCountRegress ? state.repCount : result.repCount,
+          fatigueLevel: didRepCountRegress
+              ? state.fatigueLevel
+              : result.fatigueLevel,
         );
         break;
 
@@ -310,7 +336,13 @@ class PoseSessionNotifier extends StateNotifier<PoseSessionState> {
           currentPhase: newPhase,
           message: result.message,
           totalScore: result.totalScore,
+          romScore: result.romScore,
+          stabilityScore: result.stabilityScore,
+          flowScore: result.flowScore,
           grade: result.grade,
+          gradeColor: result.gradeColor,
+          repCount: result.totalReps,
+          recommendations: result.recommendations,
         );
         break;
 

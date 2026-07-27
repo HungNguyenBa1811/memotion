@@ -219,7 +219,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
                               ),
                               child: Text(
                                 widget.moodMessage ??
-                                    'How are you feeling today?',
+                                    'Your health is great today',
                                 style: AppTextStyles.headline3.copyWith(
                                   fontSize: (isTablet ? 20 : 16) * textScale,
                                   fontWeight: FontWeight.w700,

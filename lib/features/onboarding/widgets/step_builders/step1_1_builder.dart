@@ -1,36 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../providers/onboarding_provider.dart';
 
-/// Builder cho Step 1.1: Phone Number input screen
+/// Builder cho Step 1.1: Email input screen
 /// Figma design: Bxer3DnXLQcxg5HSArHa8w node 453:1691
-class Step1_1Builder extends ConsumerStatefulWidget {
-  const Step1_1Builder({super.key});
+class OnboardingEmailStepBuilder extends ConsumerStatefulWidget {
+  const OnboardingEmailStepBuilder({super.key});
 
   @override
-  ConsumerState<Step1_1Builder> createState() => _Step1_1BuilderState();
+  ConsumerState<OnboardingEmailStepBuilder> createState() =>
+      _OnboardingEmailStepBuilderState();
 }
 
-class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
-  late TextEditingController _phoneController;
+class _OnboardingEmailStepBuilderState
+    extends ConsumerState<OnboardingEmailStepBuilder> {
+  late TextEditingController _emailController;
 
   @override
   void initState() {
     super.initState();
     final state = ref.read(onboardingProvider);
-    _phoneController = TextEditingController(text: state.usernameOrPhone ?? '');
+    _emailController = TextEditingController(text: state.email ?? '');
   }
 
   @override
   void dispose() {
-    _phoneController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
-  void _onPhoneChanged(String value) {
-    ref.read(onboardingProvider.notifier).setUsernameOrPhone(value);
+  void _onEmailChanged(String value) {
+    ref.read(onboardingProvider.notifier).setEmail(value);
   }
 
   @override
@@ -46,7 +47,7 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
             padding: const EdgeInsets.symmetric(horizontal: 0),
             child: Center(
               child: Text(
-                'Enter your phone number\nto continue',
+                'Enter your email address\nto continue',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lexend(
                   fontSize: 22,
@@ -62,7 +63,7 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
 
           // Label - Lexend medium 16px
           Text(
-            'Phone number',
+            'Email address',
             style: GoogleFonts.lexend(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -77,15 +78,14 @@ class _Step1_1BuilderState extends ConsumerState<Step1_1Builder> {
           SizedBox(
             height: 54,
             child: TextField(
-              controller: _phoneController,
-              onChanged: _onPhoneChanged,
-              keyboardType: TextInputType.phone,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(15),
-              ],
+              controller: _emailController,
+              onChanged: _onEmailChanged,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.email],
+              autocorrect: false,
               decoration: InputDecoration(
-                hintText: 'Phone number',
+                hintText: 'Email address',
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(

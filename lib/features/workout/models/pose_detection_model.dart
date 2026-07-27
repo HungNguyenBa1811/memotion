@@ -157,6 +157,13 @@ class PoseFrameResult {
       (data['stability_score'] as num?)?.toDouble() ?? 0.0;
   double get flowScore => (data['flow_score'] as num?)?.toDouble() ?? 0.0;
   String get grade => data['grade'] as String? ?? '';
+  String get gradeColor => data['grade_color'] as String? ?? 'yellow';
+  int get totalReps => data['total_reps'] as int? ?? 0;
+  List<String> get recommendations =>
+      (data['recommendations'] as List<dynamic>?)?.whereType<String>().toList(
+        growable: false,
+      ) ??
+      const [];
 }
 
 /// Final session results from DELETE /sessions/{id}
@@ -235,13 +242,23 @@ class PoseSessionResults {
 /// Calibrated joint data
 class CalibratedJoint {
   final String joint;
+  final String jointType;
   final double maxAngle;
 
-  const CalibratedJoint({required this.joint, required this.maxAngle});
+  const CalibratedJoint({
+    required this.joint,
+    this.jointType = '',
+    required this.maxAngle,
+  });
 
   factory CalibratedJoint.fromJson(Map<String, dynamic> json) {
     return CalibratedJoint(
-      joint: json['joint'] as String? ?? '',
+      joint:
+          json['joint_name'] as String? ??
+          json['joint'] as String? ??
+          json['joint_type'] as String? ??
+          '',
+      jointType: json['joint_type'] as String? ?? '',
       maxAngle: (json['max_angle'] as num?)?.toDouble() ?? 0.0,
     );
   }
@@ -251,13 +268,31 @@ class CalibratedJoint {
 class RepScore {
   final int rep;
   final double score;
+  final double romScore;
+  final double stabilityScore;
+  final double flowScore;
+  final int durationMs;
 
-  const RepScore({required this.rep, required this.score});
+  const RepScore({
+    required this.rep,
+    required this.score,
+    this.romScore = 0,
+    this.stabilityScore = 0,
+    this.flowScore = 0,
+    this.durationMs = 0,
+  });
 
   factory RepScore.fromJson(Map<String, dynamic> json) {
     return RepScore(
-      rep: json['rep'] as int? ?? 0,
-      score: (json['score'] as num?)?.toDouble() ?? 0.0,
+      rep: json['rep_number'] as int? ?? json['rep'] as int? ?? 0,
+      score:
+          (json['total_score'] as num?)?.toDouble() ??
+          (json['score'] as num?)?.toDouble() ??
+          0.0,
+      romScore: (json['rom_score'] as num?)?.toDouble() ?? 0.0,
+      stabilityScore: (json['stability_score'] as num?)?.toDouble() ?? 0.0,
+      flowScore: (json['flow_score'] as num?)?.toDouble() ?? 0.0,
+      durationMs: json['duration_ms'] as int? ?? 0,
     );
   }
 }

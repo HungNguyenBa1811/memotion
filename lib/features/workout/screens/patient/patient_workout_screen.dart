@@ -128,7 +128,7 @@ class _PatientWorkoutScreenContentState
                   cardScale: cardScale,
                 ),
               ),
-              SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 2),
+              SizedBox(height: ResponsiveUtils.bottomNavPadding(context) * 20),
             ],
           ),
         ),

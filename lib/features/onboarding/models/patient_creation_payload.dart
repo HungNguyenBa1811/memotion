@@ -1,3 +1,5 @@
+import 'dart:math';
+
 class PatientCreationPayload {
   final String patientFullName;
   final String patientEmail;
@@ -9,25 +11,25 @@ class PatientCreationPayload {
     required this.patientPhone,
   });
 
-  factory PatientCreationPayload.fromCaretaker({
+  factory PatientCreationPayload.fromOnboarding({
     required String patientFullName,
-    required String patientPhone,
-    required String caretakerEmail,
+    required String patientEmail,
+    Random? random,
   }) {
     final fullName = patientFullName.trim();
-    final phone = patientPhone.trim();
+    final email = patientEmail.trim();
 
     if (fullName.isEmpty) {
       throw const FormatException('Patient full name is required.');
     }
-    if (phone.isEmpty) {
-      throw const FormatException('Patient phone number is required.');
+    if (!_isValidEmail(email)) {
+      throw const FormatException('A valid patient email is required.');
     }
 
     return PatientCreationPayload(
       patientFullName: fullName,
-      patientEmail: _patientEmailAlias(caretakerEmail, phone),
-      patientPhone: phone,
+      patientEmail: email,
+      patientPhone: _randomVietnamesePhone(random ?? Random()),
     );
   }
 
@@ -38,19 +40,14 @@ class PatientCreationPayload {
   };
 }
 
-String _patientEmailAlias(String caretakerEmail, String patientPhone) {
-  final email = caretakerEmail.trim();
-  final separator = email.lastIndexOf('@');
-  if (separator <= 0 || separator == email.length - 1) {
-    throw const FormatException('A valid caretaker email is required.');
-  }
+bool _isValidEmail(String value) {
+  return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value);
+}
 
-  final localPart = email.substring(0, separator);
-  final domain = email.substring(separator + 1);
-  final patientToken = patientPhone.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
-  if (patientToken.isEmpty) {
-    throw const FormatException('Patient phone number is invalid.');
+String _randomVietnamesePhone(Random random) {
+  final buffer = StringBuffer('091');
+  for (var index = 0; index < 7; index++) {
+    buffer.write(random.nextInt(10));
   }
-
-  return '$localPart+patient-$patientToken@$domain';
+  return buffer.toString();
 }

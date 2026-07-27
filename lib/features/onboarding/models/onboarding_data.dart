@@ -50,13 +50,13 @@ class OnboardingStep1Config extends OnboardingStepConfig {
       );
 }
 
-/// Step 1.1 (becomes Step 2): Phone Number input
+/// Step 1.1 (becomes Step 2): Email input
 /// Figma: Bxer3DnXLQcxg5HSArHa8w node 453:1691
-class OnboardingStep1_1Config extends OnboardingStepConfig {
-  const OnboardingStep1_1Config()
+class OnboardingEmailStepConfig extends OnboardingStepConfig {
+  const OnboardingEmailStepConfig()
     : super(
         step: 2,
-        title: 'Enter your phone number to continue',
+        title: 'Enter your email address to continue',
         subtitle: null,
         imagePath: 'assets/images/onboarding/elderly4.png',
         titleAlignment: TitleAlignment.center,
@@ -248,7 +248,7 @@ class OnboardingStep17Config extends OnboardingStepConfig {
 class OnboardingConfig {
   static final Map<int, OnboardingStepConfig> _steps = {
     1: const OnboardingStep1Config(),
-    2: const OnboardingStep1_1Config(), // New Step 1.1: Username/Phone
+    2: const OnboardingEmailStepConfig(),
     3: const OnboardingStep2Config(),
     4: const OnboardingStep3Config(),
     5: const OnboardingStep4Config(),
@@ -279,8 +279,8 @@ class OnboardingConfig {
 class OnboardingData {
   final int currentStep;
 
-  // Step 1.1 (Step 2) - Username/Phone
-  final String? usernameOrPhone;
+  // Step 1.1 (Step 2) - Patient email
+  final String? email;
 
   // Step 3 - Personal info
   final String? fullName;
@@ -347,7 +347,7 @@ class OnboardingData {
 
   const OnboardingData({
     this.currentStep = 1,
-    this.usernameOrPhone,
+    this.email,
     this.fullName,
     this.birthYear,
     this.gender,
@@ -376,7 +376,7 @@ class OnboardingData {
 
   OnboardingData copyWith({
     int? currentStep,
-    String? usernameOrPhone,
+    String? email,
     String? fullName,
     int? birthYear,
     Gender? gender,
@@ -404,7 +404,7 @@ class OnboardingData {
   }) {
     return OnboardingData(
       currentStep: currentStep ?? this.currentStep,
-      usernameOrPhone: usernameOrPhone ?? this.usernameOrPhone,
+      email: email ?? this.email,
       fullName: fullName ?? this.fullName,
       birthYear: birthYear ?? this.birthYear,
       gender: gender ?? this.gender,
@@ -436,7 +436,7 @@ class OnboardingData {
   Map<String, dynamic> toJson() {
     return {
       'currentStep': currentStep,
-      'usernameOrPhone': usernameOrPhone,
+      'email': email,
       'fullName': fullName,
       'birthYear': birthYear,
       'gender': gender?.name,

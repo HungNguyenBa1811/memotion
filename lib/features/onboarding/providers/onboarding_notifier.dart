@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import 'package:memotion/core/router/app_router.dart';
-import '../../auth/providers/auth_provider.dart';
 import '../models/patient_creation_payload.dart';
 import '../models/onboarding_state.dart';
 import '../models/onboarding_data.dart';
@@ -116,10 +115,6 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     state = state.copyWith(iadlScore: score);
   }
 
-  // Additional setters from onboarding_provider
-  void setUsernameOrPhone(String value) =>
-      state = state.copyWith(phone: value.trim());
-
   void setDoctorAdvice(String value) =>
       state = state.copyWith(doctorRecommended: value);
 
@@ -199,15 +194,12 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     try {
       // Read data from onboardingProvider (where step builders save data)
       final uiData = ref.read(onboardingProvider);
-      final caretakerEmail = ref.read(authProvider).user?.email;
 
-      // The endpoint requires a unique patient email. Derive a distinct alias
-      // from the authenticated caretaker's email while keeping the phone in
-      // phone-only fields.
-      final body = PatientCreationPayload.fromCaretaker(
+      // The phone field is backend-required but not collected during
+      // onboarding, so the payload supplies a valid random phone number.
+      final body = PatientCreationPayload.fromOnboarding(
         patientFullName: uiData.fullName ?? '',
-        patientPhone: uiData.usernameOrPhone ?? '',
-        caretakerEmail: caretakerEmail ?? '',
+        patientEmail: uiData.email ?? '',
       ).toJson();
       debugPrint('[NOTIFIER] createPatient() payload: $body');
       final resp = await _repo.createPatient(body: body);

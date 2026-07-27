@@ -524,7 +524,7 @@ class _MedicationMainScreenContentState
 
       return ListView.builder(
         padding: EdgeInsets.only(
-          bottom: ResponsiveUtils.bottomNavPadding(context) + 40,
+          bottom: ResponsiveUtils.bottomNavPadding(context) * 20,
         ),
         itemCount: medications.length,
         itemBuilder: (context, index) {

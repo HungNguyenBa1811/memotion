@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memotion/features/workout/data/pose_overlay_controller.dart';
 import 'package:memotion/features/workout/models/pose_landmark_model.dart';
+import 'package:memotion/features/workout/models/pose_overlay_model.dart';
 import 'package:memotion/features/workout/widgets/pose_landmark_overlay.dart';
 
 void main() {
+  test('default overlay uses bold light-yellow bones', () {
+    const style = PoseOverlayStyle();
+
+    expect(style.highConfidenceColor, const Color(0xFFFFF59D));
+    expect(style.boneColor, const Color(0xE6FFF59D));
+    expect(style.boneWidthPx, 5);
+  });
+
   testWidgets('overlay updates repaint without rebuilding its parent', (
     tester,
   ) async {

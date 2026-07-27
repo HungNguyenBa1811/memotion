@@ -250,9 +250,11 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
       'sessionActive=${state.isSessionActive}, repCount=${state.repCount}',
     );
 
-    // Only navigate to results if we actually completed training
+    // Phase 4 is the backend's explicit final-report state. Do not gate it on
+    // the last phase-3 rep count because the backend's transition frame resets
+    // the optional sync fields to their defaults.
     if (phase == PosePhase.completed || phase == PosePhase.scoring) {
-      if (state.isSessionActive && state.repCount > 0) {
+      if (state.isSessionActive) {
         PoseLogger.phaseComplete(
           3,
           'Training complete - navigating to results',
@@ -260,7 +262,7 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
         _navigateToResults();
       } else {
         PoseLogger.warning(
-          'Ignoring completed phase in training - no reps yet',
+          'Ignoring completed phase because the session is no longer active',
         );
       }
     }
@@ -299,6 +301,8 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
 
     if (!mounted) return;
 
+    results ??= _phaseFourFallbackResults(durationSeconds);
+
     context.pushReplacement(
       '/workout-training-complete',
       extra: {
@@ -307,6 +311,28 @@ class _PoseTrainingScreenState extends ConsumerState<PoseTrainingScreen> {
         'duration': duration,
         'durationSeconds': durationSeconds,
       },
+    );
+  }
+
+  PoseSessionResults? _phaseFourFallbackResults(int durationSeconds) {
+    final state = ref.read(poseSessionProvider);
+    if (state.currentPhase != PosePhase.scoring) return null;
+
+    return PoseSessionResults(
+      sessionId: state.sessionId ?? '',
+      exerciseName: '',
+      durationSeconds: durationSeconds,
+      totalScore: state.totalScore,
+      romScore: state.romScore,
+      stabilityScore: state.stabilityScore,
+      flowScore: state.flowScore,
+      grade: state.grade,
+      gradeColor: state.gradeColor,
+      totalReps: state.repCount,
+      fatigueLevel: state.fatigueLevel,
+      calibratedJoints: const [],
+      repScores: const [],
+      recommendations: state.recommendations,
     );
   }
 

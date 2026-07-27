@@ -344,7 +344,7 @@ class _NutritionScreenContentState
     }
 
     final hPad = ResponsiveUtils.horizontalPadding(context);
-    final bottomPad = ResponsiveUtils.bottomNavPadding(context) + 40;
+    final bottomPad = ResponsiveUtils.bottomNavPadding(context) * 20;
     final isTablet = ResponsiveUtils.isTabletOrLarger(context);
     final isLarge = ResponsiveUtils.isLargeTablet(context);
     final fontScale = isLarge

@@ -120,7 +120,9 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
                 ),
                 const SizedBox(height: 30),
                 _buildContent(context, workoutState, isTablet: false),
-                SizedBox(height: ResponsiveUtils.bottomNavPadding(context)),
+                SizedBox(
+                  height: ResponsiveUtils.bottomNavPadding(context) * 20,
+                ),
               ],
             ),
           ),
@@ -377,7 +379,7 @@ class _WorkoutScreenContentState extends ConsumerState<WorkoutScreenContent> {
 
       return ListView.builder(
         padding: EdgeInsets.only(
-          bottom: ResponsiveUtils.bottomNavPadding(context) + 16,
+          bottom: ResponsiveUtils.bottomNavPadding(context) * 20,
         ),
         itemCount: workouts.length,
         itemBuilder: (context, index) {

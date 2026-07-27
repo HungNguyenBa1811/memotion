@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memotion/features/workout/data/pose_result_decoder.dart';
+import 'package:memotion/features/workout/models/pose_detection_model.dart';
 
 void main() {
   const decoder = PoseResultDecoder();
@@ -150,6 +151,78 @@ void main() {
       expect(result.landmarks.first.x, -0.2);
       expect(result.landmarks.last.y, 1.3);
     });
+
+    test('decodes every score returned by the real-time phase-4 payload', () {
+      final result = decoder.decode({
+        'phase': 4,
+        'phase_name': 'scoring',
+        'data': {
+          'total_score': 87.5,
+          'rom_score': 90.0,
+          'stability_score': 84.0,
+          'flow_score': 88.5,
+          'grade': 'XUAT SAC',
+          'grade_color': 'green',
+          'total_reps': 8,
+          'recommendations': ['Keep a steady pace'],
+        },
+        'pose': _pose(detected: false),
+        'frame_timestamp_ms': 1722057000123,
+      });
+
+      expect(result.totalScore, 87.5);
+      expect(result.romScore, 90);
+      expect(result.stabilityScore, 84);
+      expect(result.flowScore, 88.5);
+      expect(result.grade, 'XUAT SAC');
+      expect(result.gradeColor, 'green');
+      expect(result.totalReps, 8);
+      expect(result.recommendations, ['Keep a steady pace']);
+    });
+  });
+
+  test('final session results match backend detail field names', () {
+    final results = PoseSessionResults.fromJson({
+      'data': {
+        'session_id': 'pose-1',
+        'exercise_name': 'Arm raise',
+        'duration_seconds': 75,
+        'total_score': 87.5,
+        'rom_score': 90.0,
+        'stability_score': 84.0,
+        'flow_score': 88.5,
+        'grade': 'XUAT SAC',
+        'grade_color': 'green',
+        'total_reps': 8,
+        'fatigue_level': 'MILD',
+        'calibrated_joints': [
+          {
+            'joint_name': 'Left shoulder',
+            'joint_type': 'left_shoulder',
+            'max_angle': 165.0,
+          },
+        ],
+        'rep_scores': [
+          {
+            'rep_number': 1,
+            'rom_score': 91.0,
+            'stability_score': 83.0,
+            'flow_score': 86.0,
+            'total_score': 87.0,
+            'duration_ms': 2300,
+          },
+        ],
+        'recommendations': ['Keep a steady pace'],
+      },
+    });
+
+    expect(results.totalScore, 87.5);
+    expect(results.calibratedJoints.single.joint, 'Left shoulder');
+    expect(results.calibratedJoints.single.jointType, 'left_shoulder');
+    expect(results.repScores.single.rep, 1);
+    expect(results.repScores.single.score, 87);
+    expect(results.repScores.single.romScore, 91);
+    expect(results.repScores.single.durationMs, 2300);
   });
 }
 

@@ -29,7 +29,7 @@ class StepBuilderFactory {
       case 1:
         return const Step1Builder();
       case 2:
-        return const Step1_1Builder();
+        return const OnboardingEmailStepBuilder();
       case 3:
         return const Step2Builder();
       case 4:

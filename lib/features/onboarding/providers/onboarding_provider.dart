@@ -7,6 +7,11 @@ final onboardingProvider =
       return OnboardingNotifier();
     });
 
+bool isValidOnboardingEmail(String? value) {
+  final email = value?.trim() ?? '';
+  return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email);
+}
+
 /// StateNotifier quản lý logic onboarding
 ///
 /// Cung cấp các method để:
@@ -38,11 +43,11 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
     }
   }
 
-  /// ========== Step 1.1 (Step 2): Username/Phone Number ==========
+  /// ========== Step 1.1 (Step 2): Email address ==========
 
-  /// Cập nhật username hoặc số điện thoại
-  void setUsernameOrPhone(String value) {
-    state = state.copyWith(usernameOrPhone: value.trim());
+  /// Cập nhật email của người nhận chăm sóc
+  void setEmail(String value) {
+    state = state.copyWith(email: value.trim());
   }
 
   /// ========== Step 3 (old Step 2): Personal Information ==========
@@ -243,8 +248,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
         return true; // Step 1 chỉ là giới thiệu
 
       case 2:
-        // Step 2 (1.1): Username/Phone
-        return true;
+        return isValidOnboardingEmail(state.email);
 
       case 3:
         // Step 3 (old Step 2) yêu cầu: tên, năm sinh, giới tính, chiều cao, cân nặng
@@ -290,7 +294,12 @@ class OnboardingNotifier extends StateNotifier<OnboardingData> {
   String? getValidationError() {
     switch (state.currentStep) {
       case 2:
-        // Step 2 (1.1): Username/Phone - optional
+        if (state.email == null || state.email!.isEmpty) {
+          return 'Please enter an email address.';
+        }
+        if (!isValidOnboardingEmail(state.email)) {
+          return 'Please enter a valid email address.';
+        }
         return null;
 
       case 3:
@@ -372,8 +381,7 @@ final canProceedProvider = Provider<bool>((ref) {
       return true; // Step 1 chỉ là giới thiệu
 
     case 2:
-      // Step 2 (1.1): Username/Phone - bắt buộc nhập
-      return state.usernameOrPhone != null && state.usernameOrPhone!.isNotEmpty;
+      return isValidOnboardingEmail(state.email);
 
     case 3:
       // Step 3: Personal info - yêu cầu tên, năm sinh, giới tính, chiều cao, cân nặng
@@ -458,9 +466,11 @@ final validationErrorProvider = Provider<String?>((ref) {
 
   switch (state.currentStep) {
     case 2:
-      // Step 2 (1.1): Username/Phone - bắt buộc nhập
-      if (state.usernameOrPhone == null || state.usernameOrPhone!.isEmpty) {
-        return 'Please enter a phone number.';
+      if (state.email == null || state.email!.isEmpty) {
+        return 'Please enter an email address.';
+      }
+      if (!isValidOnboardingEmail(state.email)) {
+        return 'Please enter a valid email address.';
       }
       return null;
 
