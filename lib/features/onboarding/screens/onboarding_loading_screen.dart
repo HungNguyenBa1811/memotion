@@ -5,10 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../providers/onboarding_notifier.dart';
 import '../providers/onboarding_provider.dart';
 
-/// Loading screen shown while submitting onboarding data (3 API calls)
+/// Loading screen shown while simulating onboarding submission.
 class OnboardingLoadingScreen extends ConsumerStatefulWidget {
   const OnboardingLoadingScreen({super.key});
 
@@ -62,37 +61,28 @@ class _OnboardingLoadingScreenState
   }
 
   Future<void> _submitOnboardingData() async {
-    final notifier = ref.read(onboardingNotifierProvider.notifier);
+    // Simulate patient creation and general-profile submission. Both calls
+    // belong to the first visible progress step.
+    setState(() => _currentStep = 0);
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
 
-    try {
-      final success = await notifier.submitFinalProfile(
-        context,
-        ref,
-        onProgress: (step) {
-          if (mounted) setState(() => _currentStep = step);
-        },
-      );
+    // Simulate physical-therapy profile submission.
+    setState(() => _currentStep = 1);
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
 
-      if (!success) {
-        // The notifier routes retryable failures back to the wizard and
-        // authentication failures back to registration.
-        return;
-      }
-      if (!mounted) return;
+    // Simulate care-plan generation.
+    setState(() => _currentStep = 2);
+    await Future.delayed(const Duration(seconds: 15));
+    if (!mounted) return;
 
-      setState(() => _currentStep = 3);
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (!mounted) return;
-
-      ref.read(onboardingProvider.notifier).completeOnboarding();
-      // Clear the client-side first-login flag only after every API succeeds.
-      ref.read(authProvider.notifier).markOnboardingComplete();
-      context.go(AppRoutes.profile);
-    } catch (error, stackTrace) {
-      debugPrint('[OnboardingLoadingScreen] Submission failed: $error');
-      debugPrintStack(stackTrace: stackTrace);
-      if (mounted) context.go(AppRoutes.onboardingStep1);
-    }
+    setState(() => _currentStep = 3);
+    ref.read(onboardingProvider.notifier).completeOnboarding();
+    ref.read(authProvider.notifier).markOnboardingComplete();
+    context.go(AppRoutes.profile);
   }
 
   @override
