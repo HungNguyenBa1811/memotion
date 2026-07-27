@@ -7,6 +7,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/network/api_exceptions.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../../../shared/widgets/health_status_notice.dart';
 import '../providers/medication_provider.dart';
 import '../models/medication.dart';
 import '../widgets/medication_task_card.dart';
@@ -193,6 +194,8 @@ class _MedicationMainScreenContentState
                   },
                 ),
                 const SizedBox(height: 16),
+                const HealthStatusNotice.medication(),
+                const SizedBox(height: 16),
                 _buildFilterTabs(selectedFilter),
                 const SizedBox(height: 16),
                 medicationsAsync.when(
@@ -247,6 +250,8 @@ class _MedicationMainScreenContentState
               _resetSelection();
             },
           ),
+          const SizedBox(height: 16),
+          const HealthStatusNotice.medication(),
           const SizedBox(height: 16),
           _buildFilterTabs(selectedFilter),
           const SizedBox(height: 16),

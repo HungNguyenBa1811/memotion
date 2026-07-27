@@ -14,13 +14,15 @@ class PatientDto {
   final String fullName;
 
   final String email;
-  final String phone;
+
+  // Null for accounts registered via email-based onboarding.
+  final String? phone;
 
   const PatientDto({
     required this.userId,
     required this.fullName,
     required this.email,
-    required this.phone,
+    this.phone,
   });
 
   factory PatientDto.fromJson(Map<String, dynamic> json) =>
@@ -56,7 +58,8 @@ class RegisterResponseDto {
   @JsonKey(name: 'user_id')
   final String userId;
 
-  final String phone;
+  // Null for accounts registered via email-based onboarding.
+  final String? phone;
   final String role;
   final PatientDto? patient;
 
@@ -65,7 +68,7 @@ class RegisterResponseDto {
     required this.email,
     required this.isActive,
     required this.userId,
-    required this.phone,
+    this.phone,
     required this.role,
     this.patient,
   });

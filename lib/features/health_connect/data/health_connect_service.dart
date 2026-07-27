@@ -141,4 +141,38 @@ class HealthConnectService {
       return const HealthData();
     }
   }
+
+  /// Returns the average recorded heart rate for a closed time range.
+  ///
+  /// This is intentionally separate from [fetchHealthData], where
+  /// [HealthData.heartRate] represents the latest reading for today.
+  Future<int?> fetchAverageHeartRate({
+    required DateTime startTime,
+    required DateTime endTime,
+  }) async {
+    try {
+      final dataPoints = await _health.getHealthDataFromTypes(
+        types: const [HealthDataType.HEART_RATE],
+        startTime: startTime,
+        endTime: endTime,
+      );
+      final cleaned = _health.removeDuplicates(dataPoints);
+      final readings = cleaned
+          .where((point) => point.type == HealthDataType.HEART_RATE)
+          .map(
+            (point) =>
+                (point.value as NumericHealthValue).numericValue.toDouble(),
+          )
+          .where((value) => value > 0)
+          .toList();
+
+      if (readings.isEmpty) return null;
+
+      final total = readings.fold<double>(0, (sum, value) => sum + value);
+      return (total / readings.length).round();
+    } catch (e) {
+      debugPrint('[HealthConnect] fetchAverageHeartRate error: $e');
+      return null;
+    }
+  }
 }

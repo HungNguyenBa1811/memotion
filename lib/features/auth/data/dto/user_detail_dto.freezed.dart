@@ -28,8 +28,8 @@ mixin _$UserDetailDto {
   bool get isActive => throw _privateConstructorUsedError;
   String get role => throw _privateConstructorUsedError;
   @JsonKey(name: 'user_id')
-  String get userId => throw _privateConstructorUsedError;
-  String get phone => throw _privateConstructorUsedError;
+  String get userId => throw _privateConstructorUsedError; // Null for accounts registered via email-based onboarding.
+  String? get phone => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_first_login')
   bool? get isFirstLogin => throw _privateConstructorUsedError;
   PatientDto? get patient => throw _privateConstructorUsedError;
@@ -57,7 +57,7 @@ abstract class $UserDetailDtoCopyWith<$Res> {
     @JsonKey(name: 'is_active') bool isActive,
     String role,
     @JsonKey(name: 'user_id') String userId,
-    String phone,
+    String? phone,
     @JsonKey(name: 'is_first_login') bool? isFirstLogin,
     PatientDto? patient,
   });
@@ -83,7 +83,7 @@ class _$UserDetailDtoCopyWithImpl<$Res, $Val extends UserDetailDto>
     Object? isActive = null,
     Object? role = null,
     Object? userId = null,
-    Object? phone = null,
+    Object? phone = freezed,
     Object? isFirstLogin = freezed,
     Object? patient = freezed,
   }) {
@@ -109,10 +109,10 @@ class _$UserDetailDtoCopyWithImpl<$Res, $Val extends UserDetailDto>
                 ? _value.userId
                 : userId // ignore: cast_nullable_to_non_nullable
                       as String,
-            phone: null == phone
+            phone: freezed == phone
                 ? _value.phone
                 : phone // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             isFirstLogin: freezed == isFirstLogin
                 ? _value.isFirstLogin
                 : isFirstLogin // ignore: cast_nullable_to_non_nullable
@@ -142,7 +142,7 @@ abstract class _$$UserDetailDtoImplCopyWith<$Res>
     @JsonKey(name: 'is_active') bool isActive,
     String role,
     @JsonKey(name: 'user_id') String userId,
-    String phone,
+    String? phone,
     @JsonKey(name: 'is_first_login') bool? isFirstLogin,
     PatientDto? patient,
   });
@@ -167,7 +167,7 @@ class __$$UserDetailDtoImplCopyWithImpl<$Res>
     Object? isActive = null,
     Object? role = null,
     Object? userId = null,
-    Object? phone = null,
+    Object? phone = freezed,
     Object? isFirstLogin = freezed,
     Object? patient = freezed,
   }) {
@@ -193,10 +193,10 @@ class __$$UserDetailDtoImplCopyWithImpl<$Res>
             ? _value.userId
             : userId // ignore: cast_nullable_to_non_nullable
                   as String,
-        phone: null == phone
+        phone: freezed == phone
             ? _value.phone
             : phone // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         isFirstLogin: freezed == isFirstLogin
             ? _value.isFirstLogin
             : isFirstLogin // ignore: cast_nullable_to_non_nullable
@@ -219,7 +219,7 @@ class _$UserDetailDtoImpl implements _UserDetailDto {
     @JsonKey(name: 'is_active') required this.isActive,
     required this.role,
     @JsonKey(name: 'user_id') required this.userId,
-    required this.phone,
+    this.phone,
     @JsonKey(name: 'is_first_login') this.isFirstLogin,
     this.patient,
   });
@@ -240,8 +240,9 @@ class _$UserDetailDtoImpl implements _UserDetailDto {
   @override
   @JsonKey(name: 'user_id')
   final String userId;
+  // Null for accounts registered via email-based onboarding.
   @override
-  final String phone;
+  final String? phone;
   @override
   @JsonKey(name: 'is_first_login')
   final bool? isFirstLogin;
@@ -306,7 +307,7 @@ abstract class _UserDetailDto implements UserDetailDto {
     @JsonKey(name: 'is_active') required final bool isActive,
     required final String role,
     @JsonKey(name: 'user_id') required final String userId,
-    required final String phone,
+    final String? phone,
     @JsonKey(name: 'is_first_login') final bool? isFirstLogin,
     final PatientDto? patient,
   }) = _$UserDetailDtoImpl;
@@ -326,9 +327,9 @@ abstract class _UserDetailDto implements UserDetailDto {
   String get role;
   @override
   @JsonKey(name: 'user_id')
-  String get userId;
+  String get userId; // Null for accounts registered via email-based onboarding.
   @override
-  String get phone;
+  String? get phone;
   @override
   @JsonKey(name: 'is_first_login')
   bool? get isFirstLogin;

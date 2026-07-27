@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../features/medication/providers/medication_provider.dart';
+import '../../../../shared/widgets/health_status_notice.dart';
 import '../../providers/home_provider.dart';
 import '../../widgets/greeting_hero.dart';
 import '../../widgets/action_card.dart';
@@ -142,6 +143,8 @@ class CaretakerHomeScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       heroSection,
+                      const SizedBox(height: 24),
+                      const HealthStatusNotice.home(),
                       const SizedBox(height: 24),
                       medicationSection,
                       const SizedBox(height: 24),

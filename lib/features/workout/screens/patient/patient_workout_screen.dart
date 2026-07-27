@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../shared/widgets/health_status_notice.dart';
 import '../../models/workout_model.dart';
 import '../../providers/workout_provider.dart';
 import '../../widgets/calendar_day_picker.dart';
@@ -114,6 +115,13 @@ class _PatientWorkoutScreenContentState
                             .read(workoutListProvider.notifier)
                             .selectDate(_calendarDays[index].date);
                       },
+                    ),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 0 : 20,
+                      ),
+                      child: const HealthStatusNotice.workout(),
                     ),
                   ],
                 ),

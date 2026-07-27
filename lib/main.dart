@@ -10,6 +10,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/medication/providers/medication_provider.dart';
 import 'features/medication/screens/medication_alarm_screen.dart';
+import 'features/sos/widgets/sos_coordinator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,6 +97,8 @@ class _MemotionAppState extends ConsumerState<MemotionApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       routerConfig: router,
+      builder: (context, child) =>
+          SosCoordinator(child: child ?? const SizedBox.shrink()),
     );
   }
 }

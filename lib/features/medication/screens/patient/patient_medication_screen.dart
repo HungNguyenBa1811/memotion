@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../shared/widgets/health_status_notice.dart';
 import '../../models/medication.dart';
 import '../../providers/medication_provider.dart';
 import '../../widgets/medication_vertical_card.dart';
@@ -114,6 +115,8 @@ class _PatientMedicationScreenContentState
                         _resetSelection();
                       },
                     ),
+                    const SizedBox(height: 16),
+                    const HealthStatusNotice.medication(),
                     const SizedBox(height: 16),
                   ],
                 ),

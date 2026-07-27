@@ -14,7 +14,8 @@ class UserDetailDto with _$UserDetailDto {
     @JsonKey(name: 'is_active') required bool isActive,
     required String role,
     @JsonKey(name: 'user_id') required String userId,
-    required String phone,
+    // Null for accounts registered via email-based onboarding.
+    String? phone,
     @JsonKey(name: 'is_first_login') bool? isFirstLogin,
     PatientDto? patient,
   }) = _UserDetailDto;

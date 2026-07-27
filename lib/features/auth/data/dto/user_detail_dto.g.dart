@@ -13,7 +13,7 @@ _$UserDetailDtoImpl _$$UserDetailDtoImplFromJson(Map<String, dynamic> json) =>
       isActive: json['is_active'] as bool,
       role: json['role'] as String,
       userId: json['user_id'] as String,
-      phone: json['phone'] as String,
+      phone: json['phone'] as String?,
       isFirstLogin: json['is_first_login'] as bool?,
       patient: json['patient'] == null
           ? null

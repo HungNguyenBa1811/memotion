@@ -11,7 +11,9 @@ import '../../providers/home_provider.dart';
 import '../../widgets/patient_greeting_hero.dart';
 import '../../widgets/upcoming_medication_card.dart';
 import '../../../../shared/widgets/widgets.dart';
+import '../../../../shared/widgets/health_status_notice.dart';
 import '../../../voice_command/providers/voice_audio_playing_provider.dart';
+import '../../../sos/providers/sos_controller.dart';
 
 /// Homepage screen for PATIENT (Elderly) role (Figma design - node 535:1851)
 /// Displays greeting, SOS button, medication schedule, quick actions, and health summary
@@ -44,6 +46,9 @@ class PatientHomeScreen extends ConsumerWidget {
       onActionPressed: () {
         homeNotifier.triggerSOS();
         _showSOSDialog(context);
+      },
+      onNotificationDoubleTap: () {
+        ref.read(sosControllerProvider.notifier).triggerPatientAlert();
       },
     );
 
@@ -103,6 +108,8 @@ class PatientHomeScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       heroSection,
+                      const SizedBox(height: 24),
+                      const HealthStatusNotice.home(),
                       const SizedBox(height: 24),
                       medicationSection,
                       const SizedBox(height: 24),

@@ -7,6 +7,7 @@ import '../../../../core/network/api_exceptions.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../shared/widgets/health_status_notice.dart';
 import '../../models/nutrition_task.dart';
 import '../../providers/nutrition_provider.dart';
 import '../../widgets/nutrition_empty_state.dart';
@@ -87,6 +88,13 @@ class _PatientNutritionScreenContentState
                   ref.read(nutritionSelectedDateProvider.notifier).state =
                       _calendarDays[index].date;
                 },
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: ResponsiveUtils.horizontalPadding(context),
+                ),
+                child: const HealthStatusNotice.nutrition(),
               ),
               const SizedBox(height: 16),
               SizedBox(

@@ -10,7 +10,7 @@ PatientDto _$PatientDtoFromJson(Map<String, dynamic> json) => PatientDto(
   userId: json['user_id'] as String,
   fullName: json['full_name'] as String,
   email: json['email'] as String,
-  phone: json['phone'] as String,
+  phone: json['phone'] as String?,
 );
 
 Map<String, dynamic> _$PatientDtoToJson(PatientDto instance) =>
@@ -27,7 +27,7 @@ RegisterResponseDto _$RegisterResponseDtoFromJson(Map<String, dynamic> json) =>
       email: json['email'] as String,
       isActive: json['is_active'] as bool,
       userId: json['user_id'] as String,
-      phone: json['phone'] as String,
+      phone: json['phone'] as String?,
       role: json['role'] as String,
       patient: json['patient'] == null
           ? null

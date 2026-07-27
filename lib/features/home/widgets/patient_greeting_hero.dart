@@ -14,6 +14,7 @@ class PatientGreetingHero extends StatefulWidget {
   final String? moodMessage;
   final String actionButtonText;
   final VoidCallback? onActionPressed;
+  final VoidCallback? onNotificationDoubleTap;
 
   const PatientGreetingHero({
     super.key,
@@ -23,6 +24,7 @@ class PatientGreetingHero extends StatefulWidget {
     this.moodMessage,
     this.actionButtonText = 'GET HELP',
     this.onActionPressed,
+    this.onNotificationDoubleTap,
   });
 
   @override
@@ -159,6 +161,7 @@ class _PatientGreetingHeroState extends State<PatientGreetingHero>
             // Notification icon with touch target
             InkWell(
               onTap: () {},
+              onDoubleTap: widget.onNotificationDoubleTap,
               borderRadius: BorderRadius.circular(notifBoxSize / 2),
               child: Container(
                 width: notifBoxSize,

@@ -6,6 +6,7 @@ import '../../../core/network/api_exceptions.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/utils/responsive_utils.dart';
+import '../../../shared/widgets/health_status_notice.dart';
 import '../models/nutrition_task.dart';
 import '../providers/nutrition_provider.dart';
 import '../widgets/nutrition_empty_state.dart';
@@ -212,6 +213,14 @@ class _NutritionScreenContentState
                   color: const Color(0xFFD87659),
                 ),
               ),
+            ),
+            SizedBox(height: 20 * fontScale),
+
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: ResponsiveUtils.horizontalPadding(context),
+              ),
+              child: const HealthStatusNotice.nutrition(),
             ),
             SizedBox(height: 20 * fontScale),
 

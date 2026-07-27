@@ -36,6 +36,14 @@ class ApiConstants {
   // Voice Command Endpoints
   static const String voiceCommandProcess = '/api/voice-command/process';
 
+  // SOS Endpoints
+  static const String sosTrigger = '/api/sos/trigger';
+  static const String sosActive = '/api/sos/active';
+  static const String sosHistory = '/api/sos/history';
+  static String sosCancel(String sosId) => '/api/sos/$sosId/cancel';
+  static String sosAcknowledge(String sosId) => '/api/sos/$sosId/acknowledge';
+  static String sosResolve(String sosId) => '/api/sos/$sosId/resolve';
+
   // Pose Detection Endpoints (Real-time WebSocket)
   static const String poseHealth = '/api/pose/health';
   static const String poseSessions = '/api/pose/sessions';
