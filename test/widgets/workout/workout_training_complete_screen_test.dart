@@ -5,7 +5,7 @@ import 'package:memotion/features/workout/models/pose_detection_model.dart';
 import 'package:memotion/features/workout/screens/workout_training_complete_screen.dart';
 
 void main() {
-  testWidgets('shows final scores and recommendations returned by backend', (
+  testWidgets('shows final scores and translates Vietnamese backend grades', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(430, 1200);
@@ -43,7 +43,8 @@ void main() {
 
     expect(find.text('Arm raise'), findsOneWidget);
     expect(find.text('87.5'), findsOneWidget);
-    expect(find.text('XUAT SAC'), findsOneWidget);
+    expect(find.text('Excellent'), findsOneWidget);
+    expect(find.text('XUAT SAC'), findsNothing);
     expect(find.text('01:15'), findsOneWidget);
     expect(find.text('8'), findsOneWidget);
     expect(find.text('90%'), findsOneWidget);

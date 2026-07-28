@@ -27,6 +27,7 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
     final score = results?.totalScore;
     final scoreColor = _gradeColor(results?.gradeColor);
     final exerciseName = results?.exerciseName.trim();
+    final grade = _englishGrade(results?.grade);
     final recommendations = results?.recommendations ?? const <String>[];
 
     return Scaffold(
@@ -74,9 +75,7 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
 
                 // Great Effort text
                 Text(
-                  results?.grade.isNotEmpty == true
-                      ? results!.grade
-                      : 'Well Done',
+                  grade,
                   style: GoogleFonts.lexend(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
@@ -343,6 +342,32 @@ class WorkoutTrainingCompleteScreen extends ConsumerWidget {
     return value == value.roundToDouble()
         ? value.toInt().toString()
         : value.toStringAsFixed(1);
+  }
+
+  String _englishGrade(String? value) {
+    final grade = value?.trim() ?? '';
+    if (grade.isEmpty) return 'Well Done';
+
+    final normalized = grade
+        .toUpperCase()
+        .replaceAll('_', ' ')
+        .replaceAll(RegExp(r'\s+'), ' ');
+    return switch (normalized) {
+      'XUAT SAC' || 'XUẤT SẮC' => 'Excellent',
+      'TOT' || 'TỐT' => 'Very Good',
+      'KHA' || 'KHÁ' => 'Good',
+      'TRUNG BINH' || 'TRUNG BÌNH' => 'Fair',
+      'DAT' || 'ĐẠT' => 'Passed',
+      'CAN CAI THIEN' ||
+      'CẦN CẢI THIỆN' ||
+      'YEU' ||
+      'YẾU' ||
+      'KEM' ||
+      'KÉM' ||
+      'CHUA DAT' ||
+      'CHƯA ĐẠT' => 'Needs Improvement',
+      _ => grade,
+    };
   }
 
   Color _gradeColor(String? value) {
